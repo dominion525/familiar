@@ -107,18 +107,16 @@ file first and use `execute_js_file`** — this sidesteps all escaping:
 
 ```bash
 cat > /tmp/snippet.js <<'EOF'
-(() => {
-  const items = [...document.querySelectorAll('.product[data-id]')];
-  return JSON.stringify(items.map(el => el.dataset.id));
-})()
+const items = [...document.querySelectorAll('.product[data-id]')];
+JSON.stringify(items.map(el => el.dataset.id))
 EOF
 osascript "$SCRIPT" execute_js_file "$WID" "$TID" /tmp/snippet.js
 ```
 
-`execute javascript` evaluates an **expression** and returns its value — a bare
-top-level `return` produces no result (`missing value`). Wrap any multi-statement
-script in an IIFE (`(() => { ... })()`) so the function's `return` value is what
-comes back.
+`execute javascript` returns the value of the **last evaluated expression** (the
+completion value, like the DevTools console). End the script with an expression to
+get a result — a multi-statement script is fine. A bare top-level `return` does not
+work and yields `missing value`, so leave the final expression without `return`.
 
 When generating the JS programmatically, write the file with your editor tool (which
 needs no shell escaping) rather than building a long inline string.

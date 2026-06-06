@@ -106,18 +106,16 @@ osascript "$SCRIPT" close_tab "$WID" "$TID"
 
 ```bash
 cat > /tmp/snippet.js <<'EOF'
-(() => {
-  const items = [...document.querySelectorAll('.product[data-id]')];
-  return JSON.stringify(items.map(el => el.dataset.id));
-})()
+const items = [...document.querySelectorAll('.product[data-id]')];
+JSON.stringify(items.map(el => el.dataset.id))
 EOF
 osascript "$SCRIPT" execute_js_file "$WID" "$TID" /tmp/snippet.js
 ```
 
-`execute javascript` は**式**を評価してその値を返します。トップレベルに素の
-`return` を書いても結果は返りません（`missing value` になります）。複数文の
-スクリプトは IIFE（`(() => { ... })()`）で包み、関数の `return` 値が返るように
-してください。
+`execute javascript` は**最後に評価した式の値**を返します（DevTools コンソールと
+同じ completion value の挙動）。結果が欲しいときはスクリプトの末尾を式で終えて
+ください。複数文でも問題ありません。トップレベルに素の `return` を書くと機能せず
+`missing value` になるので、末尾は `return` を付けずに式のまま置きます。
 
 JS をプログラムで生成する場合は、長いインライン文字列を組み立てるのではなく、エディタ
 ツール（シェルエスケープ不要）でファイルに書き出してください。
