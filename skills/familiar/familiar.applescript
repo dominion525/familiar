@@ -6,6 +6,10 @@
 --   new_tab
 --   new_incognito_tab
 --   navigate WID TID URL
+--   reload WID TID
+--   go_back WID TID
+--   go_forward WID TID
+--   stop WID TID
 --   close_tab WID TID
 --   wait_for_load WID TID
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
@@ -33,6 +37,18 @@ on run argv
 		set actionResult to my doNewIncognitoTab()
 	else if action is "navigate" then
 		my doNavigate(item 2 of argv, item 3 of argv, item 4 of argv)
+		set actionResult to ""
+	else if action is "reload" then
+		my doReload(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "go_back" then
+		my doGoBack(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "go_forward" then
+		my doGoForward(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "stop" then
+		my doStop(item 2 of argv, item 3 of argv)
 		set actionResult to ""
 	else if action is "close_tab" then
 		my doCloseTab(item 2 of argv, item 3 of argv)
@@ -129,6 +145,42 @@ on doNavigate(wId, tId, targetURL)
 		end tell
 	end tell
 end doNavigate
+
+-- Reload a tab.
+on doReload(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			reload tab id (tId as integer)
+		end tell
+	end tell
+end doReload
+
+-- Navigate a tab back in its history (if possible).
+on doGoBack(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			go back tab id (tId as integer)
+		end tell
+	end tell
+end doGoBack
+
+-- Navigate a tab forward in its history (if possible).
+on doGoForward(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			go forward tab id (tId as integer)
+		end tell
+	end tell
+end doGoForward
+
+-- Stop the tab from loading.
+on doStop(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			stop tab id (tId as integer)
+		end tell
+	end tell
+end doStop
 
 on doCloseTab(wId, tId)
 	tell application "Google Chrome"

@@ -53,6 +53,12 @@ osascript "$SCRIPT" close_tab "$WID" "$TID"
 ```bash
 osascript "$SCRIPT" navigate "$WID" "$TID" "https://example.com"
 osascript "$SCRIPT" get_tab_url "$WID" "$TID"
+
+# 履歴・リロード操作（戻り値なし）
+osascript "$SCRIPT" reload "$WID" "$TID"
+osascript "$SCRIPT" go_back "$WID" "$TID"
+osascript "$SCRIPT" go_forward "$WID" "$TID"
+osascript "$SCRIPT" stop "$WID" "$TID"
 ```
 
 待機:

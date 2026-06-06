@@ -55,6 +55,12 @@ Navigation:
 ```bash
 osascript "$SCRIPT" navigate "$WID" "$TID" "https://example.com"
 osascript "$SCRIPT" get_tab_url "$WID" "$TID"
+
+# History / reload control (no value returned)
+osascript "$SCRIPT" reload "$WID" "$TID"
+osascript "$SCRIPT" go_back "$WID" "$TID"
+osascript "$SCRIPT" go_forward "$WID" "$TID"
+osascript "$SCRIPT" stop "$WID" "$TID"
 ```
 
 Waiting:

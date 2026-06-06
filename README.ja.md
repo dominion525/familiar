@@ -13,6 +13,7 @@ English version: [README.md](README.md)
 
 - `list_tabs` / `new_tab` / `new_incognito_tab` / `close_tab` — タブ管理（new_tab は通常ウィンドウ、new_incognito_tab はシークレット）
 - `navigate` / `get_tab_url` — ナビゲーション
+- `reload` / `go_back` / `go_forward` / `stop` — 履歴・リロード操作
 - `wait_for_load` / `wait_for_selector` — 読み込み・要素出現の待機
 - `get_html` — 現在の DOM の HTML を取得
 - `execute_js` / `execute_js_file` — 任意 JavaScript の実行（複雑なものはファイル経由）
