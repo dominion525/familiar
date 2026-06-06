@@ -15,6 +15,8 @@
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
 --   get_html WID TID
 --   get_tab_url WID TID
+--   active_tab WID
+--   window_mode WID
 --   execute_js WID TID EXPRESSION
 --   execute_js_file WID TID JS_FILE_PATH
 
@@ -61,6 +63,10 @@ on run argv
 		set actionResult to my doGetHtml(item 2 of argv, item 3 of argv)
 	else if action is "get_tab_url" then
 		set actionResult to my doGetTabUrl(item 2 of argv, item 3 of argv)
+	else if action is "active_tab" then
+		set actionResult to my doActiveTab(item 2 of argv)
+	else if action is "window_mode" then
+		set actionResult to my doWindowMode(item 2 of argv)
 	else if action is "execute_js" then
 		set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "execute_js_file" then
@@ -247,6 +253,23 @@ on doGetTabUrl(wId, tId)
 		end tell
 	end tell
 end doGetTabUrl
+
+-- Return the active tab of a window as "windowId,tabId".
+on doActiveTab(wId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			set tabId to id of active tab
+		end tell
+		return (wId as text) & "," & (tabId as text)
+	end tell
+end doActiveTab
+
+-- Return a window's mode ("normal" or "incognito").
+on doWindowMode(wId)
+	tell application "Google Chrome"
+		return mode of window id (wId as integer)
+	end tell
+end doWindowMode
 
 on doExecuteJs(wId, tId, jsExpr)
 	tell application "Google Chrome"

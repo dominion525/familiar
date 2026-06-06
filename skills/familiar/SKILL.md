@@ -48,6 +48,12 @@ osascript "$SCRIPT" new_incognito_tab
 
 # Close a tab
 osascript "$SCRIPT" close_tab "$WID" "$TID"
+
+# Get a window's active tab as "windowId,tabId"
+osascript "$SCRIPT" active_tab "$WID"
+
+# Get a window's mode ("normal" or "incognito")
+osascript "$SCRIPT" window_mode "$WID"
 ```
 
 Navigation:

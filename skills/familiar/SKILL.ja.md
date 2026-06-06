@@ -46,6 +46,12 @@ osascript "$SCRIPT" new_incognito_tab
 
 # タブを閉じる
 osascript "$SCRIPT" close_tab "$WID" "$TID"
+
+# ウィンドウのアクティブタブを "windowId,tabId" で取得
+osascript "$SCRIPT" active_tab "$WID"
+
+# ウィンドウのモード（normal / incognito）を取得
+osascript "$SCRIPT" window_mode "$WID"
 ```
 
 ナビゲーション:
