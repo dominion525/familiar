@@ -17,6 +17,7 @@
 --   get_tab_url WID TID
 --   active_tab WID
 --   window_mode WID
+--   is_loading WID TID
 --   execute_js WID TID EXPRESSION
 --   execute_js_file WID TID JS_FILE_PATH
 
@@ -67,6 +68,8 @@ on run argv
 		set actionResult to my doActiveTab(item 2 of argv)
 	else if action is "window_mode" then
 		set actionResult to my doWindowMode(item 2 of argv)
+	else if action is "is_loading" then
+		set actionResult to my doIsLoading(item 2 of argv, item 3 of argv)
 	else if action is "execute_js" then
 		set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "execute_js_file" then
@@ -270,6 +273,16 @@ on doWindowMode(wId)
 		return mode of window id (wId as integer)
 	end tell
 end doWindowMode
+
+-- Return whether a tab is currently loading ("true" or "false"). Native, so it
+-- works even when "Allow JavaScript from Apple Events" is off.
+on doIsLoading(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			return (loading of tab id (tId as integer)) as text
+		end tell
+	end tell
+end doIsLoading
 
 on doExecuteJs(wId, tId, jsExpr)
 	tell application "Google Chrome"

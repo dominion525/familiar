@@ -12,7 +12,7 @@ behind bot/WAF defenses tend to treat it as a normal user.
 Everything is tab-scoped (windowId + tabId); it never relies on the "active tab".
 
 - `list_tabs` / `new_tab` / `new_incognito_tab` / `close_tab` — tab management (new_tab uses a normal window, new_incognito_tab an incognito one)
-- `active_tab` / `window_mode` — inspect a window's active tab / mode
+- `active_tab` / `window_mode` / `is_loading` — inspect active tab / window mode / tab loading state
 - `navigate` / `get_tab_url` — navigation
 - `reload` / `go_back` / `go_forward` / `stop` — history & reload control
 - `wait_for_load` / `wait_for_selector` — wait for page load / element to appear

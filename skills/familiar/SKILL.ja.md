@@ -52,6 +52,9 @@ osascript "$SCRIPT" active_tab "$WID"
 
 # ウィンドウのモード（normal / incognito）を取得
 osascript "$SCRIPT" window_mode "$WID"
+
+# タブが読み込み中か。"true"|"false" を返す（ネイティブ、JS 不要）
+osascript "$SCRIPT" is_loading "$WID" "$TID"
 ```
 
 ナビゲーション:

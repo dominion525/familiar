@@ -54,6 +54,9 @@ osascript "$SCRIPT" active_tab "$WID"
 
 # Get a window's mode ("normal" or "incognito")
 osascript "$SCRIPT" window_mode "$WID"
+
+# Is a tab currently loading? Returns "true"|"false" (native, works without JS)
+osascript "$SCRIPT" is_loading "$WID" "$TID"
 ```
 
 Navigation:
