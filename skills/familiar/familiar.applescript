@@ -4,12 +4,20 @@
 -- Actions:
 --   list_tabs
 --   new_tab
+--   new_incognito_tab
 --   navigate WID TID URL
+--   reload WID TID
+--   go_back WID TID
+--   go_forward WID TID
+--   stop WID TID
 --   close_tab WID TID
 --   wait_for_load WID TID
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
 --   get_html WID TID
 --   get_tab_url WID TID
+--   active_tab WID
+--   window_mode WID
+--   is_loading WID TID
 --   execute_js WID TID EXPRESSION
 --   execute_js_file WID TID JS_FILE_PATH
 
@@ -28,8 +36,22 @@ on run argv
 		set actionResult to my doListTabs()
 	else if action is "new_tab" then
 		set actionResult to my doNewTab()
+	else if action is "new_incognito_tab" then
+		set actionResult to my doNewIncognitoTab()
 	else if action is "navigate" then
 		my doNavigate(item 2 of argv, item 3 of argv, item 4 of argv)
+		set actionResult to ""
+	else if action is "reload" then
+		my doReload(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "go_back" then
+		my doGoBack(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "go_forward" then
+		my doGoForward(item 2 of argv, item 3 of argv)
+		set actionResult to ""
+	else if action is "stop" then
+		my doStop(item 2 of argv, item 3 of argv)
 		set actionResult to ""
 	else if action is "close_tab" then
 		my doCloseTab(item 2 of argv, item 3 of argv)
@@ -42,6 +64,12 @@ on run argv
 		set actionResult to my doGetHtml(item 2 of argv, item 3 of argv)
 	else if action is "get_tab_url" then
 		set actionResult to my doGetTabUrl(item 2 of argv, item 3 of argv)
+	else if action is "active_tab" then
+		set actionResult to my doActiveTab(item 2 of argv)
+	else if action is "window_mode" then
+		set actionResult to my doWindowMode(item 2 of argv)
+	else if action is "is_loading" then
+		set actionResult to my doIsLoading(item 2 of argv, item 3 of argv)
 	else if action is "execute_js" then
 		set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "execute_js_file" then
@@ -72,24 +100,44 @@ on doListTabs()
 	end tell
 end doListTabs
 
+-- Open a new tab in a normal (non-incognito) window.
 on doNewTab()
+	return my openTabInMode("normal")
+end doNewTab
+
+-- Open a new tab in an incognito window.
+on doNewIncognitoTab()
+	return my openTabInMode("incognito")
+end doNewIncognitoTab
+
+-- Open a tab in the front-most window of the given mode ("normal" or
+-- "incognito"). Reuses such a window if one exists; otherwise creates a new
+-- window and reuses its initial tab so no blank tab is left behind.
+on openTabInMode(targetMode)
 	tell application "Google Chrome"
 		set targetWindow to missing value
 		repeat with aWindow in (every window)
-			if mode of aWindow is "incognito" then
+			if mode of aWindow is targetMode then
 				set targetWindow to aWindow
 				exit repeat
 			end if
 		end repeat
 		if targetWindow is missing value then
-			set targetWindow to (make new window with properties {mode:"incognito"})
+			if targetMode is "incognito" then
+				set targetWindow to (make new window with properties {mode:"incognito"})
+			else
+				set targetWindow to (make new window)
+			end if
+			-- A freshly created window already has one (blank) tab; reuse it.
+			set newTab to (tab 1 of targetWindow)
+		else
+			set newTab to (make new tab at end of tabs of targetWindow)
 		end if
-		set newTab to (make new tab at end of tabs of targetWindow)
 		set windowId to id of targetWindow
 		set tabId to id of newTab
 		return (windowId as text) & "," & (tabId as text)
 	end tell
-end doNewTab
+end openTabInMode
 
 on doNavigate(wId, tId, targetURL)
 	tell application "Google Chrome"
@@ -106,6 +154,42 @@ on doNavigate(wId, tId, targetURL)
 		end tell
 	end tell
 end doNavigate
+
+-- Reload a tab.
+on doReload(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			reload tab id (tId as integer)
+		end tell
+	end tell
+end doReload
+
+-- Navigate a tab back in its history (if possible).
+on doGoBack(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			go back tab id (tId as integer)
+		end tell
+	end tell
+end doGoBack
+
+-- Navigate a tab forward in its history (if possible).
+on doGoForward(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			go forward tab id (tId as integer)
+		end tell
+	end tell
+end doGoForward
+
+-- Stop the tab from loading.
+on doStop(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			stop tab id (tId as integer)
+		end tell
+	end tell
+end doStop
 
 on doCloseTab(wId, tId)
 	tell application "Google Chrome"
@@ -172,6 +256,33 @@ on doGetTabUrl(wId, tId)
 		end tell
 	end tell
 end doGetTabUrl
+
+-- Return the active tab of a window as "windowId,tabId".
+on doActiveTab(wId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			set tabId to id of active tab
+		end tell
+		return (wId as text) & "," & (tabId as text)
+	end tell
+end doActiveTab
+
+-- Return a window's mode ("normal" or "incognito").
+on doWindowMode(wId)
+	tell application "Google Chrome"
+		return mode of window id (wId as integer)
+	end tell
+end doWindowMode
+
+-- Return whether a tab is currently loading ("true" or "false"). Native, so it
+-- works even when "Allow JavaScript from Apple Events" is off.
+on doIsLoading(wId, tId)
+	tell application "Google Chrome"
+		tell window id (wId as integer)
+			return (loading of tab id (tId as integer)) as text
+		end tell
+	end tell
+end doIsLoading
 
 on doExecuteJs(wId, tId, jsExpr)
 	tell application "Google Chrome"
