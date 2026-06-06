@@ -1,0 +1,17 @@
+{
+  "name": "familiar",
+  "version": "0.1.0",
+  "description": "Control your real macOS Google Chrome via AppleScript — tab-scoped browser automation without the DevTools Protocol or Playwright.",
+  "author": {
+    "name": "dominion525"
+  },
+  "homepage": "https://github.com/dominion525/familiar",
+  "license": "MIT",
+  "keywords": [
+    "chrome",
+    "applescript",
+    "macos",
+    "browser-automation",
+    "scraping"
+  ]
+}

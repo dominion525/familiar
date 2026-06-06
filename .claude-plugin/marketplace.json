@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "familiar",
+  "description": "AppleScript-powered Chrome control for macOS, packaged as a Claude Code skill.",
+  "owner": {
+    "name": "dominion525"
+  },
+  "plugins": [
+    {
+      "name": "familiar",
+      "source": ".",
+      "description": "Control your real macOS Google Chrome via AppleScript — tab-scoped browser automation without the DevTools Protocol or Playwright."
+    }
+  ]
+}
