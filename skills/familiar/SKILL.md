@@ -38,9 +38,13 @@ Tab management:
 # List every tab as: windowId,tabId,title,url (one per line)
 osascript "$SCRIPT" list_tabs
 
+# Open a tab in a normal window (adds to the front-most normal window, or
+# creates one if none exists). Prints "windowId,tabId".
+osascript "$SCRIPT" new_tab
+
 # Open a tab in an incognito window (reuses one if present, else creates it).
 # Prints "windowId,tabId".
-osascript "$SCRIPT" new_tab
+osascript "$SCRIPT" new_incognito_tab
 
 # Close a tab
 osascript "$SCRIPT" close_tab "$WID" "$TID"
@@ -122,11 +126,14 @@ needs no shell escaping) rather than building a long inline string.
 `wait_for_selector` escapes single quotes/backslashes in the selector internally, so
 attribute selectors like `[data-x='y']` are safe to pass.
 
-## Incognito behavior
+## Normal vs incognito tabs
 
-`new_tab` prefers an existing incognito window and creates one if none exists. Cookies
-start empty and vanish when the window closes. Chrome is launched automatically if it
-is not running.
+`new_tab` opens in a normal (non-incognito) window: it adds a tab to the front-most
+normal window, or creates a new normal window if none exists. `new_incognito_tab`
+targets an incognito window instead, reusing an existing one or creating it (incognito
+cookies start empty and vanish when the window closes). When either action creates a
+new window, it reuses that window's initial tab so no blank tab is left behind. Chrome
+is launched automatically if it is not running.
 
 ## Notes
 

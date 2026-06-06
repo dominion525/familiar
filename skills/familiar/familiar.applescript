@@ -4,6 +4,7 @@
 -- Actions:
 --   list_tabs
 --   new_tab
+--   new_incognito_tab
 --   navigate WID TID URL
 --   close_tab WID TID
 --   wait_for_load WID TID
@@ -28,6 +29,8 @@ on run argv
 		set actionResult to my doListTabs()
 	else if action is "new_tab" then
 		set actionResult to my doNewTab()
+	else if action is "new_incognito_tab" then
+		set actionResult to my doNewIncognitoTab()
 	else if action is "navigate" then
 		my doNavigate(item 2 of argv, item 3 of argv, item 4 of argv)
 		set actionResult to ""
@@ -72,24 +75,44 @@ on doListTabs()
 	end tell
 end doListTabs
 
+-- Open a new tab in a normal (non-incognito) window.
 on doNewTab()
+	return my openTabInMode("normal")
+end doNewTab
+
+-- Open a new tab in an incognito window.
+on doNewIncognitoTab()
+	return my openTabInMode("incognito")
+end doNewIncognitoTab
+
+-- Open a tab in the front-most window of the given mode ("normal" or
+-- "incognito"). Reuses such a window if one exists; otherwise creates a new
+-- window and reuses its initial tab so no blank tab is left behind.
+on openTabInMode(targetMode)
 	tell application "Google Chrome"
 		set targetWindow to missing value
 		repeat with aWindow in (every window)
-			if mode of aWindow is "incognito" then
+			if mode of aWindow is targetMode then
 				set targetWindow to aWindow
 				exit repeat
 			end if
 		end repeat
 		if targetWindow is missing value then
-			set targetWindow to (make new window with properties {mode:"incognito"})
+			if targetMode is "incognito" then
+				set targetWindow to (make new window with properties {mode:"incognito"})
+			else
+				set targetWindow to (make new window)
+			end if
+			-- A freshly created window already has one (blank) tab; reuse it.
+			set newTab to (tab 1 of targetWindow)
+		else
+			set newTab to (make new tab at end of tabs of targetWindow)
 		end if
-		set newTab to (make new tab at end of tabs of targetWindow)
 		set windowId to id of targetWindow
 		set tabId to id of newTab
 		return (windowId as text) & "," & (tabId as text)
 	end tell
-end doNewTab
+end openTabInMode
 
 on doNavigate(wId, tId, targetURL)
 	tell application "Google Chrome"

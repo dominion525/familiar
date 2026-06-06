@@ -11,7 +11,7 @@ behind bot/WAF defenses tend to treat it as a normal user.
 
 Everything is tab-scoped (windowId + tabId); it never relies on the "active tab".
 
-- `list_tabs` / `new_tab` / `close_tab` — tab management (new_tab prefers an incognito window)
+- `list_tabs` / `new_tab` / `new_incognito_tab` / `close_tab` — tab management (new_tab uses a normal window, new_incognito_tab an incognito one)
 - `navigate` / `get_tab_url` — navigation
 - `wait_for_load` / `wait_for_selector` — wait for page load / element to appear
 - `get_html` — get the current DOM as HTML
