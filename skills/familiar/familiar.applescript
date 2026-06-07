@@ -24,6 +24,11 @@
 --   execute_js_file WID TID JS_FILE_PATH
 --   click WID TID SELECTOR
 --   fill WID TID SELECTOR VALUE
+--   get_text WID TID SELECTOR
+--   get_attribute WID TID SELECTOR NAME
+--   get_value WID TID SELECTOR
+--   exists WID TID SELECTOR
+--   query_all WID TID SELECTOR
 --
 -- SELECTOR forms (see selectorResolverJs):
 --   CSS (default)   e.g. "button.submit", "#email"
@@ -87,6 +92,16 @@ on run argv
 		set actionResult to my doClick(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "fill" then
 		set actionResult to my doFill(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+	else if action is "get_text" then
+		set actionResult to my doGetText(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "get_attribute" then
+		set actionResult to my doGetAttribute(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+	else if action is "get_value" then
+		set actionResult to my doGetValue(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "exists" then
+		set actionResult to my doExists(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "query_all" then
+		set actionResult to my doQueryAll(item 2 of argv, item 3 of argv, item 4 of argv)
 	else
 		error "Unknown action: " & action
 	end if
@@ -339,6 +354,16 @@ on selectorResolverJs()
   }
   return document.querySelector(sel);
 }
+function __famFindAll(sel){
+  if (sel.indexOf('xpath=') === 0) {
+    var r = document.evaluate(sel.slice(6), document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    var a = []; for (var i = 0; i < r.snapshotLength; i++) a.push(r.snapshotItem(i)); return a;
+  }
+  if (sel.indexOf('text=') === 0 || sel.indexOf('label=') === 0) {
+    var el = __famFind(sel); return el ? [el] : [];
+  }
+  return Array.prototype.slice.call(document.querySelectorAll(sel));
+}
 "
 end selectorResolverJs
 
@@ -370,6 +395,54 @@ on doFill(wId, tId, sel, val)
 })()"
 	return my runJs(wId, tId, js)
 end doFill
+
+-- Get an element's visible text. Returns the trimmed text, or "not_found".
+on doGetText(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  return (el.innerText || el.textContent || '').trim();
+})()"
+	return my runJs(wId, tId, js)
+end doGetText
+
+-- Get an attribute value. Returns the value (empty string if the attribute is
+-- absent), or "not_found" if no element matched.
+on doGetAttribute(wId, tId, sel, attrName)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  var v = el.getAttribute('" & my jsEscape(attrName) & "');
+  return v === null ? '' : v;
+})()"
+	return my runJs(wId, tId, js)
+end doGetAttribute
+
+-- Get an input/textarea/select value. Returns the value, or "not_found".
+on doGetValue(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  return (el.value === undefined || el.value === null) ? '' : String(el.value);
+})()"
+	return my runJs(wId, tId, js)
+end doGetValue
+
+-- Whether a matching element exists. Returns "true" or "false".
+on doExists(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  return String(__famFind('" & my jsEscape(sel) & "') !== null);
+})()"
+	return my runJs(wId, tId, js)
+end doExists
+
+-- Trimmed text of every matching element, as a JSON array string.
+on doQueryAll(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  return JSON.stringify(__famFindAll('" & my jsEscape(sel) & "').map(function(el){ return (el.innerText || el.textContent || '').trim(); }));
+})()"
+	return my runJs(wId, tId, js)
+end doQueryAll
 
 -- ============================================================
 -- String utilities
