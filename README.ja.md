@@ -15,9 +15,13 @@ English version: [README.md](README.md)
 - `active_tab` / `window_mode` / `is_loading` — アクティブタブ / ウィンドウモード / 読み込み状態を取得
 - `navigate` / `get_tab_url` — ナビゲーション
 - `reload` / `go_back` / `go_forward` / `stop` — 履歴・リロード操作
-- `wait_for_load` / `wait_for_selector` — 読み込み・要素出現の待機
+- `wait_for_load` / `wait_for_selector` / `wait_for_function` — 読み込み・要素出現・JS 条件の待機
 - `get_html` — 現在の DOM の HTML を取得
+- `get_text` / `get_attribute` / `get_value` / `exists` / `query_all` — 要素のテキスト / 属性 / 値 / 存在 / 全一致を取得
+- `click` / `fill` / `clear` / `select_option` / `set_checked` / `press_key` / `submit` / `scroll_into_view` — 要素・フォームの操作
 - `execute_js` / `execute_js_file` — 任意 JavaScript の実行（複雑なものはファイル経由）
+
+セレクタは CSS（既定）/ `text=` / `xpath=` / `label=` の形式に対応します。
 
 ## 前提条件
 
@@ -47,13 +51,6 @@ osascript skills/familiar/familiar.applescript list_tabs
 ```
 
 スキルの使い方の詳細は `skills/familiar/SKILL.ja.md`（日本語訳）を参照してください。
-
-## 出自
-
-このスキルは `aleister` リポジトリの phantasm（WAF 回避 HTML 収集 CLI）で使っていた
-ブラウザ制御部分を、汎用的に使えるよう分離・独立させたものです。Docker 内からホストの
-Chrome を叩くための portal（Named Pipe 中継）や Ruby ラッパーは、ホスト直実行では
-不要なため持ち込んでいません。
 
 ## ライセンス
 

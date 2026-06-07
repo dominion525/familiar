@@ -15,9 +15,13 @@ Everything is tab-scoped (windowId + tabId); it never relies on the "active tab"
 - `active_tab` / `window_mode` / `is_loading` — inspect active tab / window mode / tab loading state
 - `navigate` / `get_tab_url` — navigation
 - `reload` / `go_back` / `go_forward` / `stop` — history & reload control
-- `wait_for_load` / `wait_for_selector` — wait for page load / element to appear
+- `wait_for_load` / `wait_for_selector` / `wait_for_function` — wait for page load / element / a JS condition
 - `get_html` — get the current DOM as HTML
+- `get_text` / `get_attribute` / `get_value` / `exists` / `query_all` — read element text / attribute / value / presence / all matches
+- `click` / `fill` / `clear` / `select_option` / `set_checked` / `press_key` / `submit` / `scroll_into_view` — interact with elements and forms
 - `execute_js` / `execute_js_file` — run arbitrary JavaScript (use the file form for complex scripts)
+
+Selectors accept CSS (default), `text=`, `xpath=`, and `label=` forms.
 
 ## Prerequisites
 
@@ -47,13 +51,6 @@ osascript skills/familiar/familiar.applescript list_tabs
 ```
 
 See `skills/familiar/SKILL.md` for full usage.
-
-## Origin
-
-This skill is extracted from the browser-control part of the phantasm tool (a WAF-evading
-HTML collector) in the `aleister` repository, repackaged for general-purpose use. The
-Docker-to-host bridge (the portal Named-Pipe relay) and the Ruby wrapper are intentionally
-left out — they are unnecessary when running directly on the host.
 
 ## License
 
