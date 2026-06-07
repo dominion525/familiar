@@ -43,9 +43,10 @@
 --   xpath=...       match by XPath (first node)
 --   label=...       match a form control via its <label> / aria-label
 
--- TODO: refactor the action dispatch (the if/else chain below).
-
 on run argv
+	if (count of argv) is 0 then
+		error "No action given. Usage: osascript familiar.applescript ACTION [ARGS...]"
+	end if
 	set action to item 1 of argv
 
 	-- Save focus
@@ -53,79 +54,114 @@ on run argv
 		set frontApp to name of first application process whose frontmost is true
 	end tell
 
-	if action is "list_tabs" then
-		set actionResult to my doListTabs()
-	else if action is "new_tab" then
-		set actionResult to my doNewTab()
-	else if action is "new_incognito_tab" then
-		set actionResult to my doNewIncognitoTab()
-	else if action is "navigate" then
-		my doNavigate(item 2 of argv, item 3 of argv, item 4 of argv)
-		set actionResult to ""
-	else if action is "reload" then
-		my doReload(item 2 of argv, item 3 of argv)
-		set actionResult to ""
-	else if action is "go_back" then
-		my doGoBack(item 2 of argv, item 3 of argv)
-		set actionResult to ""
-	else if action is "go_forward" then
-		my doGoForward(item 2 of argv, item 3 of argv)
-		set actionResult to ""
-	else if action is "stop" then
-		my doStop(item 2 of argv, item 3 of argv)
-		set actionResult to ""
-	else if action is "close_tab" then
-		my doCloseTab(item 2 of argv, item 3 of argv)
-		set actionResult to ""
-	else if action is "wait_for_load" then
-		set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv)
-	else if action is "wait_for_selector" then
-		set actionResult to my doWaitForSelector(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "get_html" then
-		set actionResult to my doGetHtml(item 2 of argv, item 3 of argv)
-	else if action is "get_tab_url" then
-		set actionResult to my doGetTabUrl(item 2 of argv, item 3 of argv)
-	else if action is "active_tab" then
-		set actionResult to my doActiveTab(item 2 of argv)
-	else if action is "window_mode" then
-		set actionResult to my doWindowMode(item 2 of argv)
-	else if action is "is_loading" then
-		set actionResult to my doIsLoading(item 2 of argv, item 3 of argv)
-	else if action is "execute_js" then
-		set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "execute_js_file" then
-		set actionResult to my doExecuteJsFile(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "click" then
-		set actionResult to my doClick(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "fill" then
-		set actionResult to my doFill(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "get_text" then
-		set actionResult to my doGetText(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "get_attribute" then
-		set actionResult to my doGetAttribute(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "get_value" then
-		set actionResult to my doGetValue(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "exists" then
-		set actionResult to my doExists(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "query_all" then
-		set actionResult to my doQueryAll(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "clear" then
-		set actionResult to my doClear(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "select_option" then
-		set actionResult to my doSelectOption(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "set_checked" then
-		set actionResult to my doSetChecked(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "press_key" then
-		set actionResult to my doPressKey(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else if action is "submit" then
-		set actionResult to my doSubmit(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "scroll_into_view" then
-		set actionResult to my doScrollIntoView(item 2 of argv, item 3 of argv, item 4 of argv)
-	else if action is "wait_for_function" then
-		set actionResult to my doWaitForFunction(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
-	else
-		error "Unknown action: " & action
-	end if
+	-- Default for void actions; overwritten by actions that return a value.
+	set actionResult to ""
+
+	-- Dispatch is a plain if/else chain: AppleScript has no dynamic dispatch by
+	-- name, and `run script` (eval) would be an unsafe, slower anti-pattern.
+	-- Wrapped in try so focus is restored even when an action fails.
+	try
+		if action is "list_tabs" then
+			set actionResult to my doListTabs()
+		else if action is "new_tab" then
+			set actionResult to my doNewTab()
+		else if action is "new_incognito_tab" then
+			set actionResult to my doNewIncognitoTab()
+		else if action is "navigate" then
+			my checkArgs(argv, 4, "navigate WID TID URL")
+			my doNavigate(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "reload" then
+			my checkArgs(argv, 3, "reload WID TID")
+			my doReload(item 2 of argv, item 3 of argv)
+		else if action is "go_back" then
+			my checkArgs(argv, 3, "go_back WID TID")
+			my doGoBack(item 2 of argv, item 3 of argv)
+		else if action is "go_forward" then
+			my checkArgs(argv, 3, "go_forward WID TID")
+			my doGoForward(item 2 of argv, item 3 of argv)
+		else if action is "stop" then
+			my checkArgs(argv, 3, "stop WID TID")
+			my doStop(item 2 of argv, item 3 of argv)
+		else if action is "close_tab" then
+			my checkArgs(argv, 3, "close_tab WID TID")
+			my doCloseTab(item 2 of argv, item 3 of argv)
+		else if action is "wait_for_load" then
+			my checkArgs(argv, 3, "wait_for_load WID TID")
+			set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv)
+		else if action is "wait_for_selector" then
+			my checkArgs(argv, 5, "wait_for_selector WID TID SELECTOR MAX_WAIT")
+			set actionResult to my doWaitForSelector(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "get_html" then
+			my checkArgs(argv, 3, "get_html WID TID")
+			set actionResult to my doGetHtml(item 2 of argv, item 3 of argv)
+		else if action is "get_tab_url" then
+			my checkArgs(argv, 3, "get_tab_url WID TID")
+			set actionResult to my doGetTabUrl(item 2 of argv, item 3 of argv)
+		else if action is "active_tab" then
+			my checkArgs(argv, 2, "active_tab WID")
+			set actionResult to my doActiveTab(item 2 of argv)
+		else if action is "window_mode" then
+			my checkArgs(argv, 2, "window_mode WID")
+			set actionResult to my doWindowMode(item 2 of argv)
+		else if action is "is_loading" then
+			my checkArgs(argv, 3, "is_loading WID TID")
+			set actionResult to my doIsLoading(item 2 of argv, item 3 of argv)
+		else if action is "execute_js" then
+			my checkArgs(argv, 4, "execute_js WID TID EXPRESSION")
+			set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "execute_js_file" then
+			my checkArgs(argv, 4, "execute_js_file WID TID JS_FILE_PATH")
+			set actionResult to my doExecuteJsFile(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "click" then
+			my checkArgs(argv, 4, "click WID TID SELECTOR")
+			set actionResult to my doClick(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "fill" then
+			my checkArgs(argv, 5, "fill WID TID SELECTOR VALUE")
+			set actionResult to my doFill(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "get_text" then
+			my checkArgs(argv, 4, "get_text WID TID SELECTOR")
+			set actionResult to my doGetText(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "get_attribute" then
+			my checkArgs(argv, 5, "get_attribute WID TID SELECTOR NAME")
+			set actionResult to my doGetAttribute(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "get_value" then
+			my checkArgs(argv, 4, "get_value WID TID SELECTOR")
+			set actionResult to my doGetValue(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "exists" then
+			my checkArgs(argv, 4, "exists WID TID SELECTOR")
+			set actionResult to my doExists(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "query_all" then
+			my checkArgs(argv, 4, "query_all WID TID SELECTOR")
+			set actionResult to my doQueryAll(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "clear" then
+			my checkArgs(argv, 4, "clear WID TID SELECTOR")
+			set actionResult to my doClear(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "select_option" then
+			my checkArgs(argv, 5, "select_option WID TID SELECTOR VALUE")
+			set actionResult to my doSelectOption(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "set_checked" then
+			my checkArgs(argv, 5, "set_checked WID TID SELECTOR BOOL")
+			set actionResult to my doSetChecked(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "press_key" then
+			my checkArgs(argv, 5, "press_key WID TID SELECTOR KEY")
+			set actionResult to my doPressKey(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else if action is "submit" then
+			my checkArgs(argv, 4, "submit WID TID SELECTOR")
+			set actionResult to my doSubmit(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "scroll_into_view" then
+			my checkArgs(argv, 4, "scroll_into_view WID TID SELECTOR")
+			set actionResult to my doScrollIntoView(item 2 of argv, item 3 of argv, item 4 of argv)
+		else if action is "wait_for_function" then
+			my checkArgs(argv, 5, "wait_for_function WID TID JS_EXPR MAX_WAIT")
+			set actionResult to my doWaitForFunction(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+		else
+			error "Unknown action: " & action
+		end if
+	on error errMsg number errNum
+		-- Restore focus even when the action failed, then re-raise.
+		tell application frontApp to activate
+		error errMsg number errNum
+	end try
 
 	-- Restore focus
 	tell application frontApp to activate
@@ -148,6 +184,15 @@ on runJs(wId, tId, jsExpr)
 		end tell
 	end tell
 end runJs
+
+-- Validate that argv has at least reqCount items (the action name is item 1).
+-- Raises a clear "usage: ..." error when called with too few arguments, instead
+-- of AppleScript's cryptic "Can't get item N of {...}".
+on checkArgs(argv, reqCount, usage)
+	if (count of argv) < reqCount then
+		error "usage: " & usage
+	end if
+end checkArgs
 
 -- ============================================================
 -- Tab / window management
