@@ -52,13 +52,6 @@ osascript skills/familiar/familiar.applescript list_tabs
 
 See `skills/familiar/SKILL.md` for full usage.
 
-## Origin
-
-This skill is extracted from the browser-control part of the phantasm tool (a WAF-evading
-HTML collector) in the `aleister` repository, repackaged for general-purpose use. The
-Docker-to-host bridge (the portal Named-Pipe relay) and the Ruby wrapper are intentionally
-left out — they are unnecessary when running directly on the host.
-
 ## License
 
 MIT

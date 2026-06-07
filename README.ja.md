@@ -52,13 +52,6 @@ osascript skills/familiar/familiar.applescript list_tabs
 
 スキルの使い方の詳細は `skills/familiar/SKILL.ja.md`（日本語訳）を参照してください。
 
-## 出自
-
-このスキルは `aleister` リポジトリの phantasm（WAF 回避 HTML 収集 CLI）で使っていた
-ブラウザ制御部分を、汎用的に使えるよう分離・独立させたものです。Docker 内からホストの
-Chrome を叩くための portal（Named Pipe 中継）や Ruby ラッパーは、ホスト直実行では
-不要なため持ち込んでいません。
-
 ## ライセンス
 
 MIT
