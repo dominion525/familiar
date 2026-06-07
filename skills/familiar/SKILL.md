@@ -1,6 +1,6 @@
 ---
 name: familiar
-description: Use when you need to drive a real Google Chrome browser on macOS — open or close tabs, navigate to URLs, wait for page load or a CSS selector, extract page HTML or element text/attributes, click elements and fill forms, or run arbitrary JavaScript — through AppleScript instead of the DevTools Protocol or Playwright. Especially useful for pages behind bot/WAF defenses where headless or automated browsers get blocked, since this drives the user's everyday Chrome.
+description: Use when you specifically need to drive the user's own everyday Google Chrome on macOS via AppleScript (Apple Events) — not a fresh headless/automated browser, and not the DevTools Protocol or Playwright. Especially for pages behind bot/WAF defenses that block automated browsers, since this is the real signed-in Chrome. Covers open/close tabs (incl. incognito), navigate, wait for load/selector, extract page HTML or element text/attributes, click elements, fill and submit forms, and run arbitrary JavaScript.
 ---
 
 # familiar — control macOS Chrome via AppleScript
@@ -27,42 +27,49 @@ Invoke it with `osascript`.
 - The script saves the frontmost app before acting and restores focus afterward.
 - Pacing is caller-driven: the script uses no fixed sleeps. To wait, use the explicit
   wait actions (`wait_for_load`, `wait_for_selector`, `wait_for_function`).
-- Actions return their result as **text** (not via exit status). Element actions return
-  `not_found` when the selector matches nothing, rather than raising.
+- Actions return their result as **text** (not via exit status). Most element actions return
+  `not_found` when the selector matches nothing, rather than raising — except `exists`
+  (reports `false`) and `query_all` (returns `[]`).
 
 ## Actions
 
-Run as: `osascript "$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript" ACTION [ARGS...]`
+Run as: `osascript "${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript" ACTION [ARGS...]`
+
+This index lists signatures and return values. For exact behavior, selector resolution, and
+edge cases — and whenever an action returns `not_found` / `no_form` / `no_option` / `timeout`
+and you are unsure why — read the linked reference rather than guessing. Notation below:
+`"literal"` = an exact string the action prints; `<value>` = a dynamic value.
 
 Control plane — full specs in [reference-browser.md](reference-browser.md):
 
 ```
-list_tabs                          list every tab as windowId,tabId,title,url
-new_tab                            open a tab in a normal window → "windowId,tabId"
-new_incognito_tab                  open a tab in an incognito window → "windowId,tabId"
-close_tab WID TID                  close a tab
-active_tab WID                     a window's active tab → "windowId,tabId"
-window_mode WID                    "normal" | "incognito"
-is_loading WID TID                 "true" | "false" (native, no JS)
-navigate WID TID URL               set the tab's URL (waits only for nav to begin)
-get_tab_url WID TID                the tab's current URL
-reload / go_back / go_forward / stop  WID TID    history & reload control
+list_tabs                          → lines of "<wid>,<tid>,<title>,<url>"
+new_tab                            open a tab in a normal window → "<wid>,<tid>"
+new_incognito_tab                  open a tab in an incognito window → "<wid>,<tid>"
+close_tab WID TID                  close a tab (no output)
+active_tab WID                     a window's active tab → "<wid>,<tid>"
+window_mode WID                    → "normal" | "incognito"
+is_loading WID TID                 → "true" | "false" (native, no JS)
+navigate WID TID URL               set the tab's URL; briefly waits for nav to begin (no
+                                   output) — follow with wait_for_load
+get_tab_url WID TID                → <url>
+reload / go_back / go_forward / stop  WID TID    history & reload control (no output)
 wait_for_load WID TID              poll readyState up to 60s → "complete" | "timeout"
 wait_for_selector WID TID SEL N    poll a CSS selector up to N s → "found" | "timeout"
 wait_for_function WID TID EXPR N   poll a JS expression up to N s → "true" | "timeout"
-get_html WID TID                   the live DOM as outerHTML
-execute_js WID TID EXPR            run an inline JS expression → its value
-execute_js_file WID TID PATH       run JS from a file → its value
+get_html WID TID                   the live DOM as outerHTML → <html>
+execute_js WID TID EXPR            run an inline JS expression → <value>
+execute_js_file WID TID PATH       run JS from a file → <value>
 ```
 
 Element plane — full specs and selector strategy in [reference-actions.md](reference-actions.md):
 
 ```
-get_text WID TID SEL               element's trimmed text → text | "not_found"
-get_attribute WID TID SEL NAME     attribute value ("" if absent) | "not_found"
-get_value WID TID SEL              input/textarea/select value | "not_found"
-exists WID TID SEL                 "true" | "false"
-query_all WID TID SEL              JSON array of every match's trimmed text
+get_text WID TID SEL               element's trimmed text → <text> | "not_found"
+get_attribute WID TID SEL NAME     attribute value ("" if absent) → <value> | "not_found"
+get_value WID TID SEL              input/textarea/select value → <value> | "not_found"
+exists WID TID SEL                 → "true" | "false"
+query_all WID TID SEL              JSON array of every match's trimmed text → <json> ("[]" if none)
 click WID TID SEL                  scroll into view + click → "true" | "not_found"
 fill WID TID SEL VALUE             set an input's value (frameworks notice) → "true" | "not_found"
 clear WID TID SEL                  empty an input → "true" | "not_found"
@@ -97,7 +104,7 @@ innermost exact match).
 Open a page and read it:
 
 ```bash
-SCRIPT="$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript"
+SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript"
 
 result=$(osascript "$SCRIPT" new_tab)
 WID=$(echo "$result" | cut -d',' -f1)
@@ -123,22 +130,14 @@ osascript "$SCRIPT" wait_for_selector "$WID" "$TID" ".welcome" 30
 osascript "$SCRIPT" get_text "$WID" "$TID" ".welcome"
 ```
 
-## Complex JavaScript — prefer execute_js_file
+## Complex JavaScript
 
-`execute_js` passes the JavaScript as a shell argument, so quotes, `$`, and backslashes must
-survive shell + AppleScript escaping. Use it only for short expressions. For anything with
+`execute_js` takes the JavaScript as a shell argument (quotes, `$`, and backslashes must
+survive shell + AppleScript escaping), so use it only for short expressions. For anything with
 quotes, multiple lines, or special characters, write the JS to a file and use
-`execute_js_file`:
+`execute_js_file`.
 
-```bash
-cat > /tmp/snippet.js <<'EOF'
-const items = [...document.querySelectorAll('.product[data-id]')];
-JSON.stringify(items.map(el => el.dataset.id))
-EOF
-osascript "$SCRIPT" execute_js_file "$WID" "$TID" /tmp/snippet.js
-```
-
-`execute javascript` returns the value of the **last evaluated expression** (its completion
-value, like the DevTools console), so end the script with an expression — a multi-statement
-script is fine. A top-level `return` does not work (`missing value`); leave the final
-expression without `return`. See [reference-browser.md](reference-browser.md) for more.
+Key gotcha: `execute javascript` returns the value of the **last evaluated expression** (its
+completion value, like the DevTools console). End the script with an expression — a top-level
+`return` does not work (`missing value`). See
+[reference-browser.md](reference-browser.md) for the file-based pattern and a worked example.
