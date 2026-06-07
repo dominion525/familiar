@@ -23,8 +23,7 @@
 --   execute_js WID TID EXPRESSION
 --   execute_js_file WID TID JS_FILE_PATH
 
--- TODO: refactor action dispatch.
--- Many actions share the (wid, tid) signature and could be unified.
+-- TODO: refactor the action dispatch (the if/else chain below).
 
 on run argv
 	set action to item 1 of argv
@@ -86,6 +85,26 @@ on run argv
 	return actionResult
 end run
 
+-- ============================================================
+-- Helpers
+-- ============================================================
+
+-- Run JavaScript in a specific tab and return its completion value.
+-- Centralizes (window id, tab id) targeting so callers don't repeat the
+-- nested tells. Result is the last evaluated expression (like the DevTools
+-- console); a top-level `return` does not work.
+on runJs(wId, tId, jsExpr)
+	tell application "Google Chrome"
+		tell (tab id (tId as integer) of window id (wId as integer))
+			return execute javascript jsExpr
+		end tell
+	end tell
+end runJs
+
+-- ============================================================
+-- Tab / window management
+-- ============================================================
+
 on doListTabs()
 	tell application "Google Chrome"
 		set output to ""
@@ -141,132 +160,18 @@ on openTabInMode(targetMode)
 	end tell
 end openTabInMode
 
-on doNavigate(wId, tId, targetURL)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			set URL of tab id (tId as integer) to targetURL
-			-- Wait for navigation to begin (until readyState leaves "complete")
-			tell tab id (tId as integer)
-				repeat 6 times
-					set rs to (execute javascript "document.readyState")
-					if rs is not "complete" then exit repeat
-					delay 0.5
-				end repeat
-			end tell
-		end tell
-	end tell
-end doNavigate
-
--- Reload a tab.
-on doReload(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			reload tab id (tId as integer)
-		end tell
-	end tell
-end doReload
-
--- Navigate a tab back in its history (if possible).
-on doGoBack(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			go back tab id (tId as integer)
-		end tell
-	end tell
-end doGoBack
-
--- Navigate a tab forward in its history (if possible).
-on doGoForward(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			go forward tab id (tId as integer)
-		end tell
-	end tell
-end doGoForward
-
--- Stop the tab from loading.
-on doStop(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			stop tab id (tId as integer)
-		end tell
-	end tell
-end doStop
-
 on doCloseTab(wId, tId)
 	tell application "Google Chrome"
-		tell window id (wId as integer)
-			close tab id (tId as integer)
-		end tell
+		close (tab id (tId as integer) of window id (wId as integer))
 	end tell
 end doCloseTab
-
-on doWaitForLoad(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			tell tab id (tId as integer)
-				set maxWait to 60
-				set waited to 0
-				repeat while waited < maxWait
-					set readyState to (execute javascript "document.readyState")
-					if readyState is "complete" then
-						return "complete"
-					end if
-					delay 0.5
-					set waited to waited + 0.5
-				end repeat
-				return "timeout"
-			end tell
-		end tell
-	end tell
-end doWaitForLoad
-
-on doWaitForSelector(wId, tId, cssSelector, maxWait)
-	set safeSelector to my jsEscape(cssSelector)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			tell tab id (tId as integer)
-				set waited to 0
-				repeat while waited < (maxWait as integer)
-					set jsResult to (execute javascript "String(document.querySelector('" & safeSelector & "') !== null)")
-					if jsResult is "true" then
-						return "found"
-					end if
-					delay 0.5
-					set waited to waited + 0.5
-				end repeat
-				return "timeout"
-			end tell
-		end tell
-	end tell
-end doWaitForSelector
-
-on doGetHtml(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			tell tab id (tId as integer)
-				execute javascript "document.documentElement.outerHTML"
-			end tell
-		end tell
-	end tell
-end doGetHtml
-
-on doGetTabUrl(wId, tId)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			return URL of tab id (tId as integer)
-		end tell
-	end tell
-end doGetTabUrl
 
 -- Return the active tab of a window as "windowId,tabId".
 on doActiveTab(wId)
 	tell application "Google Chrome"
-		tell window id (wId as integer)
-			set tabId to id of active tab
-		end tell
-		return (wId as text) & "," & (tabId as text)
+		set tabId to id of active tab of window id (wId as integer)
 	end tell
+	return (wId as text) & "," & (tabId as text)
 end doActiveTab
 
 -- Return a window's mode ("normal" or "incognito").
@@ -280,34 +185,107 @@ end doWindowMode
 -- works even when "Allow JavaScript from Apple Events" is off.
 on doIsLoading(wId, tId)
 	tell application "Google Chrome"
-		tell window id (wId as integer)
-			return (loading of tab id (tId as integer)) as text
-		end tell
+		return (loading of (tab id (tId as integer) of window id (wId as integer))) as text
 	end tell
 end doIsLoading
 
-on doExecuteJs(wId, tId, jsExpr)
+-- ============================================================
+-- Navigation
+-- ============================================================
+
+on doNavigate(wId, tId, targetURL)
 	tell application "Google Chrome"
-		tell window id (wId as integer)
-			tell tab id (tId as integer)
-				execute javascript jsExpr
-			end tell
-		end tell
+		set URL of (tab id (tId as integer) of window id (wId as integer)) to targetURL
 	end tell
+	-- Wait for navigation to begin (until readyState leaves "complete")
+	repeat 6 times
+		if (my runJs(wId, tId, "document.readyState")) is not "complete" then exit repeat
+		delay 0.5
+	end repeat
+end doNavigate
+
+-- Reload a tab.
+on doReload(wId, tId)
+	tell application "Google Chrome"
+		reload (tab id (tId as integer) of window id (wId as integer))
+	end tell
+end doReload
+
+-- Navigate a tab back in its history (if possible).
+on doGoBack(wId, tId)
+	tell application "Google Chrome"
+		go back (tab id (tId as integer) of window id (wId as integer))
+	end tell
+end doGoBack
+
+-- Navigate a tab forward in its history (if possible).
+on doGoForward(wId, tId)
+	tell application "Google Chrome"
+		go forward (tab id (tId as integer) of window id (wId as integer))
+	end tell
+end doGoForward
+
+-- Stop the tab from loading.
+on doStop(wId, tId)
+	tell application "Google Chrome"
+		stop (tab id (tId as integer) of window id (wId as integer))
+	end tell
+end doStop
+
+on doGetTabUrl(wId, tId)
+	tell application "Google Chrome"
+		return URL of (tab id (tId as integer) of window id (wId as integer))
+	end tell
+end doGetTabUrl
+
+-- ============================================================
+-- Waiting
+-- ============================================================
+
+on doWaitForLoad(wId, tId)
+	set waited to 0
+	repeat while waited < 60
+		if (my runJs(wId, tId, "document.readyState")) is "complete" then return "complete"
+		delay 0.5
+		set waited to waited + 0.5
+	end repeat
+	return "timeout"
+end doWaitForLoad
+
+on doWaitForSelector(wId, tId, cssSelector, maxWait)
+	set safeSelector to my jsEscape(cssSelector)
+	set jsExpr to "String(document.querySelector('" & safeSelector & "') !== null)"
+	set waited to 0
+	repeat while waited < (maxWait as integer)
+		if (my runJs(wId, tId, jsExpr)) is "true" then return "found"
+		delay 0.5
+		set waited to waited + 0.5
+	end repeat
+	return "timeout"
+end doWaitForSelector
+
+-- ============================================================
+-- Content / scripting
+-- ============================================================
+
+on doGetHtml(wId, tId)
+	return my runJs(wId, tId, "document.documentElement.outerHTML")
+end doGetHtml
+
+on doExecuteJs(wId, tId, jsExpr)
+	return my runJs(wId, tId, jsExpr)
 end doExecuteJs
 
 -- Read JavaScript from a file and run it. Avoids all shell/quoting
 -- escaping for complex scripts: write the JS to a file, pass its path.
 on doExecuteJsFile(wId, tId, filePath)
 	set jsContent to (read (POSIX file filePath) as «class utf8»)
-	tell application "Google Chrome"
-		tell window id (wId as integer)
-			tell tab id (tId as integer)
-				execute javascript jsContent
-			end tell
-		end tell
-	end tell
+	return my runJs(wId, tId, jsContent)
 end doExecuteJsFile
+
+-- ============================================================
+-- String utilities
+-- ============================================================
 
 -- Escape a string for safe embedding inside a single-quoted JS literal.
 on jsEscape(s)
