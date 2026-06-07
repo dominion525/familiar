@@ -15,9 +15,13 @@ English version: [README.md](README.md)
 - `active_tab` / `window_mode` / `is_loading` — アクティブタブ / ウィンドウモード / 読み込み状態を取得
 - `navigate` / `get_tab_url` — ナビゲーション
 - `reload` / `go_back` / `go_forward` / `stop` — 履歴・リロード操作
-- `wait_for_load` / `wait_for_selector` — 読み込み・要素出現の待機
+- `wait_for_load` / `wait_for_selector` / `wait_for_function` — 読み込み・要素出現・JS 条件の待機
 - `get_html` — 現在の DOM の HTML を取得
+- `get_text` / `get_attribute` / `get_value` / `exists` / `query_all` — 要素のテキスト / 属性 / 値 / 存在 / 全一致を取得
+- `click` / `fill` / `clear` / `select_option` / `set_checked` / `press_key` / `submit` / `scroll_into_view` — 要素・フォームの操作
 - `execute_js` / `execute_js_file` — 任意 JavaScript の実行（複雑なものはファイル経由）
+
+セレクタは CSS（既定）/ `text=` / `xpath=` / `label=` の形式に対応します。
 
 ## 前提条件
 
