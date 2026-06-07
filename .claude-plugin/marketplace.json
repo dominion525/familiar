@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "familiar",
-      "source": ".",
+      "source": "./",
       "description": "Control your real macOS Google Chrome via AppleScript — tab-scoped browser automation without the DevTools Protocol or Playwright."
     }
   ]
