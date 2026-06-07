@@ -1,4 +1,6 @@
 -- familiar — Google Chrome control script for macOS
+-- License: MIT
+-- Copyright (c) 2026 dominion525
 -- Usage: osascript familiar.applescript ACTION [ARGS...]
 --
 -- Actions:
