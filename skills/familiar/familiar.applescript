@@ -15,6 +15,7 @@
 --   close_tab WID TID
 --   wait_for_load WID TID
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
+--   wait_for_function WID TID JS_EXPR MAX_WAIT
 --   get_html WID TID
 --   get_tab_url WID TID
 --   active_tab WID
@@ -29,6 +30,12 @@
 --   get_value WID TID SELECTOR
 --   exists WID TID SELECTOR
 --   query_all WID TID SELECTOR
+--   clear WID TID SELECTOR
+--   select_option WID TID SELECTOR VALUE
+--   set_checked WID TID SELECTOR BOOL
+--   press_key WID TID SELECTOR KEY
+--   submit WID TID SELECTOR
+--   scroll_into_view WID TID SELECTOR
 --
 -- SELECTOR forms (see selectorResolverJs):
 --   CSS (default)   e.g. "button.submit", "#email"
@@ -102,6 +109,20 @@ on run argv
 		set actionResult to my doExists(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "query_all" then
 		set actionResult to my doQueryAll(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "clear" then
+		set actionResult to my doClear(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "select_option" then
+		set actionResult to my doSelectOption(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+	else if action is "set_checked" then
+		set actionResult to my doSetChecked(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+	else if action is "press_key" then
+		set actionResult to my doPressKey(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
+	else if action is "submit" then
+		set actionResult to my doSubmit(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "scroll_into_view" then
+		set actionResult to my doScrollIntoView(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "wait_for_function" then
+		set actionResult to my doWaitForFunction(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
 	else
 		error "Unknown action: " & action
 	end if
@@ -291,6 +312,19 @@ on doWaitForSelector(wId, tId, cssSelector, maxWait)
 	return "timeout"
 end doWaitForSelector
 
+-- Poll a JavaScript expression until it is truthy. JS_EXPR is raw JS (an
+-- expression, not a selector). Returns "true" once truthy, or "timeout".
+on doWaitForFunction(wId, tId, jsExpr, maxWait)
+	set probe to "(function(){try{return String(Boolean(" & jsExpr & "));}catch(e){return 'false';}})()"
+	set waited to 0
+	repeat while waited < (maxWait as integer)
+		if (my runJs(wId, tId, probe)) is "true" then return "true"
+		delay 0.5
+		set waited to waited + 0.5
+	end repeat
+	return "timeout"
+end doWaitForFunction
+
 -- ============================================================
 -- Content / scripting
 -- ============================================================
@@ -443,6 +477,107 @@ on doQueryAll(wId, tId, sel)
 })()"
 	return my runJs(wId, tId, js)
 end doQueryAll
+
+-- Clear an input/textarea via the native value setter, then fire input/change
+-- so frameworks (React etc.) detect the change. Returns "true" / "not_found".
+on doClear(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  el.focus();
+  var proto = (el instanceof window.HTMLTextAreaElement) ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+  var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+  setter.call(el, '');
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doClear
+
+-- Select an <option> in a <select> by its value, falling back to its visible
+-- text. Sets the value via the native setter so frameworks detect it, then fires
+-- input/change. Returns "true", "no_option" if nothing matched, or "not_found".
+on doSelectOption(wId, tId, sel, val)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  var want = '" & my jsEscape(val) & "';
+  var opts = el.options || [];
+  var match = null;
+  for (var i = 0; i < opts.length; i++) { if (opts[i].value === want) { match = opts[i]; break; } }
+  if (!match) { for (var i = 0; i < opts.length; i++) { if ((opts[i].textContent || '').trim() === want) { match = opts[i]; break; } } }
+  if (!match) return 'no_option';
+  var setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set;
+  setter.call(el, match.value);
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doSelectOption
+
+-- Check or uncheck a checkbox/radio. VALUE is \"true\" / \"false\". Sets the
+-- checked state via the native setter, then fires input/change. Returns
+-- \"true\" / \"not_found\".
+on doSetChecked(wId, tId, sel, val)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  var want = '" & my jsEscape(val) & "' === 'true';
+  var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'checked').set;
+  setter.call(el, want);
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doSetChecked
+
+-- Dispatch a synthetic keydown/keypress/keyup for KEY (e.g. \"Enter\", \"a\") on
+-- the element. Events are isTrusted=false, so strict handlers may ignore them.
+-- Returns \"true\" / \"not_found\".
+on doPressKey(wId, tId, sel, keyName)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  el.focus();
+  var k = '" & my jsEscape(keyName) & "';
+  var codes = {Enter: 13, Tab: 9, Escape: 27, Backspace: 8, Delete: 46, ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39, ' ': 32};
+  var kc = (k in codes) ? codes[k] : (k.length === 1 ? k.charCodeAt(0) : 0);
+  ['keydown', 'keypress', 'keyup'].forEach(function(type){
+    el.dispatchEvent(new KeyboardEvent(type, {key: k, keyCode: kc, which: kc, bubbles: true, cancelable: true}));
+  });
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doPressKey
+
+-- Submit the form the element belongs to (or the element itself if it is a
+-- form). Uses requestSubmit so submit handlers/validation run. Returns
+-- \"true\", \"no_form\" if no form was found, or \"not_found\".
+on doSubmit(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  var form = (el instanceof window.HTMLFormElement) ? el : (el.form || el.closest('form'));
+  if (!form) return 'no_form';
+  if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doSubmit
+
+-- Scroll an element into view (centered). Returns \"true\" / \"not_found\".
+on doScrollIntoView(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  el.scrollIntoView({block: 'center', inline: 'center'});
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doScrollIntoView
 
 -- ============================================================
 -- String utilities
