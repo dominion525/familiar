@@ -22,6 +22,14 @@
 --   is_loading WID TID
 --   execute_js WID TID EXPRESSION
 --   execute_js_file WID TID JS_FILE_PATH
+--   click WID TID SELECTOR
+--   fill WID TID SELECTOR VALUE
+--
+-- SELECTOR forms (see selectorResolverJs):
+--   CSS (default)   e.g. "button.submit", "#email"
+--   text=...        match by trimmed visible text (innermost element)
+--   xpath=...       match by XPath (first node)
+--   label=...       match a form control via its <label> / aria-label
 
 -- TODO: refactor the action dispatch (the if/else chain below).
 
@@ -75,6 +83,10 @@ on run argv
 		set actionResult to my doExecuteJs(item 2 of argv, item 3 of argv, item 4 of argv)
 	else if action is "execute_js_file" then
 		set actionResult to my doExecuteJsFile(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "click" then
+		set actionResult to my doClick(item 2 of argv, item 3 of argv, item 4 of argv)
+	else if action is "fill" then
+		set actionResult to my doFill(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
 	else
 		error "Unknown action: " & action
 	end if
@@ -282,6 +294,82 @@ on doExecuteJsFile(wId, tId, filePath)
 	set jsContent to (read (POSIX file filePath) as «class utf8»)
 	return my runJs(wId, tId, jsContent)
 end doExecuteJsFile
+
+-- ============================================================
+-- Element actions
+-- ============================================================
+
+-- JavaScript that defines __famFind(selector): resolves an element from a
+-- selector string. Supports "text=", "xpath=", "label=" prefixes; otherwise
+-- treats the string as a CSS selector. Returns the element or null.
+-- (Uses only single quotes so it can sit inside an AppleScript double-quoted
+-- string.) This is prepended to each element-action script.
+on selectorResolverJs()
+	return "function __famFind(sel){
+  if (sel.indexOf('text=') === 0) {
+    var t = sel.slice(5).trim();
+    var all = document.querySelectorAll('body *');
+    var matches = [];
+    for (var i = 0; i < all.length; i++) { if (all[i].textContent.trim() === t) matches.push(all[i]); }
+    for (var i = 0; i < matches.length; i++) {
+      var hasInner = false;
+      for (var j = 0; j < matches.length; j++) { if (i !== j && matches[i].contains(matches[j])) { hasInner = true; break; } }
+      if (!hasInner) return matches[i];
+    }
+    return matches.length ? matches[0] : null;
+  }
+  if (sel.indexOf('xpath=') === 0) {
+    var r = document.evaluate(sel.slice(6), document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return r.singleNodeValue;
+  }
+  if (sel.indexOf('label=') === 0) {
+    var t = sel.slice(6).trim();
+    var labels = document.querySelectorAll('label');
+    for (var i = 0; i < labels.length; i++) {
+      if (labels[i].textContent.trim() === t) {
+        var f = labels[i].getAttribute('for');
+        if (f) { var el = document.getElementById(f); if (el) return el; }
+        var inner = labels[i].querySelector('input, textarea, select');
+        if (inner) return inner;
+      }
+    }
+    var aria = document.querySelectorAll('[aria-label]');
+    for (var i = 0; i < aria.length; i++) { if (aria[i].getAttribute('aria-label').trim() === t) return aria[i]; }
+    return null;
+  }
+  return document.querySelector(sel);
+}
+"
+end selectorResolverJs
+
+-- Click an element. Returns "true" on success, "not_found" if no element matched.
+on doClick(wId, tId, sel)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  el.scrollIntoView({block: 'center'});
+  el.click();
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doClick
+
+-- Fill an input/textarea via the native value setter so frameworks (React etc.)
+-- detect the change, then fire input/change. Returns "true" / "not_found".
+on doFill(wId, tId, sel, val)
+	set js to my selectorResolverJs() & "(function(){
+  var el = __famFind('" & my jsEscape(sel) & "');
+  if (!el) return 'not_found';
+  el.focus();
+  var proto = (el instanceof window.HTMLTextAreaElement) ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+  var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+  setter.call(el, '" & my jsEscape(val) & "');
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  return 'true';
+})()"
+	return my runJs(wId, tId, js)
+end doFill
 
 -- ============================================================
 -- String utilities
