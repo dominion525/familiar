@@ -13,24 +13,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  applescript:
     runs-on: macos-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: AppleScript syntax check
         run: osacompile -o /dev/null skills/familiar/familiar.applescript
 
-      - name: JSON manifests are valid
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: JSON manifests have required fields
         run: |
-          for f in .claude-plugin/marketplace.json .claude-plugin/plugin.json; do
-            jq empty "$f"
-          done
+          jq -e '.name and .version' .claude-plugin/plugin.json > /dev/null
+          jq -e '.name and (.plugins | length > 0) and all(.plugins[]; .name and .source)' .claude-plugin/marketplace.json > /dev/null
 
       - name: No absolute personal paths in tracked files
         run: |
-          if git grep -nE "/Users/[a-z][a-z0-9._-]+"; then
-            echo "Found absolute /Users/<name>/ paths in tracked files"
+          if git grep -nIE "/(Users|home)/[a-zA-Z][a-zA-Z0-9._-]+"; then
+            echo "Found absolute /Users/<name>/ or /home/<name>/ paths in tracked files"
             exit 1
           fi
