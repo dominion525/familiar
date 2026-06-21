@@ -65,8 +65,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: "window_mode",
-    description:
-      'Return the window\'s mode: "normal" or "incognito". Native.',
+    description: 'Return the window\'s mode: "normal" or "incognito". Native.',
     inputSchema: WindowRef,
     runArgs: (input) => [String(input.windowId)],
   },
@@ -121,8 +120,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: "stop",
-    description:
-      "Stop the tab's current loading. Native. No value returned.",
+    description: "Stop the tab's current loading. Native. No value returned.",
     inputSchema: TabRef,
     runArgs: (input) => [String(input.windowId), String(input.tabId)],
   },
