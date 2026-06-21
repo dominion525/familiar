@@ -1,16 +1,15 @@
 # macOS
 .DS_Store
 
-# エディタ / IDE
+# Editors / IDEs
 .idea/
 .vscode/
 *.swp
 *~
 
-# ログ・一時ファイル
+# Logs / temp files
 *.log
 
-# Claude Code のローカル作業用（リポジトリでは共有しない）
+# Claude Code local working files (not shared in the repo)
 .claude/
 tasks/
-CLAUDE.md
