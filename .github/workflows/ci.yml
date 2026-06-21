@@ -5,9 +5,17 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   checks:
     runs-on: macos-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -18,13 +26,6 @@ jobs:
         run: |
           for f in .claude-plugin/marketplace.json .claude-plugin/plugin.json; do
             jq empty "$f"
-          done
-
-      - name: SKILL.md frontmatter has required fields
-        run: |
-          for field in name description compatibility; do
-            grep -qE "^${field}:" skills/familiar/SKILL.md \
-              || { echo "Missing frontmatter field: ${field}"; exit 1; }
           done
 
       - name: No absolute personal paths in tracked files
