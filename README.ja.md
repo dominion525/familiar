@@ -56,6 +56,12 @@ npx skills add dominion525/familiar
 [agent-skills spec](https://agentskills.io/specification) に準拠したクライアント
 （Claude Code / Cursor など）が自動で読み込みます。レジストリは https://skills.sh。
 
+### MCP server
+
+`mcp/` には MCP server 実装（TypeScript）があり、同じ 32 actions を MCP 対応
+クライアント（Claude Code / Claude Desktop / Cursor / Codex CLI ほか）から
+利用できます。インストールと設定は [mcp/README.md](mcp/README.md) を参照。
+
 ### スタンドアロン（インストール不要）
 
 スキルをインストールしなくても、スクリプト単体で実行できます:

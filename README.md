@@ -56,6 +56,13 @@ This places the skill under `~/.agents/skills/familiar/`. Any client that follow
 [agent-skills spec](https://agentskills.io/specification) (Claude Code, Cursor, and
 others) picks it up automatically. The registry is at https://skills.sh.
 
+### MCP server
+
+The `mcp/` directory contains an MCP server implementation (TypeScript) that
+exposes the same 32 actions to any MCP-compatible client (Claude Code, Claude
+Desktop, Cursor, Codex CLI, and others). See [mcp/README.md](mcp/README.md) for
+install and configuration.
+
 ### Standalone (no install)
 
 The script also runs standalone, without installing the skill:
