@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AppleScript syntax check
+        run: osacompile -o /dev/null skills/familiar/familiar.applescript
+
+      - name: JSON manifests are valid
+        run: |
+          for f in .claude-plugin/marketplace.json .claude-plugin/plugin.json; do
+            jq empty "$f"
+          done
+
+      - name: SKILL.md frontmatter has required fields
+        run: |
+          for field in name description compatibility; do
+            grep -qE "^${field}:" skills/familiar/SKILL.md \
+              || { echo "Missing frontmatter field: ${field}"; exit 1; }
+          done
+
+      - name: No absolute personal paths in tracked files
+        run: |
+          if git grep -nE "/Users/[a-z][a-z0-9._-]+"; then
+            echo "Found absolute /Users/<name>/ paths in tracked files"
+            exit 1
+          fi
