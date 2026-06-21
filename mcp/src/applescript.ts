@@ -81,6 +81,11 @@ function classifyExecFileError(error: unknown): AppleScriptErrorKind {
  * The runner is intentionally thin: sentinel return strings such as
  * "not_found", "no_form", "no_option", and "timeout" are passed through
  * verbatim. Their interpretation belongs to the tool layer.
+ *
+ * Only the single trailing newline that `osascript` appends to every result
+ * is stripped — leading / trailing whitespace inside the returned value is
+ * preserved so reads like `get_value` and `get_attribute` keep significant
+ * whitespace, and `execute_js` can return values that contain newlines.
  */
 export async function runAction(
   action: string,
@@ -94,7 +99,7 @@ export async function runAction(
       [APPLESCRIPT_PATH, action, ...args],
       { timeout, maxBuffer: MAX_BUFFER },
     );
-    return stdout.trim();
+    return stdout.endsWith("\n") ? stdout.slice(0, -1) : stdout;
   } catch (error) {
     const kind = classifyExecFileError(error);
     const message = error instanceof Error ? error.message : String(error);

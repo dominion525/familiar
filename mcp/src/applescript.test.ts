@@ -52,10 +52,28 @@ describe("runAction", () => {
     mockExecAsync.mockReset();
   });
 
-  it("trims stdout and returns it on success", async () => {
+  it("strips only the single trailing newline (preserves inner whitespace)", async () => {
     mockExecAsync.mockResolvedValue({ stdout: "  hello  \n", stderr: "" });
     const result = await runAction("list_tabs", []);
-    expect(result).toBe("hello");
+    expect(result).toBe("  hello  ");
+  });
+
+  it("returns stdout as-is when there is no trailing newline", async () => {
+    mockExecAsync.mockResolvedValue({ stdout: "no_newline", stderr: "" });
+    expect(await runAction("get_value", ["1", "2", "#x"])).toBe("no_newline");
+  });
+
+  it("preserves embedded newlines (only the last one is stripped)", async () => {
+    mockExecAsync.mockResolvedValue({
+      stdout: "line1\nline2\n",
+      stderr: "",
+    });
+    expect(await runAction("execute_js", ["1", "2", "x"])).toBe("line1\nline2");
+  });
+
+  it("returns empty string when stdout is just a newline", async () => {
+    mockExecAsync.mockResolvedValue({ stdout: "\n", stderr: "" });
+    expect(await runAction("close_tab", ["1", "2"])).toBe("");
   });
 
   it("invokes osascript with the bundled script path and action args", async () => {
