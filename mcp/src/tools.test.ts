@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { TOOLS } from "./tools.js";
 
 describe("TOOLS", () => {
@@ -221,6 +222,74 @@ describe("TOOLS runArgs", () => {
     const tested = new Set(cases.map((c) => c.name));
     const missing = TOOLS.map((t) => t.name).filter((n) => !tested.has(n));
     expect(missing, `untested tools: ${missing.join(", ")}`).toEqual([]);
+  });
+});
+
+describe("TOOLS inputSchema validation", () => {
+  function schemaFor(name: string) {
+    const tool = TOOLS.find((t) => t.name === name);
+    if (!tool) throw new Error(`tool "${name}" not registered`);
+    return z.object(tool.inputSchema);
+  }
+
+  it("coerces numeric windowId/tabId to string (LLM-friendly)", () => {
+    const result = schemaFor("navigate").parse({
+      windowId: 1,
+      tabId: 2,
+      url: "https://example.com",
+    });
+    expect(result.windowId).toBe("1");
+    expect(result.tabId).toBe("2");
+  });
+
+  it("execute_js_file.path rejects relative paths", () => {
+    expect(() =>
+      schemaFor("execute_js_file").parse({
+        windowId: "1",
+        tabId: "2",
+        path: "relative/path.js",
+      }),
+    ).toThrow();
+  });
+
+  it("execute_js_file.path accepts absolute paths", () => {
+    expect(() =>
+      schemaFor("execute_js_file").parse({
+        windowId: "1",
+        tabId: "2",
+        path: "/tmp/snippet.js",
+      }),
+    ).not.toThrow();
+  });
+
+  it("wait_for_selector.maxSeconds caps at 300", () => {
+    expect(() =>
+      schemaFor("wait_for_selector").parse({
+        windowId: "1",
+        tabId: "2",
+        selector: ".x",
+        maxSeconds: 301,
+      }),
+    ).toThrow();
+    expect(() =>
+      schemaFor("wait_for_selector").parse({
+        windowId: "1",
+        tabId: "2",
+        selector: ".x",
+        maxSeconds: 300,
+      }),
+    ).not.toThrow();
+  });
+
+  it("wait_for_function.maxSeconds caps at 300", () => {
+    expect(() =>
+      schemaFor("wait_for_function").parse({
+        windowId: "1",
+        tabId: "2",
+        expression: "true",
+        maxSeconds: 301,
+      }),
+    ).toThrow();
   });
 });
 

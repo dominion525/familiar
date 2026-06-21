@@ -1,12 +1,15 @@
 import { z } from "zod";
 
+// windowId / tabId are coerced from any input so that LLMs which emit them as
+// numbers (a common slip-up) still pass Zod validation. The AppleScript side
+// expects strings on the command line.
 const WindowRef = {
-  windowId: z.string().describe("Chrome window id"),
+  windowId: z.coerce.string().describe("Chrome window id"),
 };
 
 const TabRef = {
   ...WindowRef,
-  tabId: z.string().describe("Chrome tab id"),
+  tabId: z.coerce.string().describe("Chrome tab id"),
 };
 
 const TabRefWithSelector = {
@@ -222,7 +225,10 @@ export const TOOLS: ToolDef[] = [
       "Read JavaScript from a UTF-8 file and run it. Sidesteps all shell/AppleScript escaping — prefer for anything with quotes, multiple lines, or special characters. Returns the completion value of the script.",
     inputSchema: {
       ...TabRef,
-      path: z.string().describe("Absolute path to the JS file"),
+      path: z
+        .string()
+        .startsWith("/", "Path must be absolute (start with /)")
+        .describe("Absolute path to the JS file"),
     },
     runArgs: (input) => [
       String(input.windowId),
