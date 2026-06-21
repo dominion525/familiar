@@ -55,7 +55,7 @@ describe("runAction", () => {
     const [file, args] = mockExecAsync.mock.calls[0];
     expect(file).toBe("osascript");
     expect(args).toEqual([
-      expect.stringMatching(/skills\/familiar\/familiar\.applescript$/),
+      expect.stringMatching(/familiar\.applescript$/),
       "navigate",
       "1",
       "2",

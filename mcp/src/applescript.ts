@@ -8,12 +8,10 @@ const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Compiled location is mcp/dist/applescript.js; the bundled AppleScript lives
-// at <repo-root>/skills/familiar/familiar.applescript, two levels up.
-const APPLESCRIPT_PATH = path.resolve(
-  __dirname,
-  "../../skills/familiar/familiar.applescript",
-);
+// The build step copies skills/familiar/familiar.applescript into mcp/dist/,
+// so the script lives next to the compiled JS regardless of where the package
+// is installed (workspace dev tree, npm install, npx cache, ...).
+const APPLESCRIPT_PATH = path.resolve(__dirname, "./familiar.applescript");
 
 const TIMEOUT_MS = 30_000;
 const MAX_BUFFER = 10 * 1024 * 1024;
