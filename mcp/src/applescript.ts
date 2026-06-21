@@ -26,16 +26,53 @@ export type RunActionOptions = {
   timeoutMs?: number;
 };
 
+/**
+ * Categorizes the underlying failure so callers (and the LLM, via the MCP
+ * isError content) can distinguish recoverable from terminal conditions.
+ *
+ * - `timeout`: the osascript kill-timeout fired before the action completed
+ * - `max_buffer`: stdout exceeded MAX_BUFFER (10 MiB)
+ * - `not_found`: the `osascript` binary itself was missing (PATH / install)
+ * - `non_zero_exit`: osascript exited with a non-zero status (usually a
+ *   syntax error or an AppleScript runtime error)
+ * - `unknown`: any other failure
+ */
+export type AppleScriptErrorKind =
+  | "timeout"
+  | "max_buffer"
+  | "not_found"
+  | "non_zero_exit"
+  | "unknown";
+
 export class AppleScriptError extends Error {
   constructor(
     message: string,
     public readonly action: string,
     public readonly args: readonly string[],
-    public readonly cause?: unknown,
+    public readonly kind: AppleScriptErrorKind,
+    options?: { cause?: unknown },
   ) {
-    super(message);
+    super(message, options);
     this.name = "AppleScriptError";
   }
+}
+
+function classifyExecFileError(error: unknown): AppleScriptErrorKind {
+  if (!(error instanceof Error)) return "unknown";
+  // Node's execFile sets `code` on the thrown error: a system errno
+  // string (ETIMEDOUT, ENOENT, ERR_CHILD_PROCESS_STDIO_MAXBUFFER) for
+  // signal-level failures, or the numeric exit code for non-zero exits.
+  const code = (error as NodeJS.ErrnoException).code;
+  if (code === "ETIMEDOUT") return "timeout";
+  if (code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") return "max_buffer";
+  if (code === "ENOENT") return "not_found";
+  if (
+    typeof code === "number" ||
+    (typeof code === "string" && /^\d+$/.test(code))
+  ) {
+    return "non_zero_exit";
+  }
+  return "unknown";
 }
 
 /**
@@ -59,12 +96,14 @@ export async function runAction(
     );
     return stdout.trim();
   } catch (error) {
+    const kind = classifyExecFileError(error);
     const message = error instanceof Error ? error.message : String(error);
     throw new AppleScriptError(
-      `osascript ${action} failed: ${message}`,
+      `osascript ${action} failed (${kind}): ${message}`,
       action,
       args,
-      error,
+      kind,
+      { cause: error },
     );
   }
 }

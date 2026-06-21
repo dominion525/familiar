@@ -24,18 +24,25 @@ const mockExecAsync = (
 )[promisify.custom];
 
 describe("AppleScriptError", () => {
-  it("preserves action, args, and cause", () => {
+  it("preserves action, args, kind, and cause (via ES2022 Error options)", () => {
     const cause = new Error("underlying");
-    const err = new AppleScriptError("boom", "click", ["1", "2", "#x"], cause);
+    const err = new AppleScriptError(
+      "boom",
+      "click",
+      ["1", "2", "#x"],
+      "non_zero_exit",
+      { cause },
+    );
     expect(err.message).toBe("boom");
     expect(err.action).toBe("click");
     expect(err.args).toEqual(["1", "2", "#x"]);
+    expect(err.kind).toBe("non_zero_exit");
     expect(err.cause).toBe(cause);
     expect(err.name).toBe("AppleScriptError");
   });
 
   it("is an instance of Error", () => {
-    const err = new AppleScriptError("x", "y", []);
+    const err = new AppleScriptError("x", "y", [], "unknown");
     expect(err).toBeInstanceOf(Error);
   });
 });
@@ -106,19 +113,24 @@ describe("runAction", () => {
   });
 
   it("wraps execFile errors in AppleScriptError preserving cause", async () => {
-    const cause = new Error("Command failed: exit code 1");
+    const cause = Object.assign(new Error("Command failed: exit code 1"), {
+      code: 1,
+    });
     mockExecAsync.mockRejectedValue(cause);
 
     await expect(runAction("click", ["1", "2", "#x"])).rejects.toMatchObject({
       name: "AppleScriptError",
       action: "click",
       args: ["1", "2", "#x"],
+      kind: "non_zero_exit",
       cause,
     });
   });
 
-  it("formats the error message with action and underlying error", async () => {
-    const cause = new Error("Timed out after 30s");
+  it("formats the error message with action, kind, and underlying error", async () => {
+    const cause = Object.assign(new Error("Timed out after 30s"), {
+      code: "ETIMEDOUT",
+    });
     mockExecAsync.mockRejectedValue(cause);
 
     try {
@@ -126,20 +138,78 @@ describe("runAction", () => {
       expect.unreachable("runAction should have thrown");
     } catch (err) {
       expect(err).toBeInstanceOf(AppleScriptError);
-      expect((err as AppleScriptError).message).toContain("wait_for_load");
-      expect((err as AppleScriptError).message).toContain(
-        "Timed out after 30s",
-      );
+      const ase = err as AppleScriptError;
+      expect(ase.message).toContain("wait_for_load");
+      expect(ase.message).toContain("(timeout)");
+      expect(ase.message).toContain("Timed out after 30s");
+      expect(ase.kind).toBe("timeout");
     }
   });
 
-  it("handles non-Error throwable values (string)", async () => {
+  it("handles non-Error throwable values (string) as kind=unknown", async () => {
     mockExecAsync.mockRejectedValue("plain string error");
 
     await expect(runAction("click", ["1", "2", "#x"])).rejects.toMatchObject({
       name: "AppleScriptError",
       action: "click",
+      kind: "unknown",
       cause: "plain string error",
+    });
+  });
+
+  describe("error classification (kind)", () => {
+    it("ETIMEDOUT → timeout", async () => {
+      mockExecAsync.mockRejectedValue(
+        Object.assign(new Error("timed out"), { code: "ETIMEDOUT" }),
+      );
+      await expect(
+        runAction("wait_for_load", ["1", "2"]),
+      ).rejects.toMatchObject({ kind: "timeout" });
+    });
+
+    it("ENOENT → not_found", async () => {
+      mockExecAsync.mockRejectedValue(
+        Object.assign(new Error("osascript not found"), { code: "ENOENT" }),
+      );
+      await expect(runAction("list_tabs", [])).rejects.toMatchObject({
+        kind: "not_found",
+      });
+    });
+
+    it("ERR_CHILD_PROCESS_STDIO_MAXBUFFER → max_buffer", async () => {
+      mockExecAsync.mockRejectedValue(
+        Object.assign(new Error("stdout exceeded"), {
+          code: "ERR_CHILD_PROCESS_STDIO_MAXBUFFER",
+        }),
+      );
+      await expect(runAction("get_html", ["1", "2"])).rejects.toMatchObject({
+        kind: "max_buffer",
+      });
+    });
+
+    it("numeric exit code → non_zero_exit", async () => {
+      mockExecAsync.mockRejectedValue(
+        Object.assign(new Error("exit 2"), { code: 2 }),
+      );
+      await expect(runAction("click", ["1", "2", "#x"])).rejects.toMatchObject({
+        kind: "non_zero_exit",
+      });
+    });
+
+    it("numeric-string exit code → non_zero_exit", async () => {
+      mockExecAsync.mockRejectedValue(
+        Object.assign(new Error("exit 137"), { code: "137" }),
+      );
+      await expect(runAction("click", ["1", "2", "#x"])).rejects.toMatchObject({
+        kind: "non_zero_exit",
+      });
+    });
+
+    it("Error without code → unknown", async () => {
+      mockExecAsync.mockRejectedValue(new Error("bare error"));
+      await expect(runAction("list_tabs", [])).rejects.toMatchObject({
+        kind: "unknown",
+      });
     });
   });
 });

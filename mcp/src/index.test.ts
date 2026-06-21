@@ -125,11 +125,12 @@ describe("tool dispatch", () => {
 
   it("returns isError content with AppleScriptError's message", async () => {
     runActionMock.mockRejectedValue(
-      new AppleScriptError("osascript click failed: boom", "click", [
-        "1",
-        "2",
-        "#x",
-      ]),
+      new AppleScriptError(
+        "osascript click failed (non_zero_exit): boom",
+        "click",
+        ["1", "2", "#x"],
+        "non_zero_exit",
+      ),
     );
     const result = await getToolCallback("click")({
       windowId: "1",
