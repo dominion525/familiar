@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  applescript:
+    runs-on: macos-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: AppleScript syntax check
+        run: osacompile -o /dev/null skills/familiar/familiar.applescript
+
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: JSON manifests have required fields
+        run: |
+          jq -e '.name and .version' .claude-plugin/plugin.json > /dev/null
+          jq -e '.name and (.plugins | length > 0) and all(.plugins[]; .name and .source)' .claude-plugin/marketplace.json > /dev/null
+
+      - name: No absolute personal paths in tracked files
+        run: |
+          if git grep -nIE "/(Users|home)/[a-zA-Z][a-zA-Z0-9._-]+"; then
+            echo "Found absolute /Users/<name>/ or /home/<name>/ paths in tracked files"
+            exit 1
+          fi
