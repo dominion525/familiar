@@ -4,8 +4,9 @@ Detailed specs for the control-plane actions (tabs/windows, navigation, waiting,
 content/scripting). For element interaction (click/fill, reads, selectors) see
 [reference-actions.md](reference-actions.md). For the overview see [SKILL.md](SKILL.md).
 
-Run as: `osascript "$SCRIPT" ACTION [ARGS...]` where
-`SCRIPT="$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript"`.
+Run as: `osascript "$SCRIPT" ACTION [ARGS...]` where `$SCRIPT` is the absolute path
+to `familiar.applescript` (see [SKILL.md](SKILL.md) "Script path" for common locations
+under Claude Code plugins and Vercel Skills).
 
 Every tab-scoped action takes `WID TID` (windowId, tabId). Native actions work even when
 "Allow JavaScript from Apple Events" is off; JS-backed actions need it on.

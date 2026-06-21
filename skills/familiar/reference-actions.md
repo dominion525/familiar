@@ -4,8 +4,9 @@ Detailed specs for element reads and interaction, plus the selector strategy. Fo
 control plane (tabs/windows, navigation, waiting, scripting) see
 [reference-browser.md](reference-browser.md). For the overview see [SKILL.md](SKILL.md).
 
-Run as: `osascript "$SCRIPT" ACTION "$WID" "$TID" SELECTOR [VALUE]` where
-`SCRIPT="$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript"`.
+Run as: `osascript "$SCRIPT" ACTION "$WID" "$TID" SELECTOR [VALUE]` where `$SCRIPT`
+is the absolute path to `familiar.applescript` (see [SKILL.md](SKILL.md) "Script path"
+for common locations under Claude Code plugins and Vercel Skills).
 
 All actions here run JavaScript, so Chrome's "Allow JavaScript from Apple Events" must be on.
 When no element matches the selector, the action returns the string `not_found` rather than
