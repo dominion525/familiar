@@ -1,7 +1,11 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AppleScriptError, runAction } from "./applescript.js";
+import {
+  AppleScriptError,
+  DEFAULT_TIMEOUT_MS,
+  runAction,
+} from "./applescript.js";
 
 // `applescript.ts` wraps `execFile` with `promisify`, which uses the
 // `util.promisify.custom` symbol. We mock that promisified function directly
@@ -74,15 +78,31 @@ describe("runAction", () => {
     ]);
   });
 
-  it("passes timeout and maxBuffer options to execFile", async () => {
+  it("falls back to the default 30s timeout when timeoutMs is omitted", async () => {
     mockExecAsync.mockResolvedValue({ stdout: "ok", stderr: "" });
     await runAction("list_tabs", []);
 
     const [, , options] = mockExecAsync.mock.calls[0];
     expect(options).toMatchObject({
-      timeout: 30_000,
+      timeout: DEFAULT_TIMEOUT_MS,
       maxBuffer: 10 * 1024 * 1024,
     });
+  });
+
+  it("uses the provided timeoutMs over the default", async () => {
+    mockExecAsync.mockResolvedValue({ stdout: "ok", stderr: "" });
+    await runAction("wait_for_load", ["1", "2"], { timeoutMs: 65_000 });
+
+    const [, , options] = mockExecAsync.mock.calls[0];
+    expect(options).toMatchObject({ timeout: 65_000 });
+  });
+
+  it("falls back to the default when timeoutMs is explicitly undefined", async () => {
+    mockExecAsync.mockResolvedValue({ stdout: "ok", stderr: "" });
+    await runAction("list_tabs", [], { timeoutMs: undefined });
+
+    const [, , options] = mockExecAsync.mock.calls[0];
+    expect(options).toMatchObject({ timeout: DEFAULT_TIMEOUT_MS });
   });
 
   it("wraps execFile errors in AppleScriptError preserving cause", async () => {

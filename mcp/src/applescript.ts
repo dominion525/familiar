@@ -13,8 +13,18 @@ const __dirname = path.dirname(__filename);
 // is installed (workspace dev tree, npm install, npx cache, ...).
 const APPLESCRIPT_PATH = path.resolve(__dirname, "./familiar.applescript");
 
-const TIMEOUT_MS = 30_000;
+export const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_BUFFER = 10 * 1024 * 1024;
+
+export type RunActionOptions = {
+  /**
+   * Override the osascript kill timeout. Tools that wait inside AppleScript
+   * (wait_for_load, wait_for_selector, wait_for_function) must pass a value
+   * that exceeds the AppleScript-side wait or the child process is killed
+   * before the action returns.
+   */
+  timeoutMs?: number;
+};
 
 export class AppleScriptError extends Error {
   constructor(
@@ -38,12 +48,14 @@ export class AppleScriptError extends Error {
 export async function runAction(
   action: string,
   args: readonly string[] = [],
+  options: RunActionOptions = {},
 ): Promise<string> {
+  const timeout = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   try {
     const { stdout } = await execFileAsync(
       "osascript",
       [APPLESCRIPT_PATH, action, ...args],
-      { timeout: TIMEOUT_MS, maxBuffer: MAX_BUFFER },
+      { timeout, maxBuffer: MAX_BUFFER },
     );
     return stdout.trim();
   } catch (error) {

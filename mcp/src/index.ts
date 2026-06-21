@@ -18,8 +18,10 @@ for (const tool of TOOLS) {
     },
     async (input) => {
       try {
-        const args = tool.runArgs(input as Record<string, unknown>);
-        const result = await runAction(tool.name, args);
+        const validated = input as Record<string, unknown>;
+        const args = tool.runArgs(validated);
+        const timeoutMs = tool.timeoutMs?.(validated);
+        const result = await runAction(tool.name, args, { timeoutMs });
         return { content: [{ type: "text", text: result }] };
       } catch (error) {
         const message =

@@ -75,7 +75,9 @@ describe("tool dispatch", () => {
     runActionMock.mockResolvedValue("wid1,tid1,Title,https://example.com");
     const result = await getToolCallback("list_tabs")({});
 
-    expect(runActionMock).toHaveBeenCalledWith("list_tabs", []);
+    expect(runActionMock).toHaveBeenCalledWith("list_tabs", [], {
+      timeoutMs: undefined,
+    });
     expect(result).toEqual({
       content: [{ type: "text", text: "wid1,tid1,Title,https://example.com" }],
     });
@@ -89,11 +91,36 @@ describe("tool dispatch", () => {
       url: "https://example.com",
     });
 
-    expect(runActionMock).toHaveBeenCalledWith("navigate", [
-      "1",
-      "2",
-      "https://example.com",
-    ]);
+    expect(runActionMock).toHaveBeenCalledWith(
+      "navigate",
+      ["1", "2", "https://example.com"],
+      { timeoutMs: undefined },
+    );
+  });
+
+  it("passes fixed timeoutMs for wait_for_load (60s + buffer)", async () => {
+    runActionMock.mockResolvedValue("complete");
+    await getToolCallback("wait_for_load")({ windowId: "1", tabId: "2" });
+
+    expect(runActionMock).toHaveBeenCalledWith("wait_for_load", ["1", "2"], {
+      timeoutMs: 65_000,
+    });
+  });
+
+  it("derives timeoutMs from maxSeconds for wait_for_selector", async () => {
+    runActionMock.mockResolvedValue("found");
+    await getToolCallback("wait_for_selector")({
+      windowId: "1",
+      tabId: "2",
+      selector: ".banner",
+      maxSeconds: 30,
+    });
+
+    expect(runActionMock).toHaveBeenCalledWith(
+      "wait_for_selector",
+      ["1", "2", ".banner", "30"],
+      { timeoutMs: 35_000 },
+    );
   });
 
   it("returns isError content with AppleScriptError's message", async () => {

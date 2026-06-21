@@ -23,7 +23,22 @@ export type ToolDef = {
   description: string;
   inputSchema: Record<string, z.ZodTypeAny>;
   runArgs: (input: Record<string, unknown>) => string[];
+  /**
+   * Optional osascript kill-timeout in milliseconds, derived from the
+   * validated input. Required for actions that wait inside AppleScript so the
+   * outer kill-timer outlives the inner wait.
+   */
+  timeoutMs?: (input: Record<string, unknown>) => number;
 };
+
+// AppleScript-side `wait_for_load` polls document.readyState for up to 60s.
+const WAIT_FOR_LOAD_INNER_MS = 60_000;
+// Buffer added to every wait-style action so the osascript kill-timer always
+// outlives the AppleScript-side wait.
+const TIMEOUT_BUFFER_MS = 5_000;
+// Upper bound for caller-supplied maxSeconds; matches what's practical to
+// stage in a single MCP tool call without monopolizing osascript.
+const MAX_WAIT_SECONDS = 300;
 
 export const TOOLS: ToolDef[] = [
   // Control plane: tabs / windows
@@ -130,6 +145,7 @@ export const TOOLS: ToolDef[] = [
       'Poll document.readyState every 0.5s up to 60s. Returns "complete" or "timeout".',
     inputSchema: TabRef,
     runArgs: (input) => [String(input.windowId), String(input.tabId)],
+    timeoutMs: () => WAIT_FOR_LOAD_INNER_MS + TIMEOUT_BUFFER_MS,
   },
   {
     name: "wait_for_selector",
@@ -142,6 +158,7 @@ export const TOOLS: ToolDef[] = [
         .number()
         .int()
         .positive()
+        .max(MAX_WAIT_SECONDS)
         .describe("Maximum seconds to poll"),
     },
     runArgs: (input) => [
@@ -150,6 +167,7 @@ export const TOOLS: ToolDef[] = [
       String(input.selector),
       String(input.maxSeconds),
     ],
+    timeoutMs: (input) => Number(input.maxSeconds) * 1000 + TIMEOUT_BUFFER_MS,
   },
   {
     name: "wait_for_function",
@@ -164,6 +182,7 @@ export const TOOLS: ToolDef[] = [
         .number()
         .int()
         .positive()
+        .max(MAX_WAIT_SECONDS)
         .describe("Maximum seconds to poll"),
     },
     runArgs: (input) => [
@@ -172,6 +191,7 @@ export const TOOLS: ToolDef[] = [
       String(input.expression),
       String(input.maxSeconds),
     ],
+    timeoutMs: (input) => Number(input.maxSeconds) * 1000 + TIMEOUT_BUFFER_MS,
   },
 
   // Control plane: content / scripting

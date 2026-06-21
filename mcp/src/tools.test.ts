@@ -223,3 +223,29 @@ describe("TOOLS runArgs", () => {
     expect(missing, `untested tools: ${missing.join(", ")}`).toEqual([]);
   });
 });
+
+describe("TOOLS timeoutMs", () => {
+  it("wait_for_load uses fixed 60s + buffer (65s total)", () => {
+    const t = TOOLS.find((tool) => tool.name === "wait_for_load");
+    expect(t?.timeoutMs?.({})).toBe(65_000);
+  });
+
+  it("wait_for_selector derives timeout from maxSeconds + buffer", () => {
+    const t = TOOLS.find((tool) => tool.name === "wait_for_selector");
+    expect(t?.timeoutMs?.({ maxSeconds: 30 })).toBe(35_000);
+    expect(t?.timeoutMs?.({ maxSeconds: 120 })).toBe(125_000);
+  });
+
+  it("wait_for_function derives timeout from maxSeconds + buffer", () => {
+    const t = TOOLS.find((tool) => tool.name === "wait_for_function");
+    expect(t?.timeoutMs?.({ maxSeconds: 60 })).toBe(65_000);
+  });
+
+  it("tools without an inner wait leave timeoutMs undefined", () => {
+    const noTimeoutTools = ["list_tabs", "navigate", "get_html", "click"];
+    for (const name of noTimeoutTools) {
+      const t = TOOLS.find((tool) => tool.name === name);
+      expect(t?.timeoutMs, `${name}.timeoutMs`).toBeUndefined();
+    }
+  });
+});
