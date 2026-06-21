@@ -1,6 +1,7 @@
 ---
 name: familiar
 description: Use when you specifically need to drive the user's own everyday Google Chrome on macOS via AppleScript (Apple Events) — not a fresh headless/automated browser, and not the DevTools Protocol or Playwright. Especially for pages behind bot/WAF defenses that block automated browsers, since this is the real signed-in Chrome. Covers open/close tabs (incl. incognito), navigate, wait for load/selector, extract page HTML or element text/attributes, click elements, fill and submit forms, and run arbitrary JavaScript.
+compatibility: macOS only. Requires Google Chrome with "Allow JavaScript from Apple Events" enabled (View → Developer → Allow JavaScript from Apple Events) and Automation permission approved on first run.
 ---
 
 # familiar — control macOS Chrome via AppleScript
@@ -9,8 +10,14 @@ Drive a real Google Chrome on macOS through AppleScript (Apple Events). No DevTo
 Protocol, no Playwright, no separate driver — it operates the user's actual browser,
 so pages that block headless/automated browsers generally treat it as a normal user.
 
-The script lives next to this file at `${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript`.
-Invoke it with `osascript`.
+## Script path
+
+This skill ships `familiar.applescript` alongside this `SKILL.md`. Invoke it with
+`osascript`, passing the absolute path. The examples below assume the path is stored
+in `$SCRIPT`. Common locations:
+
+- Claude Code plugin: `${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript`
+- Vercel Skills (`npx skills add`): typically `$HOME/.agents/skills/familiar/familiar.applescript`
 
 ## Prerequisites
 
@@ -33,7 +40,7 @@ Invoke it with `osascript`.
 
 ## Actions
 
-Run as: `osascript "${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript" ACTION [ARGS...]`
+Run as: `osascript "$SCRIPT" ACTION [ARGS...]` — `$SCRIPT` is the absolute path described in "Script path" above.
 
 This index lists signatures and return values. For exact behavior, selector resolution, and
 edge cases — and whenever an action returns `not_found` / `no_form` / `no_option` / `timeout`
@@ -104,7 +111,9 @@ innermost exact match).
 Open a page and read it:
 
 ```bash
-SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript"
+# Pick the path that matches your install:
+SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/familiar/familiar.applescript"    # Claude Code plugin
+# SCRIPT="$HOME/.agents/skills/familiar/familiar.applescript"          # Vercel Skills (npx skills add)
 
 result=$(osascript "$SCRIPT" new_tab)
 WID=$(echo "$result" | cut -d',' -f1)

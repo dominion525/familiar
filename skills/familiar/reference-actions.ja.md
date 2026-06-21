@@ -8,7 +8,8 @@
 [SKILL.ja.md](SKILL.ja.md) を参照。
 
 実行形式: `osascript "$SCRIPT" ACTION "$WID" "$TID" SELECTOR [VALUE]`
-（`SCRIPT="$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript"`）
+（`$SCRIPT` は `familiar.applescript` のフルパス。Claude Code プラグイン / Vercel Skills 配下の
+代表的な配置は [SKILL.ja.md](SKILL.ja.md) 「スクリプトの場所」を参照）
 
 ここのアクションはすべて JavaScript を実行するので、Chrome の「Apple Event からの JavaScript の
 使用を許可」が必要。セレクタに一致する要素が無い場合は例外を投げず文字列 `not_found` を返す —

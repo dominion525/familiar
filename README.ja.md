@@ -30,7 +30,9 @@ English version: [README.md](README.md)
   （表示 → 開発/管理 → Apple Event からの JavaScript の使用を許可）
 - 初回実行時にオートメーションの許可を求められたら承認する
 
-## インストール（Claude Code プラグインとして）
+## インストール
+
+### Claude Code プラグイン
 
 ```
 /plugin marketplace add dominion525/familiar
@@ -44,7 +46,19 @@ English version: [README.md](README.md)
 /plugin install familiar@familiar
 ```
 
-プラグインをインストールしなくても、スクリプト単体で実行できます:
+### Vercel Skills（agent-skills）
+
+```
+npx skills add dominion525/familiar
+```
+
+スキルが `~/.agents/skills/familiar/` に展開され、
+[agent-skills spec](https://agentskills.io/specification) に準拠したクライアント
+（Claude Code / Cursor など）が自動で読み込みます。レジストリは https://skills.sh。
+
+### スタンドアロン（インストール不要）
+
+スキルをインストールしなくても、スクリプト単体で実行できます:
 
 ```
 osascript skills/familiar/familiar.applescript list_tabs

@@ -8,7 +8,8 @@
 概要は [SKILL.ja.md](SKILL.ja.md) を参照。
 
 実行形式: `osascript "$SCRIPT" ACTION [ARGS...]`
-（`SCRIPT="$CLAUDE_PLUGIN_ROOT/skills/familiar/familiar.applescript"`）
+（`$SCRIPT` は `familiar.applescript` のフルパス。Claude Code プラグイン / Vercel Skills 配下の
+代表的な配置は [SKILL.ja.md](SKILL.ja.md) 「スクリプトの場所」を参照）
 
 タブ単位のアクションはすべて `WID TID`（windowId, tabId）を取ります。ネイティブ系は
 「Apple Event からの JavaScript の使用を許可」が無効でも動きますが、JS 系には有効化が必要です。

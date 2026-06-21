@@ -30,7 +30,9 @@ Selectors accept CSS (default), `text=`, `xpath=`, and `label=` forms.
   (View → Developer → Allow JavaScript from Apple Events)
 - Approve the Automation permission prompt on first run
 
-## Install (as a Claude Code plugin)
+## Install
+
+### Claude Code plugin
 
 ```
 /plugin marketplace add dominion525/familiar
@@ -44,7 +46,19 @@ For local development / testing:
 /plugin install familiar@familiar
 ```
 
-The script also runs standalone, without installing the plugin:
+### Vercel Skills (agent-skills)
+
+```
+npx skills add dominion525/familiar
+```
+
+This places the skill under `~/.agents/skills/familiar/`. Any client that follows the
+[agent-skills spec](https://agentskills.io/specification) (Claude Code, Cursor, and
+others) picks it up automatically. The registry is at https://skills.sh.
+
+### Standalone (no install)
+
+The script also runs standalone, without installing the skill:
 
 ```
 osascript skills/familiar/familiar.applescript list_tabs
