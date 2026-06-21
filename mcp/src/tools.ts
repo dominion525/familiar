@@ -18,12 +18,10 @@ const TabRefWithSelector = {
     ),
 };
 
-export type ToolInputShape = Record<string, z.ZodTypeAny>;
-
 export type ToolDef = {
   name: string;
   description: string;
-  inputSchema: ToolInputShape;
+  inputSchema: Record<string, z.ZodTypeAny>;
   runArgs: (input: Record<string, unknown>) => string[];
 };
 
