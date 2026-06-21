@@ -1,0 +1,14 @@
+# Hooks run on staged changes that match `glob`. When matched, each command
+# runs against the full mcp/ scope (Biome / TSC / Vitest are project-wide).
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "mcp/**"
+      run: cd mcp && npm run check:ci
+    type-check:
+      glob: "mcp/**"
+      run: cd mcp && npm run type-check
+    test:
+      glob: "mcp/**"
+      run: cd mcp && npm test
