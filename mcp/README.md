@@ -2,9 +2,7 @@
 
 MCP server for familiar — control the user's real macOS Chrome via AppleScript.
 
-This is the MCP-server variant of [familiar](https://github.com/dominion525/familiar).
-The Claude Code skill / plugin variant lives in the same repo under `skills/familiar/`,
-and both paths invoke the same `familiar.applescript`.
+This is the MCP-server variant of [familiar](https://github.com/dominion525/familiar). The Claude Code skill / plugin variant lives in the same repo under `skills/familiar/` (with `SKILL.md` driving auto-activation), and both paths invoke the same `familiar.applescript` — so behavior is identical.
 
 ## What it does
 
@@ -17,22 +15,29 @@ A MCP-compatible client (Claude Code, Claude Desktop, Cursor, Codex CLI, etc.) g
 - **Read** (5): `get_text`, `get_attribute`, `get_value`, `exists`, `query_all`
 - **Interaction** (8): `click`, `fill`, `clear`, `select_option`, `set_checked`, `press_key`, `submit`, `scroll_into_view`
 
-Because it drives the user's actual signed-in Chrome (not a fresh headless browser), pages behind bot / WAF defenses that block automated browsers generally treat it as a normal user. No DevTools Protocol, no Playwright, no separate driver.
+Because it operates the user's actual signed-in Chrome via Apple Events (rather than spawning a fresh headless browser process), the browser fingerprint is whatever Chrome normally reports — useful when working with sites that block headless browsers, though site-specific access controls still apply. No DevTools Protocol, no Playwright, no separate driver.
+
+For per-tool signatures, parameters, return shapes, and selector strategy, see [`reference-browser.md`](https://github.com/dominion525/familiar/blob/main/skills/familiar/reference-browser.md) (control plane) and [`reference-actions.md`](https://github.com/dominion525/familiar/blob/main/skills/familiar/reference-actions.md) (element actions) in the repository.
 
 ## Prerequisites
 
 - macOS with Google Chrome
-- Chrome's "Allow JavaScript from Apple Events" enabled
-  (View → Developer → Allow JavaScript from Apple Events)
+- Chrome's "Allow JavaScript from Apple Events" enabled (View → Developer → Allow JavaScript from Apple Events). Without this, the scripting and DOM-interaction tools will fail
 - Automation permission approved for the controlling terminal/app on first run
 
 ## Install
 
-### Via npx (recommended)
+The npm package is what your MCP client invokes. The client itself is configured in the next section.
+
+### Via npx (no local install)
+
+`npx` fetches and runs the latest version on demand:
 
 ```
 npx @dominion525/familiar-mcp@latest
 ```
+
+This starts the server and waits for JSON-RPC messages on stdin (Ctrl+C to exit). MCP clients spawn this automatically; you do not normally run it by hand.
 
 ### From source
 
@@ -47,8 +52,7 @@ The server entry point is `mcp/dist/index.js`.
 
 ## Configure your MCP client
 
-All examples below assume `npx @dominion525/familiar-mcp@latest`. For a local build, replace
-`npx` / `@dominion525/familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
+All examples below assume `npx @dominion525/familiar-mcp@latest`. For a local build, replace `npx` / `@dominion525/familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
 
 ### Claude Code
 
@@ -96,21 +100,9 @@ command = "npx"
 args = ["@dominion525/familiar-mcp@latest"]
 ```
 
-### Cline / Windsurf / Antigravity
+### Other MCP clients
 
-Each tool exposes an MCP settings panel that accepts the same JSON shape as the
-Cursor example above.
-
-### VS Code (GitHub Copilot Chat, Continue, etc.)
-
-Each extension has its own MCP configuration; refer to the extension docs.
-
-## How it relates to the Claude Code skill
-
-`skills/familiar/` provides the same 32 actions as a Claude Code plugin (with
-`SKILL.md` driving auto-activation), while this MCP server makes the same actions
-available to any MCP-compatible client. Behavior is identical because both paths
-shell out to the same `familiar.applescript`.
+Any MCP-compatible client (Cline, Windsurf, Antigravity, VS Code extensions like GitHub Copilot Chat or Continue, etc.) connects via the same JSON shape used in the Cursor and Claude Desktop examples above. Refer to each tool's MCP configuration documentation for the exact location.
 
 ## License
 
