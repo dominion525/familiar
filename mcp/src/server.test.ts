@@ -203,4 +203,32 @@ describe("tool dispatch (direct callback)", () => {
 
     expect(result.structuredContent).toEqual({ found: false });
   });
+
+  it("returns structuredContent { exists: true } for familiar_exists when 'true'", async () => {
+    runActionMock.mockResolvedValue("true");
+    const result = (await getToolCallback("familiar_exists")({
+      windowId: "1",
+      tabId: "2",
+      selector: ".banner",
+    })) as {
+      content: Array<{ type: string; text: string }>;
+      structuredContent?: { exists: boolean };
+    };
+
+    expect(result.structuredContent).toEqual({ exists: true });
+    expect(JSON.parse(result.content[0].text)).toEqual({ exists: true });
+  });
+
+  it("returns structuredContent { exists: false } for familiar_exists when 'false'", async () => {
+    runActionMock.mockResolvedValue("false");
+    const result = (await getToolCallback("familiar_exists")({
+      windowId: "1",
+      tabId: "2",
+      selector: ".missing",
+    })) as {
+      structuredContent?: { exists: boolean };
+    };
+
+    expect(result.structuredContent).toEqual({ exists: false });
+  });
 });

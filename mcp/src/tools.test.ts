@@ -411,6 +411,30 @@ describe("TOOLS read-side structuredContent (parseStdout)", () => {
   }
 });
 
+describe("familiar_exists structuredContent (parseStdout)", () => {
+  const tool = TOOLS.find((t) => t.name === "familiar_exists");
+
+  it("declares an outputSchema and parseStdout", () => {
+    expect(tool?.outputSchema).toBeDefined();
+    expect(tool?.parseStdout).toBeDefined();
+  });
+
+  it("maps 'true' stdout to { exists: true }", () => {
+    expect(tool?.parseStdout?.("true")).toEqual({ exists: true });
+  });
+
+  it("maps 'false' stdout to { exists: false }", () => {
+    expect(tool?.parseStdout?.("false")).toEqual({ exists: false });
+  });
+
+  it("maps any non-'true' stdout to { exists: false } (sentinel safety)", () => {
+    // Defensive: AppleScript should only ever return "true" or "false", but
+    // any stray value should not silently flip exists to true.
+    expect(tool?.parseStdout?.("yes")).toEqual({ exists: false });
+    expect(tool?.parseStdout?.("")).toEqual({ exists: false });
+  });
+});
+
 describe("TOOLS timeoutMs", () => {
   it("familiar_wait_for_load uses fixed 60s + buffer (65s total)", () => {
     const t = TOOLS.find((tool) => tool.name === "familiar_wait_for_load");

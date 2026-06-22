@@ -12,7 +12,7 @@ const MAX_BUFFER_MIB = Math.round(MAX_BUFFER / (1024 * 1024));
 type ZodRawShape = Record<string, z.ZodTypeAny>;
 type InputOf<TShape extends ZodRawShape> = z.infer<z.ZodObject<TShape>>;
 
-export type ToolDef<TShape extends ZodRawShape = ZodRawShape> = {
+type ToolDefCommon<TShape extends ZodRawShape> = {
   name: string;
   description: string;
   inputSchema: TShape;
@@ -27,25 +27,39 @@ export type ToolDef<TShape extends ZodRawShape = ZodRawShape> = {
    * outer kill-timer outlives the inner wait.
    */
   timeoutMs?(input: InputOf<TShape>): number;
-  /**
-   * Optional MCP outputSchema declaring the shape of structuredContent. Accepts
-   * either a raw shape (Record<string, ZodTypeAny>, wrapped by the SDK into
-   * z.object) or a full Zod schema instance (z.discriminatedUnion, z.object,
-   * etc.) — the SDK's registerTool overload accepts both via
-   * `ZodRawShapeCompat | AnySchema` (mcp.d.ts:150).
-   */
-  outputSchema?: ZodRawShape | z.ZodTypeAny;
-  /**
-   * Optional translator from raw osascript stdout to a structured object that
-   * conforms to outputSchema. Set together with outputSchema. Used to bridge
-   * the current AppleScript-side sentinel returns (e.g. "not_found") to a
-   * structured { found, value } so the LLM can distinguish "element absent"
-   * from "element present with the literal value 'not_found'".
-   * (Full disambiguation will land when the AppleScript side is updated to
-   * emit structured returns directly — tracked in tasks/todo.md.)
-   */
-  parseStdout?(stdout: string): Record<string, unknown>;
 };
+
+/**
+ * MCP outputSchema declares the shape of structuredContent. Accepts either a
+ * raw shape (Record<string, ZodTypeAny>, wrapped by the SDK into z.object) or
+ * a full Zod schema instance (z.object etc.) — the SDK's registerTool overload
+ * accepts both via `ZodRawShapeCompat | AnySchema` (mcp.d.ts:150). Note: the
+ * SDK's normalizeObjectSchema rejects z.discriminatedUnion, see ReadResult
+ * comment for the workaround.
+ */
+type ToolOutputSchema = ZodRawShape | z.ZodTypeAny;
+
+/**
+ * ToolDef is a discriminated union: a tool either declares both outputSchema
+ * and parseStdout (structured response) or declares neither (raw text). The
+ * MCP SDK throws an "Output validation error" at runtime if outputSchema is
+ * declared but the response carries no structuredContent (mcp.js:196), so
+ * binding the two fields at the type layer prevents that drift at compile
+ * time.
+ *
+ * parseStdout translates osascript stdout into the object that flows into
+ * structuredContent. It exists as a bridge until the AppleScript side emits
+ * structured returns directly (tracked in tasks/todo.md).
+ */
+export type ToolDef<TShape extends ZodRawShape = ZodRawShape> =
+  | (ToolDefCommon<TShape> & {
+      outputSchema: ToolOutputSchema;
+      parseStdout(stdout: string): Record<string, unknown>;
+    })
+  | (ToolDefCommon<TShape> & {
+      outputSchema?: undefined;
+      parseStdout?: undefined;
+    });
 
 // Shared output schema for read-side tools
 // (familiar_get_text / familiar_get_attribute / familiar_get_value).
@@ -76,6 +90,19 @@ function parseReadResult(stdout: string): ReadResultValue {
   return stdout === "not_found"
     ? { found: false }
     : { found: true, value: stdout };
+}
+
+// Output schema for familiar_exists. Keeps the read-side surface of the MCP
+// uniformly structured: every "did the element exist?" answer is a typed
+// object instead of a raw "true"/"false" string the LLM has to parse.
+const ExistsResult = {
+  exists: z
+    .boolean()
+    .describe("True if at least one element matches the selector"),
+};
+
+function parseExistsResult(stdout: string): { exists: boolean } {
+  return { exists: stdout === "true" };
 }
 
 /**
@@ -370,9 +397,11 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "familiar_exists",
     description:
-      'Check whether an element is present without reading anything from it. Returns "true" or "false" — never "not_found". Use for quick yes/no checks. If you want to wait for it to appear, use familiar_wait_for_selector instead of polling familiar_exists.',
+      "Check whether an element is present without reading anything from it. Returns structuredContent `{ exists: boolean }` — never absent. Use for quick yes/no checks. If you want to wait for it to appear, use familiar_wait_for_selector instead of polling familiar_exists.",
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
+    outputSchema: ExistsResult,
+    parseStdout: parseExistsResult,
   }),
   defineTool({
     name: "familiar_query_all",
