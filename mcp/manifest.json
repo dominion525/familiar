@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "familiar-mcp",
+  "display_name": "familiar — real macOS Chrome via AppleScript",
+  "version": "0.1.0",
+  "description": "MCP server that drives the user's real macOS Chrome via AppleScript. 32 tools.",
+  "author": {
+    "name": "dominion525",
+    "url": "https://github.com/dominion525"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/dominion525/familiar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dominion525/familiar"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"]
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  }
+}

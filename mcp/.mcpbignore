@@ -1,0 +1,23 @@
+# Source / tests / configs — not needed at runtime
+src/
+*.test.ts
+tsconfig.json
+tsconfig.build.json
+biome.json
+knip.json
+vitest.config.ts
+lefthook.yml
+
+# Build artifacts
+*.mcpb
+coverage/
+
+# Dev tooling
+.gitignore
+.mcpbignore
+node_modules/.cache/
+node_modules/.bin/
+
+# Editor / OS
+.DS_Store
+*.swp
