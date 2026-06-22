@@ -155,7 +155,7 @@ describe("MCP contract (in-memory transport)", () => {
     expect(result.structuredContent).toEqual({ found: false });
   });
 
-  it("returns isError content when runAction throws AppleScriptError", async () => {
+  it("returns isError + structuredContent {kind, action} when runAction throws AppleScriptError", async () => {
     runActionMock.mockRejectedValue(
       new AppleScriptError(
         "osascript click failed (non_zero_exit): boom",
@@ -174,5 +174,21 @@ describe("MCP contract (in-memory transport)", () => {
     const content = result.content as TextContent[];
     expect(content[0].type).toBe("text");
     expect(content[0].text).toContain("boom");
+    expect(result.structuredContent).toEqual({
+      kind: "non_zero_exit",
+      action: "click",
+    });
+  });
+
+  it("returns isError + structuredContent {kind: 'unknown'} for non-AppleScriptError throws", async () => {
+    runActionMock.mockRejectedValue(new Error("network failure"));
+
+    const result = await client.callTool({
+      name: "familiar_list_tabs",
+      arguments: {},
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.structuredContent).toEqual({ kind: "unknown" });
   });
 });

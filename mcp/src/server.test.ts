@@ -121,7 +121,7 @@ describe("tool dispatch (direct callback)", () => {
     );
   });
 
-  it("returns isError content with AppleScriptError's message", async () => {
+  it("returns isError + AppleScriptError message + structuredContent {kind, action}", async () => {
     runActionMock.mockRejectedValue(
       new AppleScriptError(
         "osascript click failed (non_zero_exit): boom",
@@ -130,23 +130,36 @@ describe("tool dispatch (direct callback)", () => {
         "non_zero_exit",
       ),
     );
-    const result = await getToolCallback("familiar_click")({
+    const result = (await getToolCallback("familiar_click")({
       windowId: "1",
       tabId: "2",
       selector: "#x",
-    });
+    })) as {
+      isError?: boolean;
+      content: Array<{ type: string; text: string }>;
+      structuredContent?: { kind: string; action?: string };
+    };
 
     expect(result.isError).toBe(true);
     expect(result.content[0].type).toBe("text");
     expect(result.content[0].text).toContain("boom");
+    expect(result.structuredContent).toEqual({
+      kind: "non_zero_exit",
+      action: "click",
+    });
   });
 
-  it("returns isError content for non-AppleScriptError throws", async () => {
+  it("returns isError + structuredContent {kind: 'unknown'} for non-AppleScriptError throws", async () => {
     runActionMock.mockRejectedValue(new Error("network failure"));
-    const result = await getToolCallback("familiar_list_tabs")({});
+    const result = (await getToolCallback("familiar_list_tabs")({})) as {
+      isError?: boolean;
+      content: Array<{ type: string; text: string }>;
+      structuredContent?: { kind: string };
+    };
 
     expect(result.isError).toBe(true);
     expect(result.content[0].type).toBe("text");
+    expect(result.structuredContent).toEqual({ kind: "unknown" });
   });
 
   it("stringifies non-string throwables in the error content", async () => {

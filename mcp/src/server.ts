@@ -49,10 +49,25 @@ export function createServer(): McpServer {
           }
           return { content: [{ type: "text", text: stdout }] };
         } catch (error) {
-          const message =
-            error instanceof AppleScriptError ? error.message : String(error);
+          // Surface AppleScriptError's classification as structuredContent so
+          // the LLM can branch on `kind` (timeout → retry, max_buffer → narrow
+          // the query, non_zero_exit → give up) without regex-scraping the
+          // message text. The MCP SDK skips outputSchema validation when
+          // isError is true (mcp.js:validateToolOutput), so this is safe even
+          // for tools that declare a typed outputSchema.
+          if (error instanceof AppleScriptError) {
+            return {
+              content: [{ type: "text", text: error.message }],
+              structuredContent: {
+                kind: error.kind,
+                action: error.action,
+              },
+              isError: true,
+            };
+          }
           return {
-            content: [{ type: "text", text: message }],
+            content: [{ type: "text", text: String(error) }],
+            structuredContent: { kind: "unknown" as const },
             isError: true,
           };
         }
