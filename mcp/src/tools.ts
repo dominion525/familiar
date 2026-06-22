@@ -101,47 +101,49 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "list_tabs",
     description:
-      'List all open Chrome tabs across all windows. Returns one tab per line as "<windowId>,<tabId>,<title>,<url>". Native; works even when "Allow JavaScript from Apple Events" is off.',
+      'Enumerate every open Chrome tab across every window. The starting point for tab-scoped actions: most other tools need a windowId/tabId pair, which comes from this output (or from new_tab / new_incognito_tab). Returns one line per tab: "<windowId>,<tabId>,<title>,<url>". Native — works even when "Allow JavaScript from Apple Events" is off.',
     inputSchema: {},
     runArgs: () => [],
   }),
   defineTool({
     name: "new_tab",
     description:
-      'Open a new tab in a normal Chrome window (creates one if no normal window exists). Launches Chrome if not running. Returns "<windowId>,<tabId>". When it creates a new window it reuses the initial tab so no blank tab is left behind.',
+      'Open a new tab in a normal (non-incognito) Chrome window and return its "<windowId>,<tabId>". Launches Chrome if needed. For an incognito context use new_incognito_tab. Follow with navigate to load a URL.',
     inputSchema: {},
     runArgs: () => [],
   }),
   defineTool({
     name: "new_incognito_tab",
     description:
-      'Open a new tab in an incognito Chrome window (creates one if none exists). Incognito cookies start empty and vanish when the window closes. Returns "<windowId>,<tabId>".',
+      'Like new_tab but targets an incognito window. Use when isolation from the user\'s normal browsing profile matters. State is shared across all incognito windows and discarded when the last incognito window closes. Returns "<windowId>,<tabId>".',
     inputSchema: {},
     runArgs: () => [],
   }),
   defineTool({
     name: "close_tab",
-    description: "Close the specified tab. No value returned.",
+    description:
+      "Close the specified tab. Pair with new_tab / new_incognito_tab to clean up tabs opened by the task. No value returned.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "active_tab",
     description:
-      'Return the active tab of the given window as "<windowId>,<tabId>". Native.',
+      'Return the active (front) tab of one window as "<windowId>,<tabId>". Use when you need the tab the user is looking at right now in a specific window — list_tabs returns every tab, active_tab narrows to one. Native.',
     inputSchema: WindowRef,
     runArgs: (input) => [input.windowId],
   }),
   defineTool({
     name: "window_mode",
-    description: 'Return the window\'s mode: "normal" or "incognito". Native.',
+    description:
+      'Return "normal" or "incognito" for the given window. Useful before reading storage or cookies, since incognito windows have isolated state. Native.',
     inputSchema: WindowRef,
     runArgs: (input) => [input.windowId],
   }),
   defineTool({
     name: "is_loading",
     description:
-      'Return "true" or "false" for whether the tab is currently loading. Native (no JS required), unlike wait_for_load which polls document.readyState.',
+      'One-shot check of whether the tab is currently loading. Returns "true" or "false". Use this when you only need to peek at the loading state (e.g. skip a step if mid-navigation); to actually block until ready, use wait_for_load. Native (no JS required).',
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
@@ -150,7 +152,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "navigate",
     description:
-      "Navigate the tab to a URL. Briefly waits for navigation to begin (up to ~3s) but does NOT wait for the page to finish — follow with wait_for_load and/or wait_for_selector. No value returned.",
+      "Set the tab's URL. Returns once navigation has started; does NOT block until the page finishes loading. Standard pattern: navigate → wait_for_load (DOM ready), or navigate → wait_for_selector (a known element appears). No value returned.",
     inputSchema: {
       ...TabRef,
       url: z.string().describe("URL to navigate to"),
@@ -159,33 +161,36 @@ export const TOOLS: ToolDef[] = [
   }),
   defineTool({
     name: "get_tab_url",
-    description: "Return the tab's current URL. Native.",
+    description:
+      "Return the tab's current URL. Useful after navigate to confirm the final URL (after redirects), or to read the user's current URL before acting. Native.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "reload",
-    description: "Reload the tab. Native. No value returned.",
+    description:
+      "Reload the tab. Follow with wait_for_load when the next step depends on a freshly-loaded DOM. No value returned. Native.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "go_back",
     description:
-      "Navigate back in the tab's history. Native. No value returned. No-op if there is no history to go back to.",
+      "Navigate back in the tab's history. No-op if there is no back history. Follow with wait_for_load if the next step needs the previous page's DOM ready. No value returned. Native.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "go_forward",
     description:
-      "Navigate forward in the tab's history. Native. No value returned. No-op if there is no history to go forward to.",
+      "Navigate forward in the tab's history. No-op if there is no forward history. Follow with wait_for_load if the next step needs the forward page's DOM ready. No value returned. Native.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "stop",
-    description: "Stop the tab's current loading. Native. No value returned.",
+    description:
+      "Stop the tab's in-progress loading. No value returned. Native.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
@@ -194,7 +199,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "wait_for_load",
     description:
-      'Poll document.readyState every 0.5s up to 60s. Returns "complete" or "timeout".',
+      'Block until document.readyState reaches "complete" (polled every 0.5s, up to 60s). The standard follow-up to navigate / reload / go_back / go_forward when the next step needs a finished DOM. For a more specific signal (a particular element appearing), use wait_for_selector. Returns "complete" or "timeout".',
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
     timeoutMs: () => WAIT_FOR_LOAD_INNER_MS + TIMEOUT_BUFFER_MS,
@@ -202,7 +207,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "wait_for_selector",
     description:
-      'Poll until a CSS selector matches, up to maxSeconds. Returns "found" or "timeout". Takes a CSS selector ONLY (not text=/xpath=/label= forms).',
+      'Block until a specific element appears (CSS selector polled up to maxSeconds). Use for SPA / lazy-loaded content where wait_for_load reports "complete" before the element exists. Takes a CSS selector ONLY (no text= / xpath= / label= prefixes). Returns "found" or "timeout".',
     inputSchema: {
       ...TabRef,
       selector: z.string().describe("CSS selector to wait for"),
@@ -224,7 +229,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "wait_for_function",
     description:
-      'Poll a JavaScript expression until it is truthy, up to maxSeconds. Returns "true" or "timeout". The expression is evaluated as Boolean(...); a thrown error counts as false (safe for probing not-yet-defined properties). Pass an expression, not a statement.',
+      'Block until an arbitrary JavaScript expression becomes truthy (polled up to maxSeconds). Use when the condition cannot be expressed as a selector — e.g. "window.__appReady === true" or "document.querySelectorAll(\'.row\').length >= 10". If a CSS selector alone is the condition, prefer wait_for_selector (cheaper and less error-prone). Evaluated as Boolean(expr); a thrown error counts as false, so probing not-yet-defined properties is safe. Pass an expression, not a statement (no top-level `return`). Returns "true" or "timeout".',
     inputSchema: {
       ...TabRef,
       expression: z
@@ -250,14 +255,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "get_html",
     description:
-      "Return the tab's live DOM as document.documentElement.outerHTML. May return up to 10 MiB. For lazy/Shadow content, wait for a selector or run JS to realize it first.",
+      "Return the live DOM as document.documentElement.outerHTML. Use for whole-page extraction or when the structure matters; for a single element's text/attribute, get_text / get_attribute / query_all are much smaller. May return up to 10 MiB. Note: outerHTML does NOT include shadow trees — for shadow-DOM content use execute_js to traverse explicitly. For lazy-loaded content, wait_for_selector first.",
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),
   defineTool({
     name: "execute_js",
     description:
-      "Run a JavaScript expression inline and return its value as text. Use for SHORT expressions only (quotes/$/backslashes must survive shell + AppleScript escaping). For anything with quotes, multiple lines, or special characters, use execute_js_file. The returned value is the LAST evaluated expression (completion value, like the DevTools console). A top-level `return` does not work.",
+      "Run short inline JavaScript in the page and return the LAST evaluated expression as text (completion value, like the DevTools console). Multiple statements are fine; end with an expression — a top-level `return` does not work. Inline strings must survive AppleScript escaping, so for anything with quotes, newlines, or special characters, use execute_js_file instead.",
     inputSchema: {
       ...TabRef,
       expression: z.string().describe("JavaScript expression"),
@@ -267,7 +272,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "execute_js_file",
     description:
-      "Read JavaScript from a UTF-8 file and run it. Sidesteps all shell/AppleScript escaping — prefer for anything with quotes, multiple lines, or special characters. Returns the completion value of the script.",
+      "Read JavaScript from a UTF-8 file on the local filesystem (absolute path to an existing file) and run it in the page. Sidesteps AppleScript escaping entirely — prefer this for multi-line scripts, anything with quotes, or anything with special characters. Returns the completion value (multiple statements are fine; end with an expression).",
     inputSchema: {
       ...TabRef,
       path: z
@@ -282,7 +287,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "get_text",
     description:
-      "Return the element's trimmed visible text (innerText, falling back to textContent) as structuredContent { found, value }. found is false if the selector matched nothing.",
+      "Read one element's trimmed visible text (innerText, falling back to textContent). Returns structuredContent `{ found, value }`: value is the element's text when found is true; found is false if the selector matched nothing. The most common read action for headings, labels, status messages. For input values use get_value, for attributes use get_attribute, for multiple elements use query_all.",
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
     outputSchema: ReadResult,
@@ -291,7 +296,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "get_attribute",
     description:
-      "Return the named attribute's value as structuredContent { found, value }. value is the attribute value (empty string if the attribute is absent on a matched element); found is false if no element matched.",
+      "Read a named attribute (href, src, data-*, aria-*, etc.) of one element. Returns structuredContent `{ found, value }`: value is the attribute value (empty string if the attribute is missing on a matched element); found is false if no element matched. For visible text use get_text; for input current value use get_value.",
     inputSchema: {
       ...TabRefWithSelector,
       name: z.string().describe("Attribute name (e.g. href, src, data-id)"),
@@ -308,7 +313,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "get_value",
     description:
-      "Return the value of an input/textarea/select as structuredContent { found, value }. value is the field value (empty string if the field has none); found is false if no element matched.",
+      "Read the current value of an input / textarea / select. Returns structuredContent `{ found, value }`: value is the field value (empty string if the field has none, distinct from absence); found is false if no element matched. Reads what fill set, what the user typed, or what a framework bound to the field.",
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
     outputSchema: ReadResult,
@@ -317,14 +322,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "exists",
     description:
-      'Return "true" or "false" for whether the element exists. Never returns "not_found" — absence is reported as "false".',
+      'Check whether an element is present without reading anything from it. Returns "true" or "false" — never "not_found". Use for quick yes/no checks. If you want to wait for it to appear, use wait_for_selector instead of polling exists.',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
   defineTool({
     name: "query_all",
     description:
-      'Return a JSON array string of the trimmed text of every matching element, e.g. ["First","Second"]. An empty result is "[]". For xpath= returns all matched nodes; for CSS returns all querySelectorAll matches; text=/label= yield at most one element.',
+      'Collect the trimmed text of every matching element as a JSON array, e.g. ["First","Second"]. Use for list / table-row / search-result extraction. Empty result is "[]". With CSS or xpath= selectors, returns every match; text= / label= yield at most one element. get_text returns only the first match.',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
@@ -333,14 +338,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "click",
     description:
-      'Scroll the element into view (centered) and call .click(). Returns "true" or "not_found".',
+      'Scroll an element into view (centered) and call .click() on it. Use for buttons, links, and most clickable UI. To toggle a checkbox/radio to a specific state use set_checked instead (click flips, set_checked sets). Returns "true" or "not_found".',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
   defineTool({
     name: "fill",
     description:
-      'Focus the input/textarea and set its value through the native value setter, then fire "input" and "change". Using the native setter is what lets frameworks like React/Vue detect the change. Returns "true" or "not_found".',
+      'Set the value of an input / textarea via the native value setter, then dispatch input + change events. The native setter ensures modern UI frameworks detect the update. For <select> use select_option, for checkbox/radio use set_checked. Returns "true" or "not_found".',
     inputSchema: {
       ...TabRefWithSelector,
       value: z.string().describe("Value to fill"),
@@ -355,14 +360,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "clear",
     description:
-      'Like fill with an empty string: focus the element, set value to "" via the native setter, fire "input"/"change". Returns "true" or "not_found".',
+      'Empty an input / textarea. Equivalent to fill with "". Returns "true" or "not_found".',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
   defineTool({
     name: "select_option",
     description:
-      'Select an <option> by its value, falling back to its visible text. Sets the value via the native setter and fires "input"/"change". Returns "true", "no_option" if nothing matched, or "not_found".',
+      'Pick an <option> in a <select>. Matches by `value` attribute first, then by visible text as a fallback. Fires input + change so framework bindings update. Returns "true", "no_option" if the select was found but had no matching option, or "not_found" if the select itself was not found.',
     inputSchema: {
       ...TabRefWithSelector,
       value: z.string().describe("Option value or visible text to select"),
@@ -377,7 +382,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "set_checked",
     description:
-      'Set a checkbox/radio\'s checked state via the native setter and fire "input"/"change". Returns "true" or "not_found".',
+      'Set a checkbox or radio to true (checked) or false (unchecked) via the native setter, then fire input + change. Prefer over click when you need a known state regardless of current state. Returns "true" or "not_found".',
     inputSchema: {
       ...TabRefWithSelector,
       checked: z.boolean().describe("Desired checked state"),
@@ -392,12 +397,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "press_key",
     description:
-      'Focus the element and dispatch synthetic keydown/keypress/keyup for the key. Named keys: Enter, Tab, Escape, Backspace, Delete, ArrowUp/Down/Left/Right, space. Otherwise a single character is used as-is. Events are isTrusted=false; strict handlers may ignore them, and this does NOT type text into the field (use fill for that). Returns "true" or "not_found".',
+      'Focus the element and dispatch synthetic keydown / keypress / keyup events for the key. Use for keyboard interactions like Enter (submit a search box), Escape (close a modal), ArrowDown (move through a menu). This does NOT type text — use fill for that. Events are isTrusted=false, so strict bot-detection sites may ignore them. Returns "true" or "not_found".',
     inputSchema: {
       ...TabRefWithSelector,
       key: z
         .string()
-        .describe("Key name (Enter/Tab/Escape/...) or single character"),
+        .describe(
+          'Single character (e.g. "a", "5") or named key: Enter, Tab, Escape, Backspace, Delete, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, space',
+        ),
     },
     runArgs: (input) => [
       input.windowId,
@@ -409,14 +416,14 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "submit",
     description:
-      'Submit the form the element belongs to (or the element itself if it is a <form>). Uses requestSubmit() so submit handlers and validation run (falls back to submit()). Returns "true", "no_form" if no form was found, or "not_found".',
+      'Submit the form the element belongs to (or the element itself if it is a <form>). Uses requestSubmit() so HTML5 validation and submit handlers run, falling back to submit() when unsupported. Often more reliable than clicking the submit button. Returns "true", "no_form" if the element was not in a form, or "not_found".',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
   defineTool({
     name: "scroll_into_view",
     description:
-      'Scroll the element into view, centered. Returns "true" or "not_found".',
+      'Scroll the element into view (centered). click already scrolls before clicking, so this is mainly for: making the element visible to the user, triggering lazy-load that activates on viewport entry, or staging a visual screenshot. Returns "true" or "not_found".',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
   }),
