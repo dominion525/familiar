@@ -21,14 +21,22 @@ export function createServer(): McpServer {
       {
         description: tool.description,
         inputSchema: tool.inputSchema,
+        outputSchema: tool.outputSchema,
       },
       async (input) => {
         try {
           const validated = input as Record<string, unknown>;
           const args = tool.runArgs(validated);
           const timeoutMs = tool.timeoutMs?.(validated);
-          const result = await runAction(tool.name, args, { timeoutMs });
-          return { content: [{ type: "text", text: result }] };
+          const stdout = await runAction(tool.name, args, { timeoutMs });
+          if (tool.parseStdout) {
+            const structured = tool.parseStdout(stdout);
+            return {
+              content: [{ type: "text", text: JSON.stringify(structured) }],
+              structuredContent: structured,
+            };
+          }
+          return { content: [{ type: "text", text: stdout }] };
         } catch (error) {
           const message =
             error instanceof AppleScriptError ? error.message : String(error);

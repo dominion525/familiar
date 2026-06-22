@@ -146,4 +146,38 @@ describe("tool dispatch (direct callback)", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("plain string error");
   });
+
+  it("returns structuredContent for get_text when the element is found", async () => {
+    runActionMock.mockResolvedValue("Hello World");
+    const result = (await getToolCallback("get_text")({
+      windowId: "1",
+      tabId: "2",
+      selector: "h1",
+    })) as {
+      content: Array<{ type: string; text: string }>;
+      structuredContent?: { found: boolean; value?: string };
+    };
+
+    expect(result.structuredContent).toEqual({
+      found: true,
+      value: "Hello World",
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({
+      found: true,
+      value: "Hello World",
+    });
+  });
+
+  it("returns structuredContent { found: false } for get_text when not_found", async () => {
+    runActionMock.mockResolvedValue("not_found");
+    const result = (await getToolCallback("get_text")({
+      windowId: "1",
+      tabId: "2",
+      selector: ".missing",
+    })) as {
+      structuredContent?: { found: boolean; value?: string };
+    };
+
+    expect(result.structuredContent).toEqual({ found: false });
+  });
 });

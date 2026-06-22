@@ -119,6 +119,29 @@ describe("MCP contract (in-memory transport)", () => {
     );
   });
 
+  it("returns structuredContent for get_text (found case)", async () => {
+    runActionMock.mockResolvedValue("Hello World");
+    const result = await client.callTool({
+      name: "get_text",
+      arguments: { windowId: "1", tabId: "2", selector: "h1" },
+    });
+
+    expect(result.structuredContent).toEqual({
+      found: true,
+      value: "Hello World",
+    });
+  });
+
+  it("returns structuredContent { found: false } for get_text on not_found", async () => {
+    runActionMock.mockResolvedValue("not_found");
+    const result = await client.callTool({
+      name: "get_text",
+      arguments: { windowId: "1", tabId: "2", selector: ".missing" },
+    });
+
+    expect(result.structuredContent).toEqual({ found: false });
+  });
+
   it("returns isError content when runAction throws AppleScriptError", async () => {
     runActionMock.mockRejectedValue(
       new AppleScriptError(

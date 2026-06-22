@@ -22,7 +22,38 @@ export type ToolDef<TShape extends ZodRawShape = ZodRawShape> = {
    * outer kill-timer outlives the inner wait.
    */
   timeoutMs?(input: InputOf<TShape>): number;
+  /**
+   * Optional MCP outputSchema declaring the shape of structuredContent. When
+   * present, the dispatch layer passes the parsed result through this schema
+   * so MCP clients get a typed object instead of a raw sentinel string.
+   */
+  outputSchema?: ZodRawShape;
+  /**
+   * Optional translator from raw osascript stdout to a structured object that
+   * conforms to outputSchema. Set together with outputSchema. Used to bridge
+   * the current AppleScript-side sentinel returns (e.g. "not_found") to a
+   * structured { found, value } so the LLM can distinguish "element absent"
+   * from "element present with the literal value 'not_found'".
+   * (Full disambiguation will land when the AppleScript side is updated to
+   * emit structured returns directly — tracked in tasks/todo.md.)
+   */
+  parseStdout?(stdout: string): Record<string, unknown>;
 };
+
+// Shared output shape for read-side tools (get_text / get_attribute / get_value).
+const ReadResult = {
+  found: z.boolean().describe("True if the element was found, false otherwise"),
+  value: z
+    .string()
+    .optional()
+    .describe("The element's value; present only when found is true"),
+};
+
+function parseReadResult(stdout: string): { found: boolean; value?: string } {
+  return stdout === "not_found"
+    ? { found: false }
+    : { found: true, value: stdout };
+}
 
 /**
  * Identity helper used to register a tool while preserving the precise schema
@@ -251,14 +282,16 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "get_text",
     description:
-      'Return the element\'s trimmed visible text (innerText, falling back to textContent), or "not_found".',
+      "Return the element's trimmed visible text (innerText, falling back to textContent) as structuredContent { found, value }. found is false if the selector matched nothing.",
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
+    outputSchema: ReadResult,
+    parseStdout: parseReadResult,
   }),
   defineTool({
     name: "get_attribute",
     description:
-      'Return the named attribute\'s value, an empty string if the attribute is absent, or "not_found" if no element matched.',
+      "Return the named attribute's value as structuredContent { found, value }. value is the attribute value (empty string if the attribute is absent on a matched element); found is false if no element matched.",
     inputSchema: {
       ...TabRefWithSelector,
       name: z.string().describe("Attribute name (e.g. href, src, data-id)"),
@@ -269,13 +302,17 @@ export const TOOLS: ToolDef[] = [
       input.selector,
       input.name,
     ],
+    outputSchema: ReadResult,
+    parseStdout: parseReadResult,
   }),
   defineTool({
     name: "get_value",
     description:
-      'Return the value of an input/textarea/select (empty string if it has none), or "not_found".',
+      "Return the value of an input/textarea/select as structuredContent { found, value }. value is the field value (empty string if the field has none); found is false if no element matched.",
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
+    outputSchema: ReadResult,
+    parseStdout: parseReadResult,
   }),
   defineTool({
     name: "exists",

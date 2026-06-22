@@ -293,6 +293,36 @@ describe("TOOLS inputSchema validation", () => {
   });
 });
 
+describe("TOOLS read-side structuredContent (parseStdout)", () => {
+  const READ_TOOLS = ["get_text", "get_attribute", "get_value"];
+
+  for (const name of READ_TOOLS) {
+    describe(name, () => {
+      const tool = TOOLS.find((t) => t.name === name);
+
+      it("declares an outputSchema and parseStdout", () => {
+        expect(tool?.outputSchema).toBeDefined();
+        expect(tool?.parseStdout).toBeDefined();
+      });
+
+      it("maps the 'not_found' sentinel to { found: false }", () => {
+        expect(tool?.parseStdout?.("not_found")).toEqual({ found: false });
+      });
+
+      it("wraps any other stdout in { found: true, value }", () => {
+        expect(tool?.parseStdout?.("hello world")).toEqual({
+          found: true,
+          value: "hello world",
+        });
+      });
+
+      it("preserves an empty-string value (distinct from not_found)", () => {
+        expect(tool?.parseStdout?.("")).toEqual({ found: true, value: "" });
+      });
+    });
+  }
+});
+
 describe("TOOLS timeoutMs", () => {
   it("wait_for_load uses fixed 60s + buffer (65s total)", () => {
     const t = TOOLS.find((tool) => tool.name === "wait_for_load");
