@@ -64,16 +64,23 @@ export type ToolDef<TShape extends ZodRawShape = ZodRawShape> =
 // Shared output schema for read-side tools
 // (familiar_get_text / familiar_get_attribute / familiar_get_value).
 //
+// AppleScript side now emits a JSON envelope:
+//   {"found": false}                   // element not found
+//   {"found": true, "value": "..."}    // element found
+// This replaces the previous bare-string return where "not_found" was both
+// the sentinel for "no element matched" and a possible page text — a page
+// element whose visible text was literally "not_found" used to be misclassified
+// as missing. With the envelope, found and value are syntactically distinct
+// from any possible page content.
+//
 // The MCP SDK's outputSchema layer only normalises raw shapes and ZodObject
 // (zod-compat.js:normalizeObjectSchema returns undefined for
-// discriminatedUnion / union / etc., which then makes mcp.js:201's
-// safeParseAsync fail and silently drop structuredContent from the response).
-// So the schema-side invariant "value is present iff found is true" cannot
-// be enforced via z.discriminatedUnion here. Instead:
-//   1. outputSchema stays as a raw shape with value: optional<string> so the
-//      SDK can normalise it into z.object
+// discriminatedUnion / union / etc.), so the schema-side invariant "value is
+// present iff found is true" cannot be enforced via z.discriminatedUnion at
+// outputSchema. Instead:
+//   1. outputSchema stays as a raw shape with value: optional<string>
 //   2. parseReadResult's return type is a TypeScript discriminated union, so
-//      any future parseStdout that returns {found: true} without a value is a
+//      a future parseStdout that returns {found: true} without value is a
 //      compile-time error in this file
 //   3. The description states the invariant for MCP clients reading the schema
 const ReadResult = {
@@ -87,9 +94,13 @@ const ReadResult = {
 type ReadResultValue = { found: true; value: string } | { found: false };
 
 function parseReadResult(stdout: string): ReadResultValue {
-  return stdout === "not_found"
-    ? { found: false }
-    : { found: true, value: stdout };
+  // stdout is a JSON envelope produced by the AppleScript layer's
+  // JSON.stringify call. A malformed payload throws SyntaxError, which the
+  // dispatch catch in server.ts turns into an isError response with
+  // structuredContent {kind: "unknown"} — surfacing as a real failure to the
+  // LLM rather than a silent shape mismatch.
+  const parsed = JSON.parse(stdout) as ReadResultValue;
+  return parsed;
 }
 
 // Output schema for familiar_exists. Keeps the read-side surface of the MCP

@@ -388,24 +388,38 @@ describe("TOOLS read-side structuredContent (parseStdout)", () => {
         expect(tool?.parseStdout).toBeDefined();
       });
 
-      it("maps the 'not_found' sentinel to { found: false } with no value key", () => {
-        const out = tool?.parseStdout?.("not_found");
+      it("parses the {found: false} envelope as {found: false} with no value key", () => {
+        const out = tool?.parseStdout?.('{"found":false}');
         expect(out).toEqual({ found: false });
         // The TS return type is a discriminated union (no `value` on the
-        // false branch). Pin that runtime invariant here so a drifting
-        // parseStdout that returns {found: false, value: undefined} fails.
+        // false branch). Pin that runtime invariant here.
         expect(out && "value" in out).toBe(false);
       });
 
-      it("wraps any other stdout in { found: true, value }", () => {
-        expect(tool?.parseStdout?.("hello world")).toEqual({
+      it("parses the {found: true, value: ...} envelope", () => {
+        expect(
+          tool?.parseStdout?.('{"found":true,"value":"hello world"}'),
+        ).toEqual({ found: true, value: "hello world" });
+      });
+
+      it("preserves an empty-string value as {found: true, value: ''}", () => {
+        expect(tool?.parseStdout?.('{"found":true,"value":""}')).toEqual({
           found: true,
-          value: "hello world",
+          value: "",
         });
       });
 
-      it("preserves an empty-string value (distinct from not_found)", () => {
-        expect(tool?.parseStdout?.("")).toEqual({ found: true, value: "" });
+      it("preserves a literal 'not_found' page text (no sentinel collision)", () => {
+        // The whole point of the JSON envelope: an element whose value
+        // happens to be the string "not_found" is now reportable as
+        // {found: true, value: "not_found"}, no longer collapsed to absent.
+        expect(
+          tool?.parseStdout?.('{"found":true,"value":"not_found"}'),
+        ).toEqual({ found: true, value: "not_found" });
+      });
+
+      it("throws on a malformed envelope (caught by dispatch, surfaces as isError)", () => {
+        expect(() => tool?.parseStdout?.("garbage")).toThrow();
       });
     });
   }

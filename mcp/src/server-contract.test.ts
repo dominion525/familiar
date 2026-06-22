@@ -133,7 +133,7 @@ describe("MCP contract (in-memory transport)", () => {
   });
 
   it("returns structuredContent for familiar_get_text (found case)", async () => {
-    runActionMock.mockResolvedValue("Hello World");
+    runActionMock.mockResolvedValue('{"found":true,"value":"Hello World"}');
     const result = await client.callTool({
       name: "familiar_get_text",
       arguments: { windowId: "1", tabId: "2", selector: "h1" },
@@ -146,7 +146,7 @@ describe("MCP contract (in-memory transport)", () => {
   });
 
   it("returns structuredContent { found: false } for familiar_get_text on not_found", async () => {
-    runActionMock.mockResolvedValue("not_found");
+    runActionMock.mockResolvedValue('{"found":false}');
     const result = await client.callTool({
       name: "familiar_get_text",
       arguments: { windowId: "1", tabId: "2", selector: ".missing" },

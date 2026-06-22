@@ -174,7 +174,7 @@ describe("tool dispatch (direct callback)", () => {
   });
 
   it("returns structuredContent for familiar_get_text when the element is found", async () => {
-    runActionMock.mockResolvedValue("Hello World");
+    runActionMock.mockResolvedValue('{"found":true,"value":"Hello World"}');
     const result = (await getToolCallback("familiar_get_text")({
       windowId: "1",
       tabId: "2",
@@ -195,7 +195,7 @@ describe("tool dispatch (direct callback)", () => {
   });
 
   it("returns structuredContent { found: false } for familiar_get_text when not_found", async () => {
-    runActionMock.mockResolvedValue("not_found");
+    runActionMock.mockResolvedValue('{"found":false}');
     const result = (await getToolCallback("familiar_get_text")({
       windowId: "1",
       tabId: "2",

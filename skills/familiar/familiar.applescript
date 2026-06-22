@@ -475,34 +475,44 @@ on doFill(wId, tId, sel, val)
 	return my runJs(wId, tId, js)
 end doFill
 
--- Get an element's visible text. Returns the trimmed text, or "not_found".
+-- Get an element's visible text. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found
+-- The envelope avoids the previous sentinel collision: a page element whose
+-- visible text was literally "not_found" used to be misreported as missing.
 on doGetText(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
-  return (el.innerText || el.textContent || '').trim();
+  if (!el) return JSON.stringify({found: false});
+  return JSON.stringify({found: true, value: (el.innerText || el.textContent || '').trim()});
 })()"
 	return my runJs(wId, tId, js)
 end doGetText
 
--- Get an attribute value. Returns the value (empty string if the attribute is
--- absent), or "not_found" if no element matched.
+-- Get an attribute value. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found; value is "" when the
+--                                     // attribute itself is absent on the element
 on doGetAttribute(wId, tId, sel, attrName)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({found: false});
   var v = el.getAttribute('" & my jsEscape(attrName) & "');
-  return v === null ? '' : v;
+  return JSON.stringify({found: true, value: v === null ? '' : v});
 })()"
 	return my runJs(wId, tId, js)
 end doGetAttribute
 
--- Get an input/textarea/select value. Returns the value, or "not_found".
+-- Get an input/textarea/select value. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found; value is "" when the
+--                                     // form control has no value set
 on doGetValue(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
-  return (el.value === undefined || el.value === null) ? '' : String(el.value);
+  if (!el) return JSON.stringify({found: false});
+  var v = (el.value === undefined || el.value === null) ? '' : String(el.value);
+  return JSON.stringify({found: true, value: v});
 })()"
 	return my runJs(wId, tId, js)
 end doGetValue

@@ -44,19 +44,24 @@ resolved element. For `query_all`, `xpath=` returns all matched nodes and CSS re
 ```bash
 osascript "$SCRIPT" get_text "$WID" "$TID" "h1"
 ```
-Returns the element's trimmed visible text (`innerText`, falling back to `textContent`), or
-`not_found`.
+Returns a JSON envelope: `{"found": true, "value": "..."}` with the element's trimmed visible
+text (`innerText`, falling back to `textContent`), or `{"found": false}` when no element
+matched. The envelope avoids the previous sentinel collision where a page element whose
+visible text was literally `not_found` was misreported as missing.
 
 ```bash
 osascript "$SCRIPT" get_attribute "$WID" "$TID" "a.link" "href"
 ```
-Returns the named attribute's value, an empty string if the attribute is absent, or
-`not_found` if no element matched.
+Returns a JSON envelope: `{"found": true, "value": "..."}` with the attribute value (empty
+string when the attribute is absent on the matched element), or `{"found": false}` when no
+element matched.
 
 ```bash
 osascript "$SCRIPT" get_value "$WID" "$TID" "#email"
 ```
-Returns the value of an input/textarea/select (empty string if it has none), or `not_found`.
+Returns a JSON envelope: `{"found": true, "value": "..."}` with the form control's value
+(empty string when the control has no value set), or `{"found": false}` when no element
+matched.
 
 ```bash
 osascript "$SCRIPT" exists "$WID" "$TID" ".banner"

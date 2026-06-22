@@ -47,17 +47,22 @@ label=...        <label> または aria-label からフォーム部品を特定
 ```bash
 osascript "$SCRIPT" get_text "$WID" "$TID" "h1"
 ```
-要素の可視テキスト（`innerText`、無ければ `textContent`）をトリムして返す。無ければ `not_found`。
+JSON エンベロープを返す: `{"found": true, "value": "..."}` に要素の可視テキスト
+（`innerText`、無ければ `textContent`）のトリム結果が入る。要素が無い場合は `{"found": false}`。
+エンベロープ化により、可視テキストが文字どおり `not_found` の要素が以前 sentinel と衝突して
+「不在」として扱われていた問題を解消する。
 
 ```bash
 osascript "$SCRIPT" get_attribute "$WID" "$TID" "a.link" "href"
 ```
-指定属性の値を返す。属性が無ければ空文字、要素が無ければ `not_found`。
+JSON エンベロープを返す: `{"found": true, "value": "..."}` に属性値が入る（属性自体が要素に
+無ければ空文字）。要素が無い場合は `{"found": false}`。
 
 ```bash
 osascript "$SCRIPT" get_value "$WID" "$TID" "#email"
 ```
-input/textarea/select の値を返す（値が無ければ空文字）。要素が無ければ `not_found`。
+JSON エンベロープを返す: `{"found": true, "value": "..."}` にフォームコントロールの値が
+入る（値が設定されていなければ空文字）。要素が無い場合は `{"found": false}`。
 
 ```bash
 osascript "$SCRIPT" exists "$WID" "$TID" ".banner"
