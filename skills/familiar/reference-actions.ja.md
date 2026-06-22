@@ -90,6 +90,7 @@ osascript "$SCRIPT" click "$WID" "$TID" "button.submit"
 ```bash
 osascript "$SCRIPT" fill "$WID" "$TID" "#email" "user@example.com"
 ```
+注意: `<input>` 要素は HTML 仕様で LF を strip する。改行を含む値を保持したい場合は `<textarea>` を使う。
 input/textarea にフォーカスし、native value setter で値を設定してから `input`/`change` を発火。
 native setter を通すことでフレームワーク（React/Vue 等）が変更を検知できる（素の `el.value = ...`
 は検知されない）。`true` / `not_found`。

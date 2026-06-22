@@ -463,7 +463,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "familiar_fill",
     description:
-      'Set the value of an input / textarea via the native value setter, then dispatch input + change events. The native setter ensures modern UI frameworks detect the update. For <select> use familiar_select_option, for checkbox/radio use familiar_set_checked. Returns "true" or "not_found".',
+      'Set the value of an input / textarea via the native value setter, then dispatch input + change events. The native setter ensures modern UI frameworks detect the update. For <select> use familiar_select_option, for checkbox/radio use familiar_set_checked. Note: <input> strips LF per HTML spec — use <textarea> if you need to preserve newlines in the value. Returns "true" or "not_found".',
     inputSchema: {
       ...TabRefWithSelector,
       value: z.string().describe("Value to fill"),

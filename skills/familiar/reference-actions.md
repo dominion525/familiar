@@ -90,6 +90,7 @@ Scrolls the element to center, then calls `.click()`. Returns `true` or `not_fou
 ```bash
 osascript "$SCRIPT" fill "$WID" "$TID" "#email" "user@example.com"
 ```
+Note: `<input>` elements strip LF per the HTML spec; use `<textarea>` if the value must preserve newlines.
 Focuses the input/textarea and sets its value through the native value setter, then fires
 `input` and `change`. Going through the native setter is what lets frameworks (React, Vue,
 etc.) detect the change — a plain `el.value = ...` is missed by them. Returns `true` or
