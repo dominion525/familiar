@@ -44,22 +44,31 @@ afterEach(() => {
 type TextContent = { type: "text"; text: string };
 
 describe("MCP contract (in-memory transport)", () => {
-  it("lists all 32 tools via tools/list", async () => {
+  it("lists all 32 tools via tools/list, every name familiar_-prefixed", async () => {
     const result = await client.listTools();
     expect(result.tools).toHaveLength(32);
     const names = result.tools.map((t) => t.name);
-    for (const expected of ["list_tabs", "navigate", "click", "execute_js"]) {
+    for (const expected of [
+      "familiar_list_tabs",
+      "familiar_navigate",
+      "familiar_click",
+      "familiar_execute_js",
+    ]) {
       expect(names).toContain(expected);
+    }
+    for (const name of names) {
+      expect(name).toMatch(/^familiar_/);
     }
   });
 
   it("dispatches tools/call to runAction and returns text content", async () => {
     runActionMock.mockResolvedValue("wid1,tid1,Title,https://example.com");
     const result = await client.callTool({
-      name: "list_tabs",
+      name: "familiar_list_tabs",
       arguments: {},
     });
 
+    // The MCP name carries the prefix, but runAction sees the bare action name.
     expect(runActionMock).toHaveBeenCalledWith("list_tabs", [], {
       timeoutMs: undefined,
     });
@@ -70,7 +79,7 @@ describe("MCP contract (in-memory transport)", () => {
 
   it("returns isError content for an unknown tool name", async () => {
     const result = await client.callTool({
-      name: "no_such_tool",
+      name: "familiar_no_such_tool",
       arguments: {},
     });
     expect(result.isError).toBe(true);
@@ -78,7 +87,7 @@ describe("MCP contract (in-memory transport)", () => {
 
   it("returns isError content when input fails Zod validation (missing field)", async () => {
     const result = await client.callTool({
-      name: "navigate",
+      name: "familiar_navigate",
       arguments: {},
     });
     expect(result.isError).toBe(true);
@@ -88,7 +97,7 @@ describe("MCP contract (in-memory transport)", () => {
 
   it("returns isError content when input exceeds the maxSeconds cap", async () => {
     const result = await client.callTool({
-      name: "wait_for_selector",
+      name: "familiar_wait_for_selector",
       arguments: {
         windowId: "1",
         tabId: "2",
@@ -104,7 +113,7 @@ describe("MCP contract (in-memory transport)", () => {
   it("coerces numeric windowId/tabId to string at the schema layer", async () => {
     runActionMock.mockResolvedValue("");
     await client.callTool({
-      name: "navigate",
+      name: "familiar_navigate",
       arguments: {
         windowId: 1,
         tabId: 2,
@@ -119,10 +128,10 @@ describe("MCP contract (in-memory transport)", () => {
     );
   });
 
-  it("returns structuredContent for get_text (found case)", async () => {
+  it("returns structuredContent for familiar_get_text (found case)", async () => {
     runActionMock.mockResolvedValue("Hello World");
     const result = await client.callTool({
-      name: "get_text",
+      name: "familiar_get_text",
       arguments: { windowId: "1", tabId: "2", selector: "h1" },
     });
 
@@ -132,10 +141,10 @@ describe("MCP contract (in-memory transport)", () => {
     });
   });
 
-  it("returns structuredContent { found: false } for get_text on not_found", async () => {
+  it("returns structuredContent { found: false } for familiar_get_text on not_found", async () => {
     runActionMock.mockResolvedValue("not_found");
     const result = await client.callTool({
-      name: "get_text",
+      name: "familiar_get_text",
       arguments: { windowId: "1", tabId: "2", selector: ".missing" },
     });
 
@@ -153,7 +162,7 @@ describe("MCP contract (in-memory transport)", () => {
     );
 
     const result = await client.callTool({
-      name: "click",
+      name: "familiar_click",
       arguments: { windowId: "1", tabId: "2", selector: "#x" },
     });
 

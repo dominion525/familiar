@@ -17,6 +17,12 @@ describe("TOOLS", () => {
       expect(tool.description.length).toBeGreaterThan(0);
     }
   });
+
+  it("namespaces every tool with the familiar_ prefix", () => {
+    for (const tool of TOOLS) {
+      expect(tool.name).toMatch(/^familiar_/);
+    }
+  });
 });
 
 describe("TOOLS runArgs", () => {
@@ -28,81 +34,81 @@ describe("TOOLS runArgs", () => {
 
   const cases: Case[] = [
     // No-arg
-    { name: "list_tabs", input: {}, expected: [] },
-    { name: "new_tab", input: {}, expected: [] },
-    { name: "new_incognito_tab", input: {}, expected: [] },
+    { name: "familiar_list_tabs", input: {}, expected: [] },
+    { name: "familiar_new_tab", input: {}, expected: [] },
+    { name: "familiar_new_incognito_tab", input: {}, expected: [] },
 
     // WindowRef only
-    { name: "active_tab", input: { windowId: "1" }, expected: ["1"] },
-    { name: "window_mode", input: { windowId: "1" }, expected: ["1"] },
+    { name: "familiar_active_tab", input: { windowId: "1" }, expected: ["1"] },
+    { name: "familiar_window_mode", input: { windowId: "1" }, expected: ["1"] },
 
     // TabRef only
     {
-      name: "close_tab",
+      name: "familiar_close_tab",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "is_loading",
+      name: "familiar_is_loading",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "get_tab_url",
+      name: "familiar_get_tab_url",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "reload",
+      name: "familiar_reload",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "go_back",
+      name: "familiar_go_back",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "go_forward",
+      name: "familiar_go_forward",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "stop",
+      name: "familiar_stop",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "wait_for_load",
+      name: "familiar_wait_for_load",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
     {
-      name: "get_html",
+      name: "familiar_get_html",
       input: { windowId: "1", tabId: "2" },
       expected: ["1", "2"],
     },
 
     // TabRef + URL / expression / path
     {
-      name: "navigate",
+      name: "familiar_navigate",
       input: { windowId: "1", tabId: "2", url: "https://example.com" },
       expected: ["1", "2", "https://example.com"],
     },
     {
-      name: "execute_js",
+      name: "familiar_execute_js",
       input: { windowId: "1", tabId: "2", expression: "document.title" },
       expected: ["1", "2", "document.title"],
     },
     {
-      name: "execute_js_file",
+      name: "familiar_execute_js_file",
       input: { windowId: "1", tabId: "2", path: "/tmp/snippet.js" },
       expected: ["1", "2", "/tmp/snippet.js"],
     },
 
     // TabRef + selector/expression + maxSeconds (number → string)
     {
-      name: "wait_for_selector",
+      name: "familiar_wait_for_selector",
       input: {
         windowId: "1",
         tabId: "2",
@@ -112,7 +118,7 @@ describe("TOOLS runArgs", () => {
       expected: ["1", "2", ".banner", "30"],
     },
     {
-      name: "wait_for_function",
+      name: "familiar_wait_for_function",
       input: {
         windowId: "1",
         tabId: "2",
@@ -124,54 +130,54 @@ describe("TOOLS runArgs", () => {
 
     // TabRefWithSelector only
     {
-      name: "get_text",
+      name: "familiar_get_text",
       input: { windowId: "1", tabId: "2", selector: "h1" },
       expected: ["1", "2", "h1"],
     },
     {
-      name: "get_value",
+      name: "familiar_get_value",
       input: { windowId: "1", tabId: "2", selector: "#email" },
       expected: ["1", "2", "#email"],
     },
     {
-      name: "exists",
+      name: "familiar_exists",
       input: { windowId: "1", tabId: "2", selector: ".banner" },
       expected: ["1", "2", ".banner"],
     },
     {
-      name: "query_all",
+      name: "familiar_query_all",
       input: { windowId: "1", tabId: "2", selector: ".item" },
       expected: ["1", "2", ".item"],
     },
     {
-      name: "click",
+      name: "familiar_click",
       input: { windowId: "1", tabId: "2", selector: "button.submit" },
       expected: ["1", "2", "button.submit"],
     },
     {
-      name: "clear",
+      name: "familiar_clear",
       input: { windowId: "1", tabId: "2", selector: "#email" },
       expected: ["1", "2", "#email"],
     },
     {
-      name: "submit",
+      name: "familiar_submit",
       input: { windowId: "1", tabId: "2", selector: "form#login" },
       expected: ["1", "2", "form#login"],
     },
     {
-      name: "scroll_into_view",
+      name: "familiar_scroll_into_view",
       input: { windowId: "1", tabId: "2", selector: ".footer" },
       expected: ["1", "2", ".footer"],
     },
 
     // TabRefWithSelector + extras
     {
-      name: "get_attribute",
+      name: "familiar_get_attribute",
       input: { windowId: "1", tabId: "2", selector: "a.link", name: "href" },
       expected: ["1", "2", "a.link", "href"],
     },
     {
-      name: "fill",
+      name: "familiar_fill",
       input: {
         windowId: "1",
         tabId: "2",
@@ -181,7 +187,7 @@ describe("TOOLS runArgs", () => {
       expected: ["1", "2", "#email", "user@example.com"],
     },
     {
-      name: "select_option",
+      name: "familiar_select_option",
       input: {
         windowId: "1",
         tabId: "2",
@@ -191,7 +197,7 @@ describe("TOOLS runArgs", () => {
       expected: ["1", "2", "select#country", "JP"],
     },
     {
-      name: "set_checked",
+      name: "familiar_set_checked",
       input: {
         windowId: "1",
         tabId: "2",
@@ -201,7 +207,7 @@ describe("TOOLS runArgs", () => {
       expected: ["1", "2", "#agree", "true"],
     },
     {
-      name: "press_key",
+      name: "familiar_press_key",
       input: {
         windowId: "1",
         tabId: "2",
@@ -233,7 +239,7 @@ describe("TOOLS inputSchema validation", () => {
   }
 
   it("coerces numeric windowId/tabId to string (LLM-friendly)", () => {
-    const result = schemaFor("navigate").parse({
+    const result = schemaFor("familiar_navigate").parse({
       windowId: 1,
       tabId: 2,
       url: "https://example.com",
@@ -242,9 +248,9 @@ describe("TOOLS inputSchema validation", () => {
     expect(result.tabId).toBe("2");
   });
 
-  it("execute_js_file.path rejects relative paths", () => {
+  it("familiar_execute_js_file.path rejects relative paths", () => {
     expect(() =>
-      schemaFor("execute_js_file").parse({
+      schemaFor("familiar_execute_js_file").parse({
         windowId: "1",
         tabId: "2",
         path: "relative/path.js",
@@ -252,9 +258,9 @@ describe("TOOLS inputSchema validation", () => {
     ).toThrow();
   });
 
-  it("execute_js_file.path accepts absolute paths", () => {
+  it("familiar_execute_js_file.path accepts absolute paths", () => {
     expect(() =>
-      schemaFor("execute_js_file").parse({
+      schemaFor("familiar_execute_js_file").parse({
         windowId: "1",
         tabId: "2",
         path: "/tmp/snippet.js",
@@ -266,9 +272,9 @@ describe("TOOLS inputSchema validation", () => {
     "text=Submit",
     "xpath=//button",
     "label=Email",
-  ])("wait_for_selector.selector rejects non-CSS prefix %s", (selector) => {
+  ])("familiar_wait_for_selector.selector rejects non-CSS prefix %s", (selector) => {
     expect(() =>
-      schemaFor("wait_for_selector").parse({
+      schemaFor("familiar_wait_for_selector").parse({
         windowId: "1",
         tabId: "2",
         selector,
@@ -277,9 +283,9 @@ describe("TOOLS inputSchema validation", () => {
     ).toThrow();
   });
 
-  it("wait_for_selector.selector accepts a plain CSS selector", () => {
+  it("familiar_wait_for_selector.selector accepts a plain CSS selector", () => {
     expect(() =>
-      schemaFor("wait_for_selector").parse({
+      schemaFor("familiar_wait_for_selector").parse({
         windowId: "1",
         tabId: "2",
         selector: ".banner",
@@ -288,9 +294,9 @@ describe("TOOLS inputSchema validation", () => {
     ).not.toThrow();
   });
 
-  it("wait_for_selector.maxSeconds caps at 300", () => {
+  it("familiar_wait_for_selector.maxSeconds caps at 300", () => {
     expect(() =>
-      schemaFor("wait_for_selector").parse({
+      schemaFor("familiar_wait_for_selector").parse({
         windowId: "1",
         tabId: "2",
         selector: ".x",
@@ -298,7 +304,7 @@ describe("TOOLS inputSchema validation", () => {
       }),
     ).toThrow();
     expect(() =>
-      schemaFor("wait_for_selector").parse({
+      schemaFor("familiar_wait_for_selector").parse({
         windowId: "1",
         tabId: "2",
         selector: ".x",
@@ -307,9 +313,9 @@ describe("TOOLS inputSchema validation", () => {
     ).not.toThrow();
   });
 
-  it("wait_for_function.maxSeconds caps at 300", () => {
+  it("familiar_wait_for_function.maxSeconds caps at 300", () => {
     expect(() =>
-      schemaFor("wait_for_function").parse({
+      schemaFor("familiar_wait_for_function").parse({
         windowId: "1",
         tabId: "2",
         expression: "true",
@@ -320,7 +326,11 @@ describe("TOOLS inputSchema validation", () => {
 });
 
 describe("TOOLS read-side structuredContent (parseStdout)", () => {
-  const READ_TOOLS = ["get_text", "get_attribute", "get_value"];
+  const READ_TOOLS = [
+    "familiar_get_text",
+    "familiar_get_attribute",
+    "familiar_get_value",
+  ];
 
   for (const name of READ_TOOLS) {
     describe(name, () => {
@@ -350,24 +360,29 @@ describe("TOOLS read-side structuredContent (parseStdout)", () => {
 });
 
 describe("TOOLS timeoutMs", () => {
-  it("wait_for_load uses fixed 60s + buffer (65s total)", () => {
-    const t = TOOLS.find((tool) => tool.name === "wait_for_load");
+  it("familiar_wait_for_load uses fixed 60s + buffer (65s total)", () => {
+    const t = TOOLS.find((tool) => tool.name === "familiar_wait_for_load");
     expect(t?.timeoutMs?.({})).toBe(65_000);
   });
 
-  it("wait_for_selector derives timeout from maxSeconds + buffer", () => {
-    const t = TOOLS.find((tool) => tool.name === "wait_for_selector");
+  it("familiar_wait_for_selector derives timeout from maxSeconds + buffer", () => {
+    const t = TOOLS.find((tool) => tool.name === "familiar_wait_for_selector");
     expect(t?.timeoutMs?.({ maxSeconds: 30 })).toBe(35_000);
     expect(t?.timeoutMs?.({ maxSeconds: 120 })).toBe(125_000);
   });
 
-  it("wait_for_function derives timeout from maxSeconds + buffer", () => {
-    const t = TOOLS.find((tool) => tool.name === "wait_for_function");
+  it("familiar_wait_for_function derives timeout from maxSeconds + buffer", () => {
+    const t = TOOLS.find((tool) => tool.name === "familiar_wait_for_function");
     expect(t?.timeoutMs?.({ maxSeconds: 60 })).toBe(65_000);
   });
 
   it("tools without an inner wait leave timeoutMs undefined", () => {
-    const noTimeoutTools = ["list_tabs", "navigate", "get_html", "click"];
+    const noTimeoutTools = [
+      "familiar_list_tabs",
+      "familiar_navigate",
+      "familiar_get_html",
+      "familiar_click",
+    ];
     for (const name of noTimeoutTools) {
       const t = TOOLS.find((tool) => tool.name === name);
       expect(t?.timeoutMs, `${name}.timeoutMs`).toBeUndefined();

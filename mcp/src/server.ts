@@ -3,6 +3,14 @@ import { AppleScriptError, runAction } from "./applescript.js";
 import { TOOLS } from "./tools.js";
 
 /**
+ * Prefix carried on every MCP-exposed tool name. Stripped before forwarding
+ * to the AppleScript side, whose action names are bare (`list_tabs`, etc.).
+ * Keeping the prefix tool-side namespaces familiar's tools when several MCP
+ * servers are mounted in the same Claude Code session.
+ */
+const TOOL_NAME_PREFIX = "familiar_";
+
+/**
  * Build a fully-configured McpServer with every familiar tool registered.
  *
  * The server is returned without a transport; callers attach the transport
@@ -16,6 +24,9 @@ export function createServer(): McpServer {
   });
 
   for (const tool of TOOLS) {
+    const actionName = tool.name.startsWith(TOOL_NAME_PREFIX)
+      ? tool.name.slice(TOOL_NAME_PREFIX.length)
+      : tool.name;
     server.registerTool(
       tool.name,
       {
@@ -28,7 +39,7 @@ export function createServer(): McpServer {
           const validated = input as Record<string, unknown>;
           const args = tool.runArgs(validated);
           const timeoutMs = tool.timeoutMs?.(validated);
-          const stdout = await runAction(tool.name, args, { timeoutMs });
+          const stdout = await runAction(actionName, args, { timeoutMs });
           if (tool.parseStdout) {
             const structured = tool.parseStdout(stdout);
             return {

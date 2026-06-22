@@ -59,10 +59,11 @@ describe("tool dispatch (direct callback)", () => {
     runActionMock.mockReset();
   });
 
-  it("dispatches list_tabs with no args and returns text content", async () => {
+  it("dispatches familiar_list_tabs with no args and returns text content", async () => {
     runActionMock.mockResolvedValue("wid1,tid1,Title,https://example.com");
-    const result = await getToolCallback("list_tabs")({});
+    const result = await getToolCallback("familiar_list_tabs")({});
 
+    // runAction receives the bare AppleScript action name (prefix stripped).
     expect(runActionMock).toHaveBeenCalledWith("list_tabs", [], {
       timeoutMs: undefined,
     });
@@ -71,9 +72,9 @@ describe("tool dispatch (direct callback)", () => {
     });
   });
 
-  it("dispatches navigate with positional args from named input", async () => {
+  it("dispatches familiar_navigate with positional args from named input", async () => {
     runActionMock.mockResolvedValue("");
-    await getToolCallback("navigate")({
+    await getToolCallback("familiar_navigate")({
       windowId: "1",
       tabId: "2",
       url: "https://example.com",
@@ -86,18 +87,21 @@ describe("tool dispatch (direct callback)", () => {
     );
   });
 
-  it("passes fixed timeoutMs for wait_for_load (60s + buffer)", async () => {
+  it("passes fixed timeoutMs for familiar_wait_for_load (60s + buffer)", async () => {
     runActionMock.mockResolvedValue("complete");
-    await getToolCallback("wait_for_load")({ windowId: "1", tabId: "2" });
+    await getToolCallback("familiar_wait_for_load")({
+      windowId: "1",
+      tabId: "2",
+    });
 
     expect(runActionMock).toHaveBeenCalledWith("wait_for_load", ["1", "2"], {
       timeoutMs: 65_000,
     });
   });
 
-  it("derives timeoutMs from maxSeconds for wait_for_selector", async () => {
+  it("derives timeoutMs from maxSeconds for familiar_wait_for_selector", async () => {
     runActionMock.mockResolvedValue("found");
-    await getToolCallback("wait_for_selector")({
+    await getToolCallback("familiar_wait_for_selector")({
       windowId: "1",
       tabId: "2",
       selector: ".banner",
@@ -120,7 +124,7 @@ describe("tool dispatch (direct callback)", () => {
         "non_zero_exit",
       ),
     );
-    const result = await getToolCallback("click")({
+    const result = await getToolCallback("familiar_click")({
       windowId: "1",
       tabId: "2",
       selector: "#x",
@@ -133,7 +137,7 @@ describe("tool dispatch (direct callback)", () => {
 
   it("returns isError content for non-AppleScriptError throws", async () => {
     runActionMock.mockRejectedValue(new Error("network failure"));
-    const result = await getToolCallback("list_tabs")({});
+    const result = await getToolCallback("familiar_list_tabs")({});
 
     expect(result.isError).toBe(true);
     expect(result.content[0].type).toBe("text");
@@ -141,15 +145,15 @@ describe("tool dispatch (direct callback)", () => {
 
   it("stringifies non-string throwables in the error content", async () => {
     runActionMock.mockRejectedValue("plain string error");
-    const result = await getToolCallback("list_tabs")({});
+    const result = await getToolCallback("familiar_list_tabs")({});
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("plain string error");
   });
 
-  it("returns structuredContent for get_text when the element is found", async () => {
+  it("returns structuredContent for familiar_get_text when the element is found", async () => {
     runActionMock.mockResolvedValue("Hello World");
-    const result = (await getToolCallback("get_text")({
+    const result = (await getToolCallback("familiar_get_text")({
       windowId: "1",
       tabId: "2",
       selector: "h1",
@@ -168,9 +172,9 @@ describe("tool dispatch (direct callback)", () => {
     });
   });
 
-  it("returns structuredContent { found: false } for get_text when not_found", async () => {
+  it("returns structuredContent { found: false } for familiar_get_text when not_found", async () => {
     runActionMock.mockResolvedValue("not_found");
-    const result = (await getToolCallback("get_text")({
+    const result = (await getToolCallback("familiar_get_text")({
       windowId: "1",
       tabId: "2",
       selector: ".missing",
