@@ -86,8 +86,8 @@ describe("TOOLS runArgs", () => {
     },
     {
       name: "familiar_wait_for_load",
-      input: { windowId: "1", tabId: "2" },
-      expected: ["1", "2"],
+      input: { windowId: "1", tabId: "2", maxSeconds: 60 },
+      expected: ["1", "2", "60"],
     },
     {
       name: "familiar_get_html",
@@ -436,9 +436,10 @@ describe("familiar_exists structuredContent (parseStdout)", () => {
 });
 
 describe("TOOLS timeoutMs", () => {
-  it("familiar_wait_for_load uses fixed 60s + buffer (65s total)", () => {
+  it("familiar_wait_for_load derives timeout from maxSeconds + buffer", () => {
     const t = TOOLS.find((tool) => tool.name === "familiar_wait_for_load");
-    expect(t?.timeoutMs?.({})).toBe(65_000);
+    expect(t?.timeoutMs?.({ maxSeconds: 60 })).toBe(65_000);
+    expect(t?.timeoutMs?.({ maxSeconds: 120 })).toBe(125_000);
   });
 
   it("familiar_wait_for_selector derives timeout from maxSeconds + buffer", () => {

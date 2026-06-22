@@ -93,16 +93,19 @@ describe("tool dispatch (direct callback)", () => {
     );
   });
 
-  it("passes fixed timeoutMs for familiar_wait_for_load (60s + buffer)", async () => {
+  it("derives timeoutMs from maxSeconds for familiar_wait_for_load", async () => {
     runActionMock.mockResolvedValue("complete");
     await getToolCallback("familiar_wait_for_load")({
       windowId: "1",
       tabId: "2",
+      maxSeconds: 60,
     });
 
-    expect(runActionMock).toHaveBeenCalledWith("wait_for_load", ["1", "2"], {
-      timeoutMs: 65_000,
-    });
+    expect(runActionMock).toHaveBeenCalledWith(
+      "wait_for_load",
+      ["1", "2", "60"],
+      { timeoutMs: 65_000 },
+    );
   });
 
   it("derives timeoutMs from maxSeconds for familiar_wait_for_selector", async () => {

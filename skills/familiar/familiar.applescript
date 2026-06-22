@@ -13,7 +13,7 @@
 --   go_forward WID TID
 --   stop WID TID
 --   close_tab WID TID
---   wait_for_load WID TID
+--   wait_for_load WID TID MAX_WAIT
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
 --   wait_for_function WID TID JS_EXPR MAX_WAIT
 --   get_html WID TID
@@ -86,8 +86,8 @@ on run argv
 			my checkArgs(argv, 3, "close_tab WID TID")
 			my doCloseTab(item 2 of argv, item 3 of argv)
 		else if action is "wait_for_load" then
-			my checkArgs(argv, 3, "wait_for_load WID TID")
-			set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv)
+			my checkArgs(argv, 4, "wait_for_load WID TID MAX_WAIT")
+			set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv, item 4 of argv)
 		else if action is "wait_for_selector" then
 			my checkArgs(argv, 5, "wait_for_selector WID TID SELECTOR MAX_WAIT")
 			set actionResult to my doWaitForSelector(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
@@ -335,9 +335,9 @@ end doGetTabUrl
 -- Waiting
 -- ============================================================
 
-on doWaitForLoad(wId, tId)
+on doWaitForLoad(wId, tId, maxWait)
 	set waited to 0
-	repeat while waited < 60
+	repeat while waited < (maxWait as integer)
 		if (my runJs(wId, tId, "document.readyState")) is "complete" then return "complete"
 		delay 0.5
 		set waited to waited + 0.5

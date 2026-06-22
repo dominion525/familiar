@@ -144,8 +144,6 @@ const TabRefWithSelector = {
     ),
 };
 
-// AppleScript-side `wait_for_load` polls document.readyState for up to 60s.
-const WAIT_FOR_LOAD_INNER_MS = 60_000;
 // Buffer added to every wait-style action so the osascript kill-timer always
 // outlives the AppleScript-side wait.
 const TIMEOUT_BUFFER_MS = 5_000;
@@ -256,10 +254,18 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "familiar_wait_for_load",
     description:
-      'Block until document.readyState reaches "complete" (polled every 0.5s, up to 60s). The standard follow-up to familiar_navigate / familiar_reload / familiar_go_back / familiar_go_forward when the next step needs a finished DOM. For a more specific signal (a particular element appearing), use familiar_wait_for_selector. Returns "complete" or "timeout".',
-    inputSchema: TabRef,
-    runArgs: (input) => [input.windowId, input.tabId],
-    timeoutMs: () => WAIT_FOR_LOAD_INNER_MS + TIMEOUT_BUFFER_MS,
+      'Block until document.readyState reaches "complete" (polled every 0.5s, up to maxSeconds). The standard follow-up to familiar_navigate / familiar_reload / familiar_go_back / familiar_go_forward when the next step needs a finished DOM. For a more specific signal (a particular element appearing), use familiar_wait_for_selector. Returns "complete" or "timeout".',
+    inputSchema: {
+      ...TabRef,
+      maxSeconds: z
+        .number()
+        .int()
+        .positive()
+        .max(MAX_WAIT_SECONDS)
+        .describe("Maximum seconds to poll"),
+    },
+    runArgs: (input) => [input.windowId, input.tabId, String(input.maxSeconds)],
+    timeoutMs: (input) => input.maxSeconds * 1000 + TIMEOUT_BUFFER_MS,
   }),
   defineTool({
     name: "familiar_wait_for_selector",
