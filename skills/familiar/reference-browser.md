@@ -80,9 +80,10 @@ there is no history in that direction.
 The script uses no fixed sleeps; pacing is caller-driven. Use these to wait explicitly.
 
 ```bash
-osascript "$SCRIPT" wait_for_load "$WID" "$TID"
+osascript "$SCRIPT" wait_for_load "$WID" "$TID" 60
 ```
-Polls `document.readyState` every 0.5s up to 60s. Returns `complete` or `timeout`.
+Polls `document.readyState` every 0.5s, up to `MAX_WAIT` seconds. Returns `complete` or
+`timeout`.
 
 ```bash
 osascript "$SCRIPT" wait_for_selector "$WID" "$TID" "a.some-class" 30
