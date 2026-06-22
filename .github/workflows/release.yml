@@ -37,8 +37,20 @@ jobs:
         run: npm publish --access public --provenance
         working-directory: mcp
 
+      - name: Build .mcpb bundle
+        run: |
+          npm prune --omit=dev
+          npx --yes @anthropic-ai/mcpb@latest pack . familiar-mcp.mcpb
+        working-directory: mcp
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
+
+      - name: Attach .mcpb to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" mcp/familiar-mcp.mcpb --clobber
