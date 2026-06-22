@@ -28,11 +28,13 @@ export type ToolDef<TShape extends ZodRawShape = ZodRawShape> = {
    */
   timeoutMs?(input: InputOf<TShape>): number;
   /**
-   * Optional MCP outputSchema declaring the shape of structuredContent. When
-   * present, the dispatch layer passes the parsed result through this schema
-   * so MCP clients get a typed object instead of a raw sentinel string.
+   * Optional MCP outputSchema declaring the shape of structuredContent. Accepts
+   * either a raw shape (Record<string, ZodTypeAny>, wrapped by the SDK into
+   * z.object) or a full Zod schema instance (z.discriminatedUnion, z.object,
+   * etc.) — the SDK's registerTool overload accepts both via
+   * `ZodRawShapeCompat | AnySchema` (mcp.d.ts:150).
    */
-  outputSchema?: ZodRawShape;
+  outputSchema?: ZodRawShape | z.ZodTypeAny;
   /**
    * Optional translator from raw osascript stdout to a structured object that
    * conforms to outputSchema. Set together with outputSchema. Used to bridge
@@ -45,17 +47,32 @@ export type ToolDef<TShape extends ZodRawShape = ZodRawShape> = {
   parseStdout?(stdout: string): Record<string, unknown>;
 };
 
-// Shared output shape for read-side tools
+// Shared output schema for read-side tools
 // (familiar_get_text / familiar_get_attribute / familiar_get_value).
+//
+// The MCP SDK's outputSchema layer only normalises raw shapes and ZodObject
+// (zod-compat.js:normalizeObjectSchema returns undefined for
+// discriminatedUnion / union / etc., which then makes mcp.js:201's
+// safeParseAsync fail and silently drop structuredContent from the response).
+// So the schema-side invariant "value is present iff found is true" cannot
+// be enforced via z.discriminatedUnion here. Instead:
+//   1. outputSchema stays as a raw shape with value: optional<string> so the
+//      SDK can normalise it into z.object
+//   2. parseReadResult's return type is a TypeScript discriminated union, so
+//      any future parseStdout that returns {found: true} without a value is a
+//      compile-time error in this file
+//   3. The description states the invariant for MCP clients reading the schema
 const ReadResult = {
   found: z.boolean().describe("True if the element was found, false otherwise"),
   value: z
     .string()
     .optional()
-    .describe("The element's value; present only when found is true"),
+    .describe("The element's value; present iff found is true"),
 };
 
-function parseReadResult(stdout: string): { found: boolean; value?: string } {
+type ReadResultValue = { found: true; value: string } | { found: false };
+
+function parseReadResult(stdout: string): ReadResultValue {
   return stdout === "not_found"
     ? { found: false }
     : { found: true, value: stdout };

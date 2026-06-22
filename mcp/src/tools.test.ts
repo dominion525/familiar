@@ -388,8 +388,13 @@ describe("TOOLS read-side structuredContent (parseStdout)", () => {
         expect(tool?.parseStdout).toBeDefined();
       });
 
-      it("maps the 'not_found' sentinel to { found: false }", () => {
-        expect(tool?.parseStdout?.("not_found")).toEqual({ found: false });
+      it("maps the 'not_found' sentinel to { found: false } with no value key", () => {
+        const out = tool?.parseStdout?.("not_found");
+        expect(out).toEqual({ found: false });
+        // The TS return type is a discriminated union (no `value` on the
+        // false branch). Pin that runtime invariant here so a drifting
+        // parseStdout that returns {found: false, value: undefined} fails.
+        expect(out && "value" in out).toBe(false);
       });
 
       it("wraps any other stdout in { found: true, value }", () => {
