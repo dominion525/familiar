@@ -1,4 +1,4 @@
-# familiar-mcp
+# @dominion525/familiar-mcp
 
 MCP server for familiar — control the user's real macOS Chrome via AppleScript.
 
@@ -29,18 +29,18 @@ The server entry point is `mcp/dist/index.js`.
 ### Via npx (after npm publish)
 
 ```
-npx familiar-mcp@latest
+npx @dominion525/familiar-mcp@latest
 ```
 
 ## Configure your MCP client
 
-All examples below assume `npx familiar-mcp@latest`. For a local build, replace
-`npx` / `familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
+All examples below assume `npx @dominion525/familiar-mcp@latest`. For a local build, replace
+`npx` / `@dominion525/familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
 
 ### Claude Code
 
 ```
-claude mcp add familiar -- npx familiar-mcp@latest
+claude mcp add familiar -- npx @dominion525/familiar-mcp@latest
 ```
 
 ### Claude Desktop
@@ -52,7 +52,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
@@ -67,7 +67,7 @@ Edit `~/.cursor/mcp.json`:
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
@@ -80,7 +80,7 @@ Edit `~/.codex/config.toml`:
 ```toml
 [mcp_servers.familiar]
 command = "npx"
-args = ["familiar-mcp@latest"]
+args = ["@dominion525/familiar-mcp@latest"]
 ```
 
 ### Cline / Windsurf / Antigravity

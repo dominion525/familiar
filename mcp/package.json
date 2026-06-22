@@ -1,5 +1,5 @@
 {
-  "name": "familiar-mcp",
+  "name": "@dominion525/familiar-mcp",
   "version": "0.1.0",
   "description": "MCP server for familiar — control the user's real macOS Chrome via AppleScript.",
   "type": "module",

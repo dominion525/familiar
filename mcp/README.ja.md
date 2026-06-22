@@ -1,4 +1,4 @@
-# familiar-mcp
+# @dominion525/familiar-mcp
 
 familiar 用 MCP server — macOS の本物の Google Chrome を AppleScript 経由で操作する。
 
@@ -31,19 +31,19 @@ server のエントリポイントは `mcp/dist/index.js`。
 ### npx 経由（npm publish 後）
 
 ```
-npx familiar-mcp@latest
+npx @dominion525/familiar-mcp@latest
 ```
 
 ## MCP client の設定
 
-以下の例はすべて `npx familiar-mcp@latest` を前提とします。ローカルビルドを使う場合は、
-`npx` / `familiar-mcp@latest` を `node /absolute/path/to/familiar/mcp/dist/index.js`
+以下の例はすべて `npx @dominion525/familiar-mcp@latest` を前提とします。ローカルビルドを使う場合は、
+`npx` / `@dominion525/familiar-mcp@latest` を `node /absolute/path/to/familiar/mcp/dist/index.js`
 に置き換えてください。
 
 ### Claude Code
 
 ```
-claude mcp add familiar -- npx familiar-mcp@latest
+claude mcp add familiar -- npx @dominion525/familiar-mcp@latest
 ```
 
 ### Claude Desktop
@@ -55,7 +55,7 @@ claude mcp add familiar -- npx familiar-mcp@latest
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
@@ -70,7 +70,7 @@ claude mcp add familiar -- npx familiar-mcp@latest
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
@@ -83,7 +83,7 @@ claude mcp add familiar -- npx familiar-mcp@latest
 ```toml
 [mcp_servers.familiar]
 command = "npx"
-args = ["familiar-mcp@latest"]
+args = ["@dominion525/familiar-mcp@latest"]
 ```
 
 ### Cline / Windsurf / Antigravity
