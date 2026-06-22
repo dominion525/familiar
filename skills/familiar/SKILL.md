@@ -34,9 +34,14 @@ in `$SCRIPT`. Common locations:
 - The script saves the frontmost app before acting and restores focus afterward.
 - Pacing is caller-driven: the script uses no fixed sleeps. To wait, use the explicit
   wait actions (`wait_for_load`, `wait_for_selector`, `wait_for_function`).
-- Actions return their result as **text** (not via exit status). Most element actions return
-  `not_found` when the selector matches nothing, rather than raising — except `exists`
-  (reports `false`) and `query_all` (returns `[]`).
+- Actions return their result as **text** (not via exit status). Read-side and multi-failure
+  actions return a JSON envelope:
+  - `get_text` / `get_attribute` / `get_value` → `{"found": true, "value": "..."}` or `{"found": false}`
+  - `select_option` / `submit` → `{"ok": true}` or `{"ok": false, "kind": "<reason>"}`
+  - `exists` → bare string `"true"` / `"false"` (never absent)
+  - other element actions (`click`, `fill`, `clear`, `set_checked`, `press_key`, `scroll_into_view`)
+    → bare string `"true"` on success or `"not_found"` when nothing matched
+  - `query_all` → JSON array string (`"[]"` if no match)
 
 ## Actions
 
@@ -61,7 +66,7 @@ navigate WID TID URL               set the tab's URL; briefly waits for nav to b
                                    output) — follow with wait_for_load
 get_tab_url WID TID                → <url>
 reload / go_back / go_forward / stop  WID TID    history & reload control (no output)
-wait_for_load WID TID              poll readyState up to 60s → "complete" | "timeout"
+wait_for_load WID TID N            poll readyState up to N s → "complete" | "timeout"
 wait_for_selector WID TID SEL N    poll a CSS selector up to N s → "found" | "timeout"
 wait_for_function WID TID EXPR N   poll a JS expression up to N s → "true" | "timeout"
 get_html WID TID                   the live DOM as outerHTML → <html>
@@ -72,18 +77,18 @@ execute_js_file WID TID PATH       run JS from a file → <value>
 Element plane — full specs and selector strategy in [reference-actions.md](reference-actions.md):
 
 ```
-get_text WID TID SEL               element's trimmed text → <text> | "not_found"
-get_attribute WID TID SEL NAME     attribute value ("" if absent) → <value> | "not_found"
-get_value WID TID SEL              input/textarea/select value → <value> | "not_found"
+get_text WID TID SEL               element's trimmed text → {"found":true,"value":<text>} | {"found":false}
+get_attribute WID TID SEL NAME     attribute value ("" if absent) → {"found":true,"value":<val>} | {"found":false}
+get_value WID TID SEL              input/textarea/select value → {"found":true,"value":<val>} | {"found":false}
 exists WID TID SEL                 → "true" | "false"
 query_all WID TID SEL              JSON array of every match's trimmed text → <json> ("[]" if none)
 click WID TID SEL                  scroll into view + click → "true" | "not_found"
 fill WID TID SEL VALUE             set an input's value (frameworks notice) → "true" | "not_found"
 clear WID TID SEL                  empty an input → "true" | "not_found"
-select_option WID TID SEL VALUE    pick an <option> by value/text → "true" | "no_option" | "not_found"
+select_option WID TID SEL VALUE    pick an <option> by value/text → {"ok":true} | {"ok":false,"kind":"no_option"|"not_found"}
 set_checked WID TID SEL BOOL       check/uncheck → "true" | "not_found"
 press_key WID TID SEL KEY          synthetic keydown/press/up → "true" | "not_found"
-submit WID TID SEL                 submit the element's form → "true" | "no_form" | "not_found"
+submit WID TID SEL                 submit the element's form → {"ok":true} | {"ok":false,"kind":"no_form"|"not_found"}
 scroll_into_view WID TID SEL       center the element → "true" | "not_found"
 ```
 
@@ -120,7 +125,7 @@ WID=$(echo "$result" | cut -d',' -f1)
 TID=$(echo "$result" | cut -d',' -f2)
 
 osascript "$SCRIPT" navigate "$WID" "$TID" "https://example.com"
-osascript "$SCRIPT" wait_for_load "$WID" "$TID"
+osascript "$SCRIPT" wait_for_load "$WID" "$TID" 60
 osascript "$SCRIPT" get_html "$WID" "$TID" > page.html
 
 osascript "$SCRIPT" close_tab "$WID" "$TID"

@@ -35,6 +35,7 @@ even on pages with bot / WAF defenses that block headless / automated browsers.
 - Prerequisite: enable "Allow JavaScript from Apple Events" in Chrome and accept the automation
   permission prompt on first run.
 - Invocation form: `osascript skills/familiar/familiar.applescript ACTION [ARGS...]`.
+- For the MCP server (`mcp/`), install the pre-commit hooks once after cloning: `npx lefthook install` at the repo root (after `cd mcp && npm install`). The hooks run Biome, tsc, and Vitest in parallel on staged changes under `mcp/`.
 
 ## Conventions
 

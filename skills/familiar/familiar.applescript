@@ -13,7 +13,7 @@
 --   go_forward WID TID
 --   stop WID TID
 --   close_tab WID TID
---   wait_for_load WID TID
+--   wait_for_load WID TID MAX_WAIT
 --   wait_for_selector WID TID SELECTOR MAX_WAIT
 --   wait_for_function WID TID JS_EXPR MAX_WAIT
 --   get_html WID TID
@@ -86,8 +86,8 @@ on run argv
 			my checkArgs(argv, 3, "close_tab WID TID")
 			my doCloseTab(item 2 of argv, item 3 of argv)
 		else if action is "wait_for_load" then
-			my checkArgs(argv, 3, "wait_for_load WID TID")
-			set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv)
+			my checkArgs(argv, 4, "wait_for_load WID TID MAX_WAIT")
+			set actionResult to my doWaitForLoad(item 2 of argv, item 3 of argv, item 4 of argv)
 		else if action is "wait_for_selector" then
 			my checkArgs(argv, 5, "wait_for_selector WID TID SELECTOR MAX_WAIT")
 			set actionResult to my doWaitForSelector(item 2 of argv, item 3 of argv, item 4 of argv, item 5 of argv)
@@ -335,9 +335,9 @@ end doGetTabUrl
 -- Waiting
 -- ============================================================
 
-on doWaitForLoad(wId, tId)
+on doWaitForLoad(wId, tId, maxWait)
 	set waited to 0
-	repeat while waited < 60
+	repeat while waited < (maxWait as integer)
 		if (my runJs(wId, tId, "document.readyState")) is "complete" then return "complete"
 		delay 0.5
 		set waited to waited + 0.5
@@ -475,34 +475,44 @@ on doFill(wId, tId, sel, val)
 	return my runJs(wId, tId, js)
 end doFill
 
--- Get an element's visible text. Returns the trimmed text, or "not_found".
+-- Get an element's visible text. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found
+-- The envelope avoids the previous sentinel collision: a page element whose
+-- visible text was literally "not_found" used to be misreported as missing.
 on doGetText(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
-  return (el.innerText || el.textContent || '').trim();
+  if (!el) return JSON.stringify({found: false});
+  return JSON.stringify({found: true, value: (el.innerText || el.textContent || '').trim()});
 })()"
 	return my runJs(wId, tId, js)
 end doGetText
 
--- Get an attribute value. Returns the value (empty string if the attribute is
--- absent), or "not_found" if no element matched.
+-- Get an attribute value. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found; value is "" when the
+--                                     // attribute itself is absent on the element
 on doGetAttribute(wId, tId, sel, attrName)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({found: false});
   var v = el.getAttribute('" & my jsEscape(attrName) & "');
-  return v === null ? '' : v;
+  return JSON.stringify({found: true, value: v === null ? '' : v});
 })()"
 	return my runJs(wId, tId, js)
 end doGetAttribute
 
--- Get an input/textarea/select value. Returns the value, or "not_found".
+-- Get an input/textarea/select value. Returns a JSON envelope:
+--   {"found": false}                  // no element matched
+--   {"found": true, "value": "..."}   // element found; value is "" when the
+--                                     // form control has no value set
 on doGetValue(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
-  return (el.value === undefined || el.value === null) ? '' : String(el.value);
+  if (!el) return JSON.stringify({found: false});
+  var v = (el.value === undefined || el.value === null) ? '' : String(el.value);
+  return JSON.stringify({found: true, value: v});
 })()"
 	return my runJs(wId, tId, js)
 end doGetValue
@@ -542,22 +552,25 @@ end doClear
 
 -- Select an <option> in a <select> by its value, falling back to its visible
 -- text. Sets the value via the native setter so frameworks detect it, then fires
--- input/change. Returns "true", "no_option" if nothing matched, or "not_found".
+-- input/change. Returns a JSON envelope:
+--   {"ok": true}                              // option selected
+--   {"ok": false, "kind": "no_option"}        // select found, no matching option
+--   {"ok": false, "kind": "not_found"}        // no select matched the selector
 on doSelectOption(wId, tId, sel, val)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({ok: false, kind: 'not_found'});
   var want = '" & my jsEscape(val) & "';
   var opts = el.options || [];
   var match = null;
   for (var i = 0; i < opts.length; i++) { if (opts[i].value === want) { match = opts[i]; break; } }
   if (!match) { for (var i = 0; i < opts.length; i++) { if ((opts[i].textContent || '').trim() === want) { match = opts[i]; break; } } }
-  if (!match) return 'no_option';
+  if (!match) return JSON.stringify({ok: false, kind: 'no_option'});
   var setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set;
   setter.call(el, match.value);
   el.dispatchEvent(new Event('input', {bubbles: true}));
   el.dispatchEvent(new Event('change', {bubbles: true}));
-  return 'true';
+  return JSON.stringify({ok: true});
 })()"
 	return my runJs(wId, tId, js)
 end doSelectOption
@@ -599,16 +612,19 @@ on doPressKey(wId, tId, sel, keyName)
 end doPressKey
 
 -- Submit the form the element belongs to (or the element itself if it is a
--- form). Uses requestSubmit so submit handlers/validation run. Returns
--- \"true\", \"no_form\" if no form was found, or \"not_found\".
+-- form). Uses requestSubmit so submit handlers/validation run. Returns a JSON
+-- envelope:
+--   {"ok": true}                              // form submitted
+--   {"ok": false, "kind": "no_form"}          // element matched but no form
+--   {"ok": false, "kind": "not_found"}        // no element matched
 on doSubmit(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({ok: false, kind: 'not_found'});
   var form = (el instanceof window.HTMLFormElement) ? el : (el.form || el.closest('form'));
-  if (!form) return 'no_form';
+  if (!form) return JSON.stringify({ok: false, kind: 'no_form'});
   if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
-  return 'true';
+  return JSON.stringify({ok: true});
 })()"
 	return my runJs(wId, tId, js)
 end doSubmit
@@ -629,9 +645,17 @@ end doScrollIntoView
 -- ============================================================
 
 -- Escape a string for safe embedding inside a single-quoted JS literal.
+-- Backslash and single quote must be escaped to avoid breaking the literal;
+-- LF, CR, and Tab must be escaped because a literal newline inside a single-
+-- quoted JS string is a SyntaxError. Other control characters (NUL, etc.) are
+-- left as-is — they are vanishingly rare in selectors / values, and AppleScript
+-- has no clean way to embed arbitrary byte literals in a replacement string.
 on jsEscape(s)
 	set s to my replaceText(s, "\\", "\\\\")
 	set s to my replaceText(s, "'", "\\'")
+	set s to my replaceText(s, linefeed, "\\n")
+	set s to my replaceText(s, return, "\\r")
+	set s to my replaceText(s, tab, "\\t")
 	return s
 end jsEscape
 

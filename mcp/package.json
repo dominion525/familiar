@@ -1,0 +1,63 @@
+{
+  "name": "familiar-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for familiar — control the user's real macOS Chrome via AppleScript.",
+  "type": "module",
+  "bin": {
+    "familiar-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && cp ../skills/familiar/familiar.applescript dist/familiar.applescript",
+    "type-check": "tsc --noEmit",
+    "format": "biome format --write",
+    "check": "biome check --write",
+    "check:ci": "biome ci",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "knip": "knip",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run check:ci && npm run type-check && npm test && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.0",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "knip": "^6.17.1",
+    "lefthook": "^2.1.9",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.9"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "os": [
+    "darwin"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "dominion525"
+  },
+  "homepage": "https://github.com/dominion525/familiar",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dominion525/familiar.git",
+    "directory": "mcp"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "chrome",
+    "applescript",
+    "macos",
+    "browser-automation"
+  ]
+}

@@ -82,9 +82,9 @@ osascript "$SCRIPT" stop "$WID" "$TID"
 スクリプトは固定の sleep を持たず、ペース配分は呼び出し側が行う。明示的に待つにはこれらを使う。
 
 ```bash
-osascript "$SCRIPT" wait_for_load "$WID" "$TID"
+osascript "$SCRIPT" wait_for_load "$WID" "$TID" 60
 ```
-`document.readyState` を 0.5 秒ごと・最大 60 秒ポーリング。`complete` / `timeout` を返す。
+`document.readyState` を 0.5 秒ごと・最大 `MAX_WAIT` 秒ポーリング。`complete` / `timeout` を返す。
 
 ```bash
 osascript "$SCRIPT" wait_for_selector "$WID" "$TID" "a.some-class" 30
