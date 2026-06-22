@@ -552,22 +552,25 @@ end doClear
 
 -- Select an <option> in a <select> by its value, falling back to its visible
 -- text. Sets the value via the native setter so frameworks detect it, then fires
--- input/change. Returns "true", "no_option" if nothing matched, or "not_found".
+-- input/change. Returns a JSON envelope:
+--   {"ok": true}                              // option selected
+--   {"ok": false, "kind": "no_option"}        // select found, no matching option
+--   {"ok": false, "kind": "not_found"}        // no select matched the selector
 on doSelectOption(wId, tId, sel, val)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({ok: false, kind: 'not_found'});
   var want = '" & my jsEscape(val) & "';
   var opts = el.options || [];
   var match = null;
   for (var i = 0; i < opts.length; i++) { if (opts[i].value === want) { match = opts[i]; break; } }
   if (!match) { for (var i = 0; i < opts.length; i++) { if ((opts[i].textContent || '').trim() === want) { match = opts[i]; break; } } }
-  if (!match) return 'no_option';
+  if (!match) return JSON.stringify({ok: false, kind: 'no_option'});
   var setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set;
   setter.call(el, match.value);
   el.dispatchEvent(new Event('input', {bubbles: true}));
   el.dispatchEvent(new Event('change', {bubbles: true}));
-  return 'true';
+  return JSON.stringify({ok: true});
 })()"
 	return my runJs(wId, tId, js)
 end doSelectOption
@@ -609,16 +612,19 @@ on doPressKey(wId, tId, sel, keyName)
 end doPressKey
 
 -- Submit the form the element belongs to (or the element itself if it is a
--- form). Uses requestSubmit so submit handlers/validation run. Returns
--- \"true\", \"no_form\" if no form was found, or \"not_found\".
+-- form). Uses requestSubmit so submit handlers/validation run. Returns a JSON
+-- envelope:
+--   {"ok": true}                              // form submitted
+--   {"ok": false, "kind": "no_form"}          // element matched but no form
+--   {"ok": false, "kind": "not_found"}        // no element matched
 on doSubmit(wId, tId, sel)
 	set js to my selectorResolverJs() & "(function(){
   var el = __famFind('" & my jsEscape(sel) & "');
-  if (!el) return 'not_found';
+  if (!el) return JSON.stringify({ok: false, kind: 'not_found'});
   var form = (el instanceof window.HTMLFormElement) ? el : (el.form || el.closest('form'));
-  if (!form) return 'no_form';
+  if (!form) return JSON.stringify({ok: false, kind: 'no_form'});
   if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
-  return 'true';
+  return JSON.stringify({ok: true});
 })()"
 	return my runJs(wId, tId, js)
 end doSubmit

@@ -425,6 +425,52 @@ describe("TOOLS read-side structuredContent (parseStdout)", () => {
   }
 });
 
+describe("familiar_select_option / familiar_submit structuredContent (parseStdout)", () => {
+  const ACTION_TOOLS = ["familiar_select_option", "familiar_submit"];
+
+  for (const name of ACTION_TOOLS) {
+    describe(name, () => {
+      const tool = TOOLS.find((t) => t.name === name);
+
+      it("declares an outputSchema and parseStdout", () => {
+        expect(tool?.outputSchema).toBeDefined();
+        expect(tool?.parseStdout).toBeDefined();
+      });
+
+      it("parses {ok: true} envelope as {ok: true}", () => {
+        expect(tool?.parseStdout?.('{"ok":true}')).toEqual({ ok: true });
+      });
+
+      it("parses {ok: false, kind: 'not_found'} envelope", () => {
+        expect(tool?.parseStdout?.('{"ok":false,"kind":"not_found"}')).toEqual({
+          ok: false,
+          kind: "not_found",
+        });
+      });
+
+      it("throws on a malformed envelope", () => {
+        expect(() => tool?.parseStdout?.("garbage")).toThrow();
+      });
+    });
+  }
+
+  it("familiar_select_option recognizes the 'no_option' kind", () => {
+    const tool = TOOLS.find((t) => t.name === "familiar_select_option");
+    expect(tool?.parseStdout?.('{"ok":false,"kind":"no_option"}')).toEqual({
+      ok: false,
+      kind: "no_option",
+    });
+  });
+
+  it("familiar_submit recognizes the 'no_form' kind", () => {
+    const tool = TOOLS.find((t) => t.name === "familiar_submit");
+    expect(tool?.parseStdout?.('{"ok":false,"kind":"no_form"}')).toEqual({
+      ok: false,
+      kind: "no_form",
+    });
+  });
+});
+
 describe("familiar_exists structuredContent (parseStdout)", () => {
   const tool = TOOLS.find((t) => t.name === "familiar_exists");
 

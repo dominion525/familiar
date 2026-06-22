@@ -9,8 +9,14 @@ is the absolute path to `familiar.applescript` (see [SKILL.md](SKILL.md) "Script
 for common locations under Claude Code plugins and Vercel Skills).
 
 All actions here run JavaScript, so Chrome's "Allow JavaScript from Apple Events" must be on.
-When no element matches the selector, the action returns the string `not_found` rather than
-raising — check the returned string instead of relying on exit status.
+Actions never raise on a missing element; they report it via the return value:
+
+- `get_text` / `get_attribute` / `get_value` return a JSON envelope `{"found": true, "value": "..."}` or `{"found": false}`
+- `select_option` / `submit` return a JSON envelope `{"ok": true}` or `{"ok": false, "kind": "<reason>"}` where `<reason>` is one of `not_found`, `no_option`, `no_form`
+- `exists` returns the bare string `true` or `false` (never `not_found`; absence is reported as `false`)
+- All other actions (`click` / `fill` / `clear` / `set_checked` / `press_key` / `scroll_into_view`) return the bare string `true` on success or `not_found` when no element matched
+
+The JSON-envelope actions avoid the previous sentinel collision where a real page value (e.g. element text literally `"not_found"`) was indistinguishable from absence.
 
 ## Selectors
 
@@ -99,8 +105,9 @@ Like `fill` with an empty string: focuses, sets value to `''` via the native set
 osascript "$SCRIPT" select_option "$WID" "$TID" "select#country" "JP"
 ```
 Selects an `<option>` by its `value`, falling back to its visible text. Sets the value via
-the native setter and fires `input`/`change`. Returns `true`, `no_option` if nothing
-matched, or `not_found`.
+the native setter and fires `input`/`change`. Returns a JSON envelope: `{"ok": true}` on
+success, `{"ok": false, "kind": "no_option"}` if the select was found but had no matching
+option, or `{"ok": false, "kind": "not_found"}` if no select matched.
 
 ```bash
 osascript "$SCRIPT" set_checked "$WID" "$TID" "#agree" true
@@ -122,7 +129,8 @@ osascript "$SCRIPT" submit "$WID" "$TID" "form#login"
 ```
 Submits the form the element belongs to (or the element itself if it is a `<form>`). Uses
 `requestSubmit()` so submit handlers and validation run (falls back to `submit()`). Returns
-`true`, `no_form` if no form was found, or `not_found`.
+a JSON envelope: `{"ok": true}` on success, `{"ok": false, "kind": "no_form"}` if the
+element was not in a form, or `{"ok": false, "kind": "not_found"}` if no element matched.
 
 ```bash
 osascript "$SCRIPT" scroll_into_view "$WID" "$TID" ".footer"

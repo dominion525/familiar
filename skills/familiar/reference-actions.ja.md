@@ -12,8 +12,14 @@
 代表的な配置は [SKILL.ja.md](SKILL.ja.md) 「スクリプトの場所」を参照）
 
 ここのアクションはすべて JavaScript を実行するので、Chrome の「Apple Event からの JavaScript の
-使用を許可」が必要。セレクタに一致する要素が無い場合は例外を投げず文字列 `not_found` を返す —
-終了ステータスではなく戻り文字列で判定すること。
+使用を許可」が必要。要素が無い場合に例外は投げず、戻り値で報告する:
+
+- `get_text` / `get_attribute` / `get_value` は JSON エンベロープ `{"found": true, "value": "..."}` または `{"found": false}` を返す
+- `select_option` / `submit` は JSON エンベロープ `{"ok": true}` または `{"ok": false, "kind": "<理由>"}` を返す（`<理由>` は `not_found` / `no_option` / `no_form` のいずれか）
+- `exists` は素の文字列 `true` または `false` を返す（`not_found` は返さない、不在は `false`）
+- その他のアクション（`click` / `fill` / `clear` / `set_checked` / `press_key` / `scroll_into_view`）は素の文字列 `true` を成功時に、`not_found` を要素未一致時に返す
+
+JSON エンベロープを返すアクションは、実ページ値（例: 要素テキストが文字どおり `"not_found"`）が不在 sentinel と衝突して区別できなくなる以前の問題を解消している。
 
 ## セレクタ
 
@@ -98,7 +104,9 @@ osascript "$SCRIPT" clear "$WID" "$TID" "#email"
 osascript "$SCRIPT" select_option "$WID" "$TID" "select#country" "JP"
 ```
 `<option>` を `value` で選択（無ければ可視テキストで照合）。native setter で値を設定し
-`input`/`change` を発火。`true` / 一致無しは `no_option` / `not_found`。
+`input`/`change` を発火。JSON エンベロープを返す: 成功時 `{"ok": true}`、select は見つかったが
+一致する option が無い場合 `{"ok": false, "kind": "no_option"}`、select 自体が見つからない場合
+`{"ok": false, "kind": "not_found"}`。
 
 ```bash
 osascript "$SCRIPT" set_checked "$WID" "$TID" "#agree" true
@@ -118,8 +126,9 @@ osascript "$SCRIPT" press_key "$WID" "$TID" "#search" "Enter"
 osascript "$SCRIPT" submit "$WID" "$TID" "form#login"
 ```
 要素が属するフォーム（要素自身が `<form>` ならそれ）を送信。`requestSubmit()` を使うので submit
-ハンドラとバリデーションが走る（無ければ `submit()` にフォールバック）。`true` / フォーム無しは
-`no_form` / `not_found`。
+ハンドラとバリデーションが走る（無ければ `submit()` にフォールバック）。JSON エンベロープを返す:
+成功時 `{"ok": true}`、要素がフォームに属していない場合 `{"ok": false, "kind": "no_form"}`、
+要素が見つからない場合 `{"ok": false, "kind": "not_found"}`。
 
 ```bash
 osascript "$SCRIPT" scroll_into_view "$WID" "$TID" ".footer"

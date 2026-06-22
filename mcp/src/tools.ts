@@ -116,6 +116,30 @@ function parseExistsResult(stdout: string): { exists: boolean } {
   return { exists: stdout === "true" };
 }
 
+// Output schema for action-side tools that can fail with one of multiple
+// named failure modes — currently familiar_select_option (kinds: not_found /
+// no_option) and familiar_submit (kinds: not_found / no_form). The envelope
+// matches the read-side {found, value} pattern in spirit, so the LLM has one
+// uniform "did the action succeed, and if not why" surface for actions with
+// >1 failure mode.
+const ActionResult = {
+  ok: z.boolean().describe("True on success, false on a categorized failure"),
+  kind: z
+    .string()
+    .optional()
+    .describe(
+      "Failure category when ok is false (e.g. 'not_found', 'no_option', 'no_form'); absent when ok is true",
+    ),
+};
+
+type ActionResultValue = { ok: true } | { ok: false; kind: string };
+
+function parseActionResult(stdout: string): ActionResultValue {
+  // AppleScript side emits a JSON envelope; malformed payloads throw
+  // SyntaxError and surface as isError {kind: "unknown"} via dispatch catch.
+  return JSON.parse(stdout) as ActionResultValue;
+}
+
 /**
  * Identity helper used to register a tool while preserving the precise schema
  * shape for downstream type inference. Without it the call-site narrows
@@ -461,7 +485,7 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "familiar_select_option",
     description:
-      'Pick an <option> in a <select>. Matches by `value` attribute first, then by visible text as a fallback. Fires input + change so framework bindings update. Returns "true", "no_option" if the select was found but had no matching option, or "not_found" if the select itself was not found.',
+      'Pick an <option> in a <select>. Matches by `value` attribute first, then by visible text as a fallback. Fires input + change so framework bindings update. Returns structuredContent `{ ok: boolean, kind?: string }`: `{ok: true}` on success, `{ok: false, kind: "no_option"}` if the select was found but had no matching option, `{ok: false, kind: "not_found"}` if the select itself was not found.',
     inputSchema: {
       ...TabRefWithSelector,
       value: z.string().describe("Option value or visible text to select"),
@@ -472,6 +496,8 @@ export const TOOLS: ToolDef[] = [
       input.selector,
       input.value,
     ],
+    outputSchema: ActionResult,
+    parseStdout: parseActionResult,
   }),
   defineTool({
     name: "familiar_set_checked",
@@ -510,9 +536,11 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "familiar_submit",
     description:
-      'Submit the form the element belongs to (or the element itself if it is a <form>). Uses requestSubmit() so HTML5 validation and submit handlers run, falling back to submit() when unsupported. Often more reliable than familiar_click on the submit button. Returns "true", "no_form" if the element was not in a form, or "not_found".',
+      'Submit the form the element belongs to (or the element itself if it is a <form>). Uses requestSubmit() so HTML5 validation and submit handlers run, falling back to submit() when unsupported. Often more reliable than familiar_click on the submit button. Returns structuredContent `{ ok: boolean, kind?: string }`: `{ok: true}` on success, `{ok: false, kind: "no_form"}` if the element was not in a form, `{ok: false, kind: "not_found"}` if the element was not found.',
     inputSchema: TabRefWithSelector,
     runArgs: (input) => [input.windowId, input.tabId, input.selector],
+    outputSchema: ActionResult,
+    parseStdout: parseActionResult,
   }),
   defineTool({
     name: "familiar_scroll_into_view",
