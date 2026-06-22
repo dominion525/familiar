@@ -65,7 +65,7 @@ npx skills add dominion525/familiar
 Claude Code でのクイックインストール:
 
 ```bash
-claude mcp add familiar -- npx familiar-mcp@latest
+claude mcp add familiar -- npx @dominion525/familiar-mcp@latest
 ```
 
 クライアント別の詳細インストールと設定は [mcp/README.ja.md](mcp/README.ja.md) を参照。

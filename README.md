@@ -65,7 +65,7 @@ Desktop, Cursor, Codex CLI, and others).
 Quick install (Claude Code):
 
 ```bash
-claude mcp add familiar -- npx familiar-mcp@latest
+claude mcp add familiar -- npx @dominion525/familiar-mcp@latest
 ```
 
 See [mcp/README.md](mcp/README.md) for full per-client install and configuration.

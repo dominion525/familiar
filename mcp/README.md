@@ -1,21 +1,47 @@
-# familiar-mcp
+# @dominion525/familiar-mcp
+
+[![npm version](https://img.shields.io/npm/v/@dominion525/familiar-mcp)](https://www.npmjs.com/package/@dominion525/familiar-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 MCP server for familiar — control the user's real macOS Chrome via AppleScript.
 
-This is the MCP-server variant of [familiar](https://github.com/dominion525/familiar).
-The Claude Code skill / plugin variant lives in the same repo under `skills/familiar/`,
-and both paths invoke the same `familiar.applescript`.
+## What it does
+
+An MCP-compatible client (Claude Code, Claude Desktop, Cursor, Codex CLI, etc.) gets 32 tools that drive the user's real Google Chrome on macOS via AppleScript (Apple Events):
+
+- **Tabs / windows** (7): `list_tabs`, `new_tab`, `new_incognito_tab`, `close_tab`, `active_tab`, `window_mode`, `is_loading`
+- **Navigation** (6): `navigate`, `get_tab_url`, `reload`, `go_back`, `go_forward`, `stop`
+- **Waiting** (3): `wait_for_load`, `wait_for_selector`, `wait_for_function`
+- **Content / scripting** (3): `get_html`, `execute_js`, `execute_js_file`
+- **Read** (5): `get_text`, `get_attribute`, `get_value`, `exists`, `query_all`
+- **Interaction** (8): `click`, `fill`, `clear`, `select_option`, `set_checked`, `press_key`, `submit`, `scroll_into_view`
+
+Because it operates the user's actual signed-in Chrome via Apple Events rather than launching a separate browser instance, pages see a regular Chrome session — no WebDriver or DevTools control channel is added. Site-specific access controls still apply; this does not guarantee access to any given site. No DevTools Protocol, no Playwright, no separate driver.
+
+For per-tool signatures, parameters, return shapes, and selector strategy, see [`reference-browser.md`](https://github.com/dominion525/familiar/blob/main/skills/familiar/reference-browser.md) (control plane) and [`reference-actions.md`](https://github.com/dominion525/familiar/blob/main/skills/familiar/reference-actions.md) (element actions) in the repository.
 
 ## Prerequisites
 
 - macOS with Google Chrome
-- Chrome's "Allow JavaScript from Apple Events" enabled
-  (View → Developer → Allow JavaScript from Apple Events)
+- Chrome's "Allow JavaScript from Apple Events" enabled (View → Developer → Allow JavaScript from Apple Events). Without this, the scripting and DOM-interaction tools will fail
 - Automation permission approved for the controlling terminal/app on first run
 
 ## Install
 
-### From source (current)
+The npm package is what your MCP client invokes. The client itself is configured in the next section.
+
+### Via npx (no local install)
+
+`npx` fetches and runs the latest version on demand:
+
+```
+npx @dominion525/familiar-mcp@latest
+```
+
+This starts the server and waits for JSON-RPC messages on stdin (Ctrl+C to exit). MCP clients spawn this automatically; you do not normally run it by hand.
+
+<details>
+<summary><b>From source</b></summary>
 
 ```
 git clone https://github.com/dominion525/familiar
@@ -26,24 +52,23 @@ npm run build
 
 The server entry point is `mcp/dist/index.js`.
 
-### Via npx (after npm publish)
-
-```
-npx familiar-mcp@latest
-```
+</details>
 
 ## Configure your MCP client
 
-All examples below assume `npx familiar-mcp@latest`. For a local build, replace
-`npx` / `familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
+All examples below assume `npx @dominion525/familiar-mcp@latest`. For a local build, replace `npx` / `@dominion525/familiar-mcp@latest` with `node /absolute/path/to/familiar/mcp/dist/index.js`.
 
-### Claude Code
+<details>
+<summary><b>Claude Code</b></summary>
 
 ```
-claude mcp add familiar -- npx familiar-mcp@latest
+claude mcp add familiar -- npx @dominion525/familiar-mcp@latest
 ```
 
-### Claude Desktop
+</details>
+
+<details>
+<summary><b>Claude Desktop</b></summary>
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
@@ -52,13 +77,16 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
 ```
 
-### Cursor
+</details>
+
+<details>
+<summary><b>Cursor</b></summary>
 
 Edit `~/.cursor/mcp.json`:
 
@@ -67,38 +95,112 @@ Edit `~/.cursor/mcp.json`:
   "mcpServers": {
     "familiar": {
       "command": "npx",
-      "args": ["familiar-mcp@latest"]
+      "args": ["@dominion525/familiar-mcp@latest"]
     }
   }
 }
 ```
 
-### Codex CLI
+</details>
+
+<details>
+<summary><b>Codex CLI</b></summary>
 
 Edit `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.familiar]
 command = "npx"
-args = ["familiar-mcp@latest"]
+args = ["@dominion525/familiar-mcp@latest"]
 ```
 
-### Cline / Windsurf / Antigravity
+</details>
 
-Each tool exposes an MCP settings panel that accepts the same JSON shape as the
-Cursor example above.
+<details>
+<summary><b>Other MCP clients</b></summary>
 
-### VS Code (GitHub Copilot Chat, Continue, etc.)
+Any MCP-compatible client (Cline, Windsurf, Antigravity, VS Code extensions like GitHub Copilot Chat or Continue, etc.) connects via the same JSON shape used in the Cursor and Claude Desktop examples above. Refer to each tool's MCP configuration documentation for the exact location.
 
-Each extension has its own MCP configuration; refer to the extension docs.
+</details>
 
-## How it relates to the Claude Code skill
+## macOS permissions
 
-`skills/familiar/` provides the same 32 actions as a Claude Code plugin (with
-`SKILL.md` driving auto-activation), while this MCP server makes the same actions
-available to any MCP-compatible client. Behavior is identical because both paths
-shell out to the same `familiar.applescript`.
+Two permissions need to be set up once before the AppleScript-backed tools can talk to Chrome:
+
+| Permission | Where | Why |
+|---|---|---|
+| Allow JavaScript from Apple Events | Chrome → View → Developer → Allow JavaScript from Apple Events | Required for any tool that runs JavaScript in the page (the read / interaction / content / JS-based wait tools). The bare tab / window / navigation / history / loading-state tools are native AppleScript and do not need this |
+| Automation → Google Chrome | System Settings → Privacy & Security → Automation → (the app spawning the MCP server) → Google Chrome | macOS asks the first time `osascript` talks to Chrome. **macOS grants Automation permission to the parent process**, not to `familiar-mcp` itself, so approve it for the app that actually runs your MCP client (typically Terminal, VS Code, Cursor, or Claude Desktop). Approve only MCP hosts you trust to control your signed-in Chrome |
+
+If the OS permission prompt never appears, run this once from the same terminal that spawns the MCP server:
+
+```
+osascript -e 'tell application "Google Chrome" to get version'
+```
+
+That call surfaces the prompt for the current parent process without depending on any open Chrome window. Once approved, subsequent MCP calls work without re-prompting.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `osascript ... failed (non_zero_exit): ... JavaScript is turned off` | Enable "Allow JavaScript from Apple Events" in Chrome → View → Developer |
+| `Not authorized to send Apple events to "Google Chrome"` | Grant Automation → Google Chrome to the parent process (Terminal / VS Code / Cursor / etc.) under System Settings → Privacy & Security → Automation |
+
+## Security
+
+### The server itself
+
+- Runs **locally** on your Mac. The Node.js server communicates only over stdio (JSON-RPC) with the calling MCP client; it initiates no remote connections of its own.
+- No telemetry, no analytics — the server does not phone home.
+
+### Capabilities exposed to the MCP client
+
+Tools that take a URL or selector trigger ordinary Chrome browser activity (network requests, cookies sent on the user's behalf, etc.). Crucially, `execute_js` and `execute_js_file` run **arbitrary JavaScript in the page**, so an MCP client granted these tools can:
+
+- Read DOM and cookies of any page the user is signed into
+- Submit forms, navigate, trigger fetch / XHR on the user's behalf
+- Manipulate session state
+
+Treat MCP-client trust as equivalent to giving that client access to your authenticated browser sessions.
+
+### Audit
+
+- The AppleScript layer is shipped as `dist/familiar.applescript` in this npm package; the development source lives at [`skills/familiar/familiar.applescript`](https://github.com/dominion525/familiar/blob/main/skills/familiar/familiar.applescript) and is copied verbatim at build time. Audit it directly to verify exactly what gets sent to Chrome.
+- Open source, MIT-licensed. Every line of both the MCP server (`mcp/src/`) and the AppleScript layer is in the repository.
+
+## Architecture
+
+```
+MCP client (Claude Code / Cursor / ...)
+        ↓ stdio (JSON-RPC, MCP protocol)
+   familiar-mcp server (Node.js)
+        ↓ child_process.execFile("osascript", ["familiar.applescript", ACTION, ...args])
+   AppleScript (Apple Events)
+        ↓ tell application "Google Chrome" / do JavaScript
+   Google Chrome (the user's actual signed-in browser)
+        ↓
+   Page DOM
+```
+
+Key design choices:
+
+- One `familiar.applescript` file backs both the MCP server and the Claude Code skill. Behavior is identical across both paths.
+- Every operation targets a specific tab by `windowId + tabId`. The MCP server never relies on Chrome's active tab — safe to use while the user works in other tabs.
+- Each tool call spawns a fresh `osascript` process (no persistent helper). Simpler to reason about, with the trade-off of per-call process startup overhead.
+
+## Related projects
+
+When you want a small, focused tool set that drives **the user's actual signed-in Chrome**, familiar-mcp is suitable. Adjacent projects with different trade-offs:
+
+- [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) — Chrome via the DevTools Protocol. Has Lighthouse and performance-tracing tools that familiar-mcp doesn't. By default, spawns a fresh Chrome with a debug port rather than using the user's existing browser session (attaching to an existing Chrome endpoint is configurable).
+- [Playwright MCP](https://github.com/microsoft/playwright-mcp) — cross-browser (Chromium / Firefox / WebKit) via Playwright. Use when you need headless or cross-browser automation. By default does not use your signed-in browser session, though Playwright supports persistent profiles.
+- [safari-mcp](https://github.com/achiya-automation/safari-mcp) — same general idea (real signed-in browser via Apple Events) for Safari instead of Chrome. Larger tool surface; includes a Safari Extension for capabilities AppleScript alone can't reach.
+
+## Use as a Claude Code skill instead
+
+As an alternative to running an MCP server, the same 32 actions are available as a Claude Code skill / plugin under `skills/familiar/` in the same repository (with `SKILL.md` driving auto-activation when Claude Code recognizes a matching request). See the [repository README](https://github.com/dominion525/familiar) for the skill / plugin install path.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
