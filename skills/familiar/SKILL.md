@@ -1,5 +1,7 @@
 ---
 name: familiar
+metadata:
+  version: "0.1.0"
 description: Use when you specifically need to drive the user's own everyday Google Chrome on macOS via AppleScript (Apple Events) — not a fresh headless/automated browser, and not the DevTools Protocol or Playwright. Especially for pages behind bot/WAF defenses that block automated browsers, since this is the real signed-in Chrome. Covers open/close tabs (incl. incognito), navigate, wait for load/selector, extract page HTML or element text/attributes, click elements, fill and submit forms, and run arbitrary JavaScript.
 compatibility: macOS only. Requires Google Chrome with "Allow JavaScript from Apple Events" enabled (View → Developer → Allow JavaScript from Apple Events) and Automation permission approved on first run.
 ---

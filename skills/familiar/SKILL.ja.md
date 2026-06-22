@@ -1,3 +1,11 @@
+---
+name: familiar
+metadata:
+  version: "0.1.0"
+description: macOS で、ユーザー本人が普段づかいしている Google Chrome を AppleScript (Apple Events) 経由で操作する必要があるときに使う — headless/自動化ブラウザの新規起動ではなく、DevTools Protocol でも Playwright でもない。特に headless/自動化ブラウザを弾く bot/WAF 対策のあるページで、これはサインイン済みの本物の Chrome を操作するため有用。タブの開閉 (シークレット含む)、navigate、ロード/セレクタの待機、ページ HTML や要素のテキスト/属性の取得、要素のクリック、フォーム入力と送信、任意の JavaScript 実行をカバー。
+compatibility: macOS のみ。Google Chrome で「Apple Event からの JavaScript の使用を許可」(表示 → 開発/管理 → Apple Event からの JavaScript の使用を許可) が必要、初回起動時に Automation 権限の承認が必要。
+---
+
 # familiar — AppleScript で macOS の Chrome を操作する（日本語訳）
 
 > これは [SKILL.md](SKILL.md) の日本語訳です。Claude Code のスキルローダーが読むのは
