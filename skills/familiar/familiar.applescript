@@ -629,9 +629,17 @@ end doScrollIntoView
 -- ============================================================
 
 -- Escape a string for safe embedding inside a single-quoted JS literal.
+-- Backslash and single quote must be escaped to avoid breaking the literal;
+-- LF, CR, and Tab must be escaped because a literal newline inside a single-
+-- quoted JS string is a SyntaxError. Other control characters (NUL, etc.) are
+-- left as-is — they are vanishingly rare in selectors / values, and AppleScript
+-- has no clean way to embed arbitrary byte literals in a replacement string.
 on jsEscape(s)
 	set s to my replaceText(s, "\\", "\\\\")
 	set s to my replaceText(s, "'", "\\'")
+	set s to my replaceText(s, linefeed, "\\n")
+	set s to my replaceText(s, return, "\\r")
+	set s to my replaceText(s, tab, "\\t")
 	return s
 end jsEscape
 
