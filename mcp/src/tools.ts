@@ -1,3 +1,5 @@
+import { statSync } from "node:fs";
+import { isAbsolute, normalize } from "node:path";
 import { z } from "zod";
 import { MAX_BUFFER } from "./applescript.js";
 
@@ -70,16 +72,23 @@ function defineTool<TShape extends ZodRawShape>(
   return def;
 }
 
-// windowId / tabId are coerced from any input so that LLMs which emit them as
-// numbers (a common slip-up) still pass Zod validation. The AppleScript side
-// expects strings on the command line.
+// windowId / tabId accept either a string or a non-negative integer (LLMs
+// commonly emit Chrome IDs as numbers); both forms transform to the string
+// that AppleScript expects on the command line. Rejecting null / arrays /
+// objects here — instead of relying on z.coerce.string() which would silently
+// stringify them to "null" / "1,2" / "[object Object]" — surfaces the bad
+// input as a clear Zod error instead of an opaque Chrome-side failure.
+const IdField = z
+  .union([z.string(), z.number().int().nonnegative()])
+  .transform(String);
+
 const WindowRef = {
-  windowId: z.coerce.string().describe("Chrome window id"),
+  windowId: IdField.describe("Chrome window id"),
 };
 
 const TabRef = {
   ...WindowRef,
-  tabId: z.coerce.string().describe("Chrome tab id"),
+  tabId: IdField.describe("Chrome tab id"),
 };
 
 const TabRefWithSelector = {
@@ -288,8 +297,19 @@ export const TOOLS: ToolDef[] = [
       ...TabRef,
       path: z
         .string()
-        .startsWith("/", "Path must be absolute (start with /)")
-        .describe("Absolute path to the JS file"),
+        .refine(isAbsolute, "Path must be absolute (start with /)")
+        .refine(
+          (p) => normalize(p) === p,
+          "Path must be canonical (no '..' or redundant '.')",
+        )
+        .refine((p) => {
+          try {
+            return statSync(p).isFile();
+          } catch {
+            return false;
+          }
+        }, "Path must point to an existing readable file")
+        .describe("Absolute, canonical path to an existing JS file"),
     },
     runArgs: (input) => [input.windowId, input.tabId, input.path],
   }),

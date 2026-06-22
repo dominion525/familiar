@@ -1,6 +1,12 @@
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { TOOLS } from "./tools.js";
+
+// An absolute path that is guaranteed to exist for the duration of the test
+// run — this very test file. Used to exercise execute_js_file.path schemas
+// that now require the path to point to an existing readable file.
+const EXISTING_ABSOLUTE_FILE = fileURLToPath(import.meta.url);
 
 describe("TOOLS", () => {
   it("registers all 32 actions", () => {
@@ -238,7 +244,7 @@ describe("TOOLS inputSchema validation", () => {
     return z.object(tool.inputSchema);
   }
 
-  it("coerces numeric windowId/tabId to string (LLM-friendly)", () => {
+  it("coerces numeric (non-negative integer) windowId/tabId to string (LLM-friendly)", () => {
     const result = schemaFor("familiar_navigate").parse({
       windowId: 1,
       tabId: 2,
@@ -246,6 +252,23 @@ describe("TOOLS inputSchema validation", () => {
     });
     expect(result.windowId).toBe("1");
     expect(result.tabId).toBe("2");
+  });
+
+  it.each([
+    null,
+    undefined,
+    [1, 2],
+    { id: 1 },
+    -1,
+    1.5,
+  ])("windowId rejects non-(string|nonneg-int) value: %s", (value) => {
+    expect(() =>
+      schemaFor("familiar_navigate").parse({
+        windowId: value,
+        tabId: "2",
+        url: "https://example.com",
+      }),
+    ).toThrow();
   });
 
   it("familiar_execute_js_file.path rejects relative paths", () => {
@@ -258,12 +281,32 @@ describe("TOOLS inputSchema validation", () => {
     ).toThrow();
   });
 
-  it("familiar_execute_js_file.path accepts absolute paths", () => {
+  it("familiar_execute_js_file.path rejects paths containing '..'", () => {
     expect(() =>
       schemaFor("familiar_execute_js_file").parse({
         windowId: "1",
         tabId: "2",
-        path: "/tmp/snippet.js",
+        path: "/tmp/../etc/passwd",
+      }),
+    ).toThrow();
+  });
+
+  it("familiar_execute_js_file.path rejects non-existent absolute paths", () => {
+    expect(() =>
+      schemaFor("familiar_execute_js_file").parse({
+        windowId: "1",
+        tabId: "2",
+        path: "/nonexistent/path/that/should/not/exist.js",
+      }),
+    ).toThrow();
+  });
+
+  it("familiar_execute_js_file.path accepts an existing absolute file path", () => {
+    expect(() =>
+      schemaFor("familiar_execute_js_file").parse({
+        windowId: "1",
+        tabId: "2",
+        path: EXISTING_ABSOLUTE_FILE,
       }),
     ).not.toThrow();
   });
