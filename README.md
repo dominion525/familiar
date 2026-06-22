@@ -60,8 +60,15 @@ others) picks it up automatically. The registry is at https://skills.sh.
 
 The `mcp/` directory contains an MCP server implementation (TypeScript) that
 exposes the same 32 actions to any MCP-compatible client (Claude Code, Claude
-Desktop, Cursor, Codex CLI, and others). See [mcp/README.md](mcp/README.md) for
-install and configuration.
+Desktop, Cursor, Codex CLI, and others).
+
+Quick install (Claude Code):
+
+```bash
+claude mcp add familiar -- npx familiar-mcp@latest
+```
+
+See [mcp/README.md](mcp/README.md) for full per-client install and configuration.
 
 ### Standalone (no install)
 

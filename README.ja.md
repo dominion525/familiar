@@ -60,7 +60,15 @@ npx skills add dominion525/familiar
 
 `mcp/` には MCP server 実装（TypeScript）があり、同じ 32 actions を MCP 対応
 クライアント（Claude Code / Claude Desktop / Cursor / Codex CLI ほか）から
-利用できます。インストールと設定は [mcp/README.md](mcp/README.md) を参照。
+利用できます。
+
+Claude Code でのクイックインストール:
+
+```bash
+claude mcp add familiar -- npx familiar-mcp@latest
+```
+
+クライアント別の詳細インストールと設定は [mcp/README.ja.md](mcp/README.ja.md) を参照。
 
 ### スタンドアロン（インストール不要）
 
