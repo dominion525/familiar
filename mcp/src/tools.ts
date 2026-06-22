@@ -207,10 +207,18 @@ export const TOOLS: ToolDef[] = [
   defineTool({
     name: "wait_for_selector",
     description:
-      'Block until a specific element appears (CSS selector polled up to maxSeconds). Use for SPA / lazy-loaded content where wait_for_load reports "complete" before the element exists. Takes a CSS selector ONLY (no text= / xpath= / label= prefixes). Returns "found" or "timeout".',
+      'Block until a specific element appears (CSS selector polled up to maxSeconds). Use for SPA / lazy-loaded content where wait_for_load reports "complete" before the element exists. Takes a CSS selector ONLY (no text= / xpath= / label= prefixes — those are rejected at the schema layer). For non-CSS conditions, use wait_for_function. Returns "found" or "timeout".',
     inputSchema: {
       ...TabRef,
-      selector: z.string().describe("CSS selector to wait for"),
+      selector: z
+        .string()
+        .refine(
+          (s) => !/^(text=|xpath=|label=)/.test(s),
+          "wait_for_selector takes a CSS selector only. For text= / xpath= / label= conditions, use wait_for_function.",
+        )
+        .describe(
+          "CSS selector to wait for (text= / xpath= / label= prefixes are rejected)",
+        ),
       maxSeconds: z
         .number()
         .int()

@@ -262,6 +262,32 @@ describe("TOOLS inputSchema validation", () => {
     ).not.toThrow();
   });
 
+  it.each([
+    "text=Submit",
+    "xpath=//button",
+    "label=Email",
+  ])("wait_for_selector.selector rejects non-CSS prefix %s", (selector) => {
+    expect(() =>
+      schemaFor("wait_for_selector").parse({
+        windowId: "1",
+        tabId: "2",
+        selector,
+        maxSeconds: 10,
+      }),
+    ).toThrow();
+  });
+
+  it("wait_for_selector.selector accepts a plain CSS selector", () => {
+    expect(() =>
+      schemaFor("wait_for_selector").parse({
+        windowId: "1",
+        tabId: "2",
+        selector: ".banner",
+        maxSeconds: 10,
+      }),
+    ).not.toThrow();
+  });
+
   it("wait_for_selector.maxSeconds caps at 300", () => {
     expect(() =>
       schemaFor("wait_for_selector").parse({
