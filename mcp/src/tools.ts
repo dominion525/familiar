@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { MAX_BUFFER } from "./applescript.js";
+
+const MAX_BUFFER_MIB = Math.round(MAX_BUFFER / (1024 * 1024));
 
 // `inputSchema` carries the raw Zod shape (key → ZodType). InputOf<TShape>
 // turns that shape into the validated input object type, so each tool's
@@ -214,11 +217,11 @@ export const TOOLS: ToolDef[] = [
       selector: z
         .string()
         .refine(
-          (s) => !/^(text=|xpath=|label=)/.test(s),
+          (s) => !/^(text=|xpath=|label=)/i.test(s),
           "familiar_wait_for_selector takes a CSS selector only. For text= / xpath= / label= conditions, use familiar_wait_for_function.",
         )
         .describe(
-          "CSS selector to wait for (text= / xpath= / label= prefixes are rejected)",
+          "CSS selector to wait for (text= / xpath= / label= prefixes are rejected, case-insensitive)",
         ),
       maxSeconds: z
         .number()
@@ -263,8 +266,7 @@ export const TOOLS: ToolDef[] = [
   // Control plane: content / scripting
   defineTool({
     name: "familiar_get_html",
-    description:
-      "Return the live DOM as document.documentElement.outerHTML. Use for whole-page extraction or when the structure matters; for a single element's text/attribute, familiar_get_text / familiar_get_attribute / familiar_query_all are much smaller. May return up to 10 MiB. Note: outerHTML does NOT include shadow trees — for shadow-DOM content use familiar_execute_js to traverse explicitly. For lazy-loaded content, familiar_wait_for_selector first.",
+    description: `Return the live DOM as document.documentElement.outerHTML. Use for whole-page extraction or when the structure matters; for a single element's text/attribute, familiar_get_text / familiar_get_attribute / familiar_query_all are much smaller. May return up to ${MAX_BUFFER_MIB} MiB. Note: outerHTML does NOT include shadow trees — for shadow-DOM content use familiar_execute_js to traverse explicitly. For lazy-loaded content, familiar_wait_for_selector first.`,
     inputSchema: TabRef,
     runArgs: (input) => [input.windowId, input.tabId],
   }),

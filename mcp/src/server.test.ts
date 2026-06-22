@@ -1,5 +1,6 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppleScriptError } from "./applescript.js";
+import { TOOLS } from "./tools.js";
 
 const { registerToolSpy, runActionMock } = vi.hoisted(() => ({
   registerToolSpy: vi.fn(),
@@ -23,7 +24,12 @@ vi.mock("./applescript.js", async () => {
   };
 });
 
-beforeAll(async () => {
+// createServer registers every TOOL via registerToolSpy, so the spy
+// accumulates calls across tests if not reset. beforeEach resets the spy
+// and re-registers, making each test self-contained (a future second
+// createServer in another test cannot leak count assertions either way).
+beforeEach(async () => {
+  registerToolSpy.mockReset();
   const { createServer } = await import("./server.js");
   createServer();
 });
@@ -40,8 +46,8 @@ function getToolCallback(name: string): ToolCallback {
 }
 
 describe("createServer (registerTool wiring)", () => {
-  it("registers all 32 tools via registerTool", () => {
-    expect(registerToolSpy).toHaveBeenCalledTimes(32);
+  it("registers every TOOL via registerTool", () => {
+    expect(registerToolSpy).toHaveBeenCalledTimes(TOOLS.length);
   });
 
   it("registers every tool with a description and Zod inputSchema", () => {

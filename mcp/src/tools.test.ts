@@ -272,7 +272,11 @@ describe("TOOLS inputSchema validation", () => {
     "text=Submit",
     "xpath=//button",
     "label=Email",
-  ])("familiar_wait_for_selector.selector rejects non-CSS prefix %s", (selector) => {
+    "TEXT=Submit",
+    "Xpath=//button",
+    "Label=Email",
+    "TeXt=Submit",
+  ])("familiar_wait_for_selector.selector rejects non-CSS prefix %s (case-insensitive)", (selector) => {
     expect(() =>
       schemaFor("familiar_wait_for_selector").parse({
         windowId: "1",

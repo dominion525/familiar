@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 const APPLESCRIPT_PATH = path.resolve(__dirname, "./familiar.applescript");
 
 export const DEFAULT_TIMEOUT_MS = 30_000;
-const MAX_BUFFER = 10 * 1024 * 1024;
+export const MAX_BUFFER = 10 * 1024 * 1024;
 
 export type RunActionOptions = {
   /**
