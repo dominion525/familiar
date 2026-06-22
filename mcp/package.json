@@ -1,5 +1,6 @@
 {
   "name": "@dominion525/familiar-mcp",
+  "mcpName": "io.github.dominion525/familiar-mcp",
   "version": "0.1.0",
   "description": "MCP server: drive the user's real macOS Chrome via AppleScript. 32 tools, sidesteps headless / bot detection by operating the actual signed-in browser.",
   "type": "module",
