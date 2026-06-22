@@ -6,6 +6,19 @@ This is the MCP-server variant of [familiar](https://github.com/dominion525/fami
 The Claude Code skill / plugin variant lives in the same repo under `skills/familiar/`,
 and both paths invoke the same `familiar.applescript`.
 
+## What it does
+
+A MCP-compatible client (Claude Code, Claude Desktop, Cursor, Codex CLI, etc.) gets 32 tools that drive the user's real Google Chrome on macOS via AppleScript (Apple Events):
+
+- **Tabs / windows** (7): `list_tabs`, `new_tab`, `new_incognito_tab`, `close_tab`, `active_tab`, `window_mode`, `is_loading`
+- **Navigation** (6): `navigate`, `get_tab_url`, `reload`, `go_back`, `go_forward`, `stop`
+- **Waiting** (3): `wait_for_load`, `wait_for_selector`, `wait_for_function`
+- **Content / scripting** (3): `get_html`, `execute_js`, `execute_js_file`
+- **Read** (5): `get_text`, `get_attribute`, `get_value`, `exists`, `query_all`
+- **Interaction** (8): `click`, `fill`, `clear`, `select_option`, `set_checked`, `press_key`, `submit`, `scroll_into_view`
+
+Because it drives the user's actual signed-in Chrome (not a fresh headless browser), pages behind bot / WAF defenses that block automated browsers generally treat it as a normal user. No DevTools Protocol, no Playwright, no separate driver.
+
 ## Prerequisites
 
 - macOS with Google Chrome
@@ -15,7 +28,13 @@ and both paths invoke the same `familiar.applescript`.
 
 ## Install
 
-### From source (current)
+### Via npx (recommended)
+
+```
+npx @dominion525/familiar-mcp@latest
+```
+
+### From source
 
 ```
 git clone https://github.com/dominion525/familiar
@@ -25,12 +44,6 @@ npm run build
 ```
 
 The server entry point is `mcp/dist/index.js`.
-
-### Via npx (after npm publish)
-
-```
-npx @dominion525/familiar-mcp@latest
-```
 
 ## Configure your MCP client
 

@@ -1,14 +1,15 @@
 {
   "name": "@dominion525/familiar-mcp",
   "version": "0.1.0",
-  "description": "MCP server for familiar — control the user's real macOS Chrome via AppleScript.",
+  "description": "MCP server: drive the user's real macOS Chrome via AppleScript. 32 tools, sidesteps headless / bot detection by operating the actual signed-in browser.",
   "type": "module",
   "bin": {
     "familiar-mcp": "dist/index.js"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "README.ja.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && cp ../skills/familiar/familiar.applescript dist/familiar.applescript",
@@ -54,10 +55,15 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "model-context-protocol",
     "chrome",
     "applescript",
+    "apple-events",
     "macos",
-    "browser-automation"
+    "browser-automation",
+    "claude-code",
+    "headless-alternative",
+    "bot-detection"
   ]
 }
