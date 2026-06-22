@@ -36,6 +36,7 @@ even on pages with bot / WAF defenses that block headless / automated browsers.
   permission prompt on first run.
 - Invocation form: `osascript skills/familiar/familiar.applescript ACTION [ARGS...]`.
 - For the MCP server (`mcp/`), install the pre-commit hooks once after cloning: `npx lefthook install` at the repo root (after `cd mcp && npm install`). The hooks run Biome, tsc, and Vitest in parallel on staged changes under `mcp/`.
+- Smoke-testing tip: pages served via `data:` URLs do NOT execute inline `<script>` blocks or inline event handler attributes (`onclick="..."`) under Chrome's data-URL security restrictions. When verifying actions like `click` or `set_checked` against a data URL, assert against the DOM state the action itself writes (e.g. `document.getElementById('check-1').checked`) rather than against side effects of inline JS that will not run. Serve from a local file (`file://`) or a local http server when inline script execution is required.
 
 ## Conventions
 
