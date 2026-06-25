@@ -3,13 +3,14 @@
   "manifest_version": "0.3",
   "name": "familiar-mcp",
   "display_name": "familiar — real macOS Chrome via AppleScript",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MCP server that drives the user's real macOS Chrome via AppleScript. 32 tools.",
   "author": {
     "name": "dominion525",
     "url": "https://github.com/dominion525"
   },
   "license": "MIT",
+  "tools": [],
   "homepage": "https://github.com/dominion525/familiar",
   "repository": {
     "type": "git",
