@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>familiar — いつもの Chrome を、あなたの使い魔に。</title>
+    <meta
+      name="description"
+      content="familiar は、macOS で普段使っている Google Chrome を AppleScript 経由で AI エージェントに操作させるツールです。DevTools Protocol も Playwright も使いません。Claude Code プラグインと MCP サーバーで提供しています。"
+    />
+    <link rel="canonical" href="https://familiar.dominion525.com/ja/" />
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://familiar.dominion525.com/"
+    />
+    <link
+      rel="alternate"
+      hreflang="ja"
+      href="https://familiar.dominion525.com/ja/"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="https://familiar.dominion525.com/"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="familiar — いつもの Chrome を、あなたの使い魔に。"
+    />
+    <meta
+      property="og:description"
+      content="普段サインインしている本物の Chrome を、AI エージェントが AppleScript で操作する。"
+    />
+    <meta property="og:url" content="https://familiar.dominion525.com/ja/" />
+    <meta
+      property="og:image"
+      content="https://familiar.dominion525.com/assets/img/ogp.png"
+    />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/main.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へ移動</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/ja/" aria-label="familiar ホーム">
+          <img src="/assets/img/logo.svg" width="28" height="28" alt="" />
+          <span>familiar</span>
+        </a>
+        <nav class="site-nav" aria-label="ページ内">
+          <a href="#usecases">使う場面</a>
+          <a href="#different">違い</a>
+          <a href="#install">インストール</a>
+          <a href="#setup">初回の設定</a>
+          <a href="#permissions">権限とデータ</a>
+          <a href="#details">詳しく</a>
+        </nav>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="言語">
+            <a href="/" hreflang="en" lang="en">EN</a>
+            <a href="/ja/" hreflang="ja" aria-current="true">JA</a>
+          </div>
+          <a
+            class="github-link"
+            href="https://github.com/dominion525/familiar"
+            aria-label="GitHub リポジトリ"
+          >
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- 1. ヒーロー -->
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <ul class="badges" aria-label="対応環境">
+              <li class="badge badge-accent">Claude Code プラグイン</li>
+              <li class="badge">MCP サーバー</li>
+              <li class="badge">macOS + Chrome</li>
+              <li class="badge">MIT</li>
+            </ul>
+            <h1 class="hero-title">
+              <span class="line"
+                >いつもの <span class="nw">Chrome を、</span></span
+              >
+              <span class="line">あなたの<em>使い魔</em>に。</span>
+            </h1>
+            <p class="hero-lead">
+              AI エージェントが、ログイン済みの Chrome
+              でページを読み、クリックし、フォームを送信。macOS の Apple
+              Events（アプリどうしの命令の仕組み）で、いつものブラウザを操作します。DevTools
+              Protocol も Playwright も、別のドライバも使いません。
+            </p>
+            <div class="hero-install">
+              <div class="code-line code-line-multi">
+                <span class="prompt" aria-hidden="true"
+                  ><span>&gt;</span><span>&gt;</span></span
+                >
+                <code
+                  ><span>/plugin marketplace add dominion525/familiar</span
+                  ><span>/plugin install familiar@familiar</span></code
+                >
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="/plugin marketplace add dominion525/familiar&#10;/plugin install familiar@familiar"
+                  aria-label="コマンドをコピー"
+                >
+                  コピー
+                </button>
+              </div>
+              <p class="hero-install-note">
+                Claude Code でこの 2 行を実行。Cursor や Codex CLI などからは
+                <a href="#install" data-select-tab="tab-mcp">MCP サーバー</a
+                >として使えます。
+              </p>
+            </div>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#install">使い始める</a>
+              <a
+                class="btn btn-ghost"
+                href="https://github.com/dominion525/familiar"
+                >GitHub で見る</a
+              >
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <figure
+              class="demo"
+              data-demo
+              aria-label="動作イメージ：「この不具合を、開いている課題管理に登録して」と頼むと、AI エージェントが familiar でログイン済みのタブのフォームに入力し、ユーザーが別のタブに切り替えた後も元のタブで送信まで続ける様子"
+            >
+              <div class="demo-request" aria-hidden="true">
+                <span class="demo-request-who">あなた</span>
+                <p>この不具合を、開いている課題管理に登録して</p>
+              </div>
+              <div class="browser" aria-hidden="true">
+                <div class="browser-tabs">
+                  <span class="browser-dots"><i></i><i></i><i></i></span>
+                  <span class="browser-tab is-active" data-tab="a">
+                    <img
+                      class="tab-eye"
+                      src="/assets/img/eye.svg"
+                      width="22"
+                      height="11"
+                      alt=""
+                    />課題 — Acme Tracker
+                  </span>
+                  <span class="browser-tab" data-tab="b"
+                    >受信トレイ — Mail</span
+                  >
+                </div>
+                <div class="browser-url">
+                  <span class="url-lock"></span
+                  ><span class="url-text" data-url
+                    >tracker.acme.example/issues/new</span
+                  >
+                  <span class="url-target">window 12 / tab 47</span>
+                </div>
+                <div class="browser-page">
+                  <div class="page page-a is-shown" data-page="a">
+                    <div class="page-head">
+                      <span class="page-avatar">S</span>
+                      <span>新しい課題</span>
+                    </div>
+                    <div class="form-field" data-field="title">
+                      <span class="field-label">タイトル</span>
+                      <span class="field-input"
+                        ><span data-type="title"
+                          >ログイン後にダッシュボードが空になる</span
+                        ></span
+                      >
+                    </div>
+                    <div class="form-field" data-field="body">
+                      <span class="field-label">内容</span>
+                      <span class="field-input field-textarea"
+                        ><span data-type="body"
+                          >ログインしてダッシュボードを開くと再現。リロードすると表示される。</span
+                        ></span
+                      >
+                    </div>
+                    <span class="form-submit" data-submit>作成</span>
+                    <div class="toast is-shown" data-toast>
+                      課題 #128 を作成しました
+                    </div>
+                  </div>
+                  <div class="page page-b" data-page="b">
+                    <div class="mail-row">
+                      <b>チーム</b><span>来週の定例について</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>請求</b><span>9 月分の請求書</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>GitHub</b><span>PR がマージされました</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>カレンダー</b><span>明日 10:00 デザインレビュー</span>
+                    </div>
+                    <p class="page-b-note">ユーザーは別のタブで作業中</p>
+                  </div>
+                </div>
+              </div>
+              <p class="demo-narration" data-narration aria-hidden="true">
+                元のタブで登録完了
+              </p>
+              <ol class="demo-log" data-log aria-hidden="true">
+                <li class="is-done" data-step="1">
+                  <span class="log-tool">familiar_list_tabs</span
+                  ><span class="log-out"
+                    >→ window 12 / tab 47「課題 — Acme Tracker」</span
+                  >
+                </li>
+                <li class="is-done" data-step="2">
+                  <span class="log-tool">familiar_fill</span
+                  ><span class="log-arg">12 47 "#title"</span
+                  ><span class="log-out">→ true</span>
+                </li>
+                <li class="is-done" data-step="3">
+                  <span class="log-tool">familiar_fill</span
+                  ><span class="log-arg">12 47 "#body"</span
+                  ><span class="log-out">→ true</span>
+                </li>
+                <li class="is-done" data-step="4">
+                  <span class="log-tool">familiar_submit</span
+                  ><span class="log-arg">12 47 "form"</span
+                  ><span class="log-out">→ { ok: true }</span>
+                </li>
+                <li class="is-done" data-step="5">
+                  <span class="log-tool">familiar_get_text</span
+                  ><span class="log-arg">12 47 ".toast"</span
+                  ><span class="log-out">→ "課題 #128 を作成しました"</span>
+                </li>
+              </ol>
+              <figcaption class="demo-caption">
+                <span>動作イメージ</span>
+                <button type="button" class="demo-replay" data-replay>
+                  もう一度再生
+                </button>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 使う場面 -->
+      <section id="usecases" class="section section-alt">
+        <div class="container usecases-inner">
+          <div class="usecases-head">
+            <p class="eyebrow">Use cases</p>
+            <h2 class="section-title">ログインしたまま、<br />任せられる。</h2>
+          </div>
+          <div class="feature-grid usecase-list">
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />01
+              </p>
+              <h3>管理画面から読む</h3>
+              <p>
+                ログインが必要な管理画面やダッシュボードを開いたまま、表の数字や一覧を拾って、まとめてもらう。
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />02
+              </p>
+              <h3>フォームに入力する</h3>
+              <p>
+                課題管理や申請フォームに内容を入力して、送信まで任せる。ログインし直す必要はありません。
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />03
+              </p>
+              <h3>作業を続けながら任せる</h3>
+              <p>
+                操作するタブは windowId + tabId
+                で決まるので、その間あなたは別のタブで作業を続けられます。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 何が違うのか -->
+      <section id="different" class="section">
+        <div class="container">
+          <p class="eyebrow">What's different</p>
+          <h2 class="section-title">
+            新しいブラウザは起動しない。<br />いつもの Chrome が動く。
+          </h2>
+          <div class="feature-grid point-list">
+            <article class="feature-card">
+              <p class="feature-index">01</p>
+              <h3>本物の Chrome</h3>
+              <p>
+                ユーザー本人がサインインしている Chrome を Apple Events
+                経由で動かします。ページから見えるのは通常の Chrome
+                セッションそのままで、WebDriver や DevTools
+                の制御経路は追加されません。
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">02</p>
+              <h3>ドライバ不要</h3>
+              <p>
+                DevTools Protocol も Playwright
+                も、別のドライバも使いません。macOS に最初からある AppleScript
+                だけで Chrome と話します。
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">03</p>
+              <h3>タブ単位で狙う</h3>
+              <p>
+                すべての操作は windowId + tabId
+                で特定のタブを対象にします。アクティブタブには依存しないので、ユーザーが別のタブで作業していても干渉しません。
+              </p>
+            </article>
+          </div>
+
+          <div class="compare">
+            <h3 class="compare-title">ほかのツールとの比較</h3>
+            <p class="compare-lead">
+              どれも AI
+              エージェントにブラウザを操作させるツールで、今はほかのツールも設定しだいで普段のブラウザにつなげられます。いちばんの違いは、ブラウザへのつなぎ方です。familiar
+              は Chrome の起動方法に手を加えず、Apple Events
+              で命令を送るだけです。
+            </p>
+            <div class="compare-scroll">
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span class="visually-hidden">項目</span>
+                    </th>
+                    <th scope="col" class="is-self">
+                      <img
+                        class="mini-eye"
+                        src="/assets/img/eye.svg"
+                        width="16"
+                        height="8"
+                        alt=""
+                      />familiar
+                    </th>
+                    <th scope="col">
+                      <a
+                        href="https://github.com/ChromeDevTools/chrome-devtools-mcp"
+                        >Chrome DevTools MCP</a
+                      >
+                    </th>
+                    <th scope="col">
+                      <a href="https://github.com/microsoft/playwright-mcp"
+                        >Playwright MCP</a
+                      >
+                    </th>
+                    <th scope="col">
+                      <a href="https://github.com/achiya-automation/safari-mcp"
+                        >safari-mcp</a
+                      >
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">操作経路</th>
+                    <td class="is-self">Apple Events</td>
+                    <td>DevTools Protocol</td>
+                    <td>Playwright</td>
+                    <td>Apple Events</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">既定で操作するブラウザ</th>
+                    <td class="is-self">普段の Chrome</td>
+                    <td>新しく起動した Chrome</td>
+                    <td>新しく起動した Chromium / Firefox / WebKit</td>
+                    <td>普段の Safari</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      既定の起動での<br /><code>navigator.webdriver</code>
+                    </th>
+                    <td class="is-self"><code>false</code></td>
+                    <td><code>true</code></td>
+                    <td><code>false</code></td>
+                    <td><code>false</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">普段のブラウザにつなぐには</th>
+                    <td class="is-self">設定不要（既定）</td>
+                    <td><code>--autoConnect</code></td>
+                    <td>拡張機能</td>
+                    <td>設定不要（既定）</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">普段のブラウザへの接続の許可</th>
+                    <td class="is-self">初回だけ</td>
+                    <td>接続のたび</td>
+                    <td>接続のたび（省略可）</td>
+                    <td>初回だけ</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">対応 OS</th>
+                    <td class="is-self">macOS</td>
+                    <td>macOS / Windows / Linux</td>
+                    <td>macOS / Windows / Linux</td>
+                    <td>macOS</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="compare-note">
+              2026 年 10 月時点。<code>navigator.webdriver</code> の Playwright
+              MCP は Chromium の場合（MCP が
+              <code>--disable-blink-features=AutomationControlled</code>
+              を付けて起動）、safari-mcp は同 README
+              の記載による。普段のブラウザにつないだ場合は、ブラウザの起動方法が変わらないので
+              <code>false</code> のまま（DevTools Protocol で接続しただけでは
+              <code>true</code> にならないことを Chrome 154 で確認）。
+            </p>
+
+            <div class="webdriver-note">
+              <h4><code>navigator.webdriver</code> とは</h4>
+              <p>
+                ブラウザが自動操作されているかをページに知らせる値で、Chrome を
+                <code>--enable-automation</code> などで起動すると
+                <code>true</code> になります。familiar は普段の Chrome
+                に命令を送るだけなので <code>false</code>
+                のままです。ただし、検出されないことの保証ではなく、サイト側のアクセス制御はそのまま効きます。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. インストール -->
+      <section id="install" class="section section-alt">
+        <div class="container">
+          <p class="eyebrow">Install</p>
+          <h2 class="section-title">使い魔と、契約を結ぶ。</h2>
+
+          <div class="tabs" data-tabs>
+            <div class="tab-list" role="tablist" aria-label="インストール方法">
+              <button
+                class="tab"
+                role="tab"
+                id="tab-plugin"
+                aria-controls="panel-plugin"
+                aria-selected="true"
+              >
+                Claude Code プラグイン
+              </button>
+              <button
+                class="tab"
+                role="tab"
+                id="tab-mcp"
+                aria-controls="panel-mcp"
+                aria-selected="false"
+              >
+                MCP サーバー
+              </button>
+            </div>
+
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-plugin"
+              aria-labelledby="tab-plugin"
+            >
+              <h3 class="panel-title">Claude Code プラグイン</h3>
+              <p>Claude Code で次の 2 行を実行します。</p>
+              <div class="code-block">
+                <pre><code>/plugin marketplace add dominion525/familiar
+/plugin install familiar@familiar</code></pre>
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="/plugin marketplace add dominion525/familiar&#10;/plugin install familiar@familiar"
+                  aria-label="コマンドをコピー"
+                >
+                  コピー
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-mcp"
+              aria-labelledby="tab-mcp"
+            >
+              <h3 class="panel-title">MCP サーバー</h3>
+              <p>
+                同じ 32 の操作を、MCP 対応クライアント（Claude Code / Claude
+                Desktop / Cursor / Codex CLI ほか）から使えます。npm パッケージ
+                <code>@dominion525/familiar-mcp</code> を
+                <code>npx</code> で起動します。Node.js 20 以上が必要です。
+              </p>
+              <div class="client-list">
+                <details open>
+                  <summary>Claude Code</summary>
+                  <div class="code-block">
+                    <pre><code>claude mcp add familiar -- npx @dominion525/familiar-mcp@latest</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy="claude mcp add familiar -- npx @dominion525/familiar-mcp@latest"
+                      aria-label="コマンドをコピー"
+                    >
+                      コピー
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Claude Desktop</summary>
+                  <p>
+                    <code
+                      >~/Library/Application
+                      Support/Claude/claude_desktop_config.json</code
+                    >
+                    を編集します。
+                  </p>
+                  <div class="code-block">
+                    <pre><code>{
+  "mcpServers": {
+    "familiar": {
+      "command": "npx",
+      "args": ["@dominion525/familiar-mcp@latest"]
+    }
+  }
+}</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="設定をコピー"
+                    >
+                      コピー
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Cursor</summary>
+                  <p><code>~/.cursor/mcp.json</code> を編集します。</p>
+                  <div class="code-block">
+                    <pre><code>{
+  "mcpServers": {
+    "familiar": {
+      "command": "npx",
+      "args": ["@dominion525/familiar-mcp@latest"]
+    }
+  }
+}</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="設定をコピー"
+                    >
+                      コピー
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Codex CLI</summary>
+                  <p><code>~/.codex/config.toml</code> を編集します。</p>
+                  <div class="code-block">
+                    <pre><code>[mcp_servers.familiar]
+command = "npx"
+args = ["@dominion525/familiar-mcp@latest"]</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="設定をコピー"
+                    >
+                      コピー
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>そのほかの MCP クライアント</summary>
+                  <p>
+                    Cline / Windsurf / Antigravity、VS Code 拡張（GitHub Copilot
+                    Chat / Continue など）は、Claude Desktop / Cursor と同じ
+                    JSON
+                    形式で接続します。設定ファイルの場所は各クライアントのドキュメントを参照してください。
+                  </p>
+                </details>
+              </div>
+            </div>
+          </div>
+
+          <p class="install-check">
+            <span class="install-check-label">動作確認</span>
+            <a href="#setup">初回の設定</a
+            >を済ませたら、エージェントに「開いているタブのタイトルを一覧にして」と頼んでみてください。タブの一覧が返ってくれば、つながっています。
+          </p>
+
+          <details class="other-methods">
+            <summary>その他の方法</summary>
+            <div class="other-grid">
+              <div>
+                <h4>Vercel Skills（agent-skills）</h4>
+                <div class="code-block">
+                  <pre><code>npx skills add dominion525/familiar</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="npx skills add dominion525/familiar"
+                    aria-label="コマンドをコピー"
+                  >
+                    コピー
+                  </button>
+                </div>
+                <p>
+                  スキルが
+                  <code>~/.agents/skills/familiar/</code>
+                  に展開され、agent-skills spec
+                  に準拠したクライアントが自動で読み込みます。
+                </p>
+              </div>
+              <div>
+                <h4>スタンドアロン（インストール不要）</h4>
+                <div class="code-block">
+                  <pre><code>osascript skills/familiar/familiar.applescript list_tabs</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="osascript skills/familiar/familiar.applescript list_tabs"
+                    aria-label="コマンドをコピー"
+                  >
+                    コピー
+                  </button>
+                </div>
+                <p>
+                  リポジトリを clone すれば、スクリプト単体でも実行できます。
+                </p>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- 5. 初回の設定 -->
+      <section id="setup" class="section">
+        <div class="container">
+          <p class="eyebrow">First-run setup</p>
+          <h2 class="section-title">最初に一度だけ、<br />2 つの許可を。</h2>
+          <p class="section-lead">
+            familiar が Chrome と話せるようにするには、Chrome の設定と macOS
+            の権限が必要です。どちらも最初の一度だけです。
+          </p>
+
+          <ol class="steps">
+            <li class="step">
+              <div class="step-head">
+                <span class="step-num">1</span>
+                <h3>
+                  Chrome で「Apple Event からの JavaScript
+                  の使用を許可」を有効にする
+                </h3>
+              </div>
+              <div class="step-body">
+                <div class="step-text">
+                  <p>Chrome のメニューから、次の項目にチェックを入れます。</p>
+                  <p class="menu-path">
+                    <span>表示</span><span>開発 / 管理</span
+                    ><span>Apple Event からの JavaScript の使用を許可</span>
+                  </p>
+                  <p>
+                    この設定は、ページの中で JavaScript を動かす操作（読み取り /
+                    操作 / コンテンツ / JS 条件の待機）に必要です。タブ /
+                    ウィンドウ / ナビゲーション / 履歴 / 読み込み状態の操作は
+                    AppleScript だけで動くので、この設定がなくても使えます。
+                  </p>
+                </div>
+                <figure class="placeholder-figure">
+                  <img
+                    src="/assets/img/setup-chrome-menu.svg"
+                    width="800"
+                    height="500"
+                    alt="Chrome の［表示］→［開発 / 管理］メニューで「Apple Event からの JavaScript の使用を許可」を選んでいる画面（ダミー画像）"
+                    loading="lazy"
+                  />
+                </figure>
+              </div>
+            </li>
+
+            <li class="step">
+              <div class="step-head">
+                <span class="step-num">2</span>
+                <h3>オートメーションの許可を承認する</h3>
+              </div>
+              <div class="step-body">
+                <div class="step-text">
+                  <p>
+                    familiar が初めて Chrome に話しかけるとき、macOS
+                    が確認ダイアログを出します。「OK」で承認してください。
+                  </p>
+                  <p class="callout">
+                    <strong>許可の対象は familiar ではありません。</strong>macOS
+                    はオートメーションの権限を親プロセスに付与します。承認する相手は、MCP
+                    クライアントや Claude Code
+                    を実際に動かしているアプリ（ターミナル / VS Code / Cursor /
+                    Claude Desktop など）です。サインイン済みの Chrome
+                    を操作する権限を渡すことになるので、信頼できるアプリにだけ承認してください。
+                  </p>
+                  <p>あとから確認・変更する場所:</p>
+                  <p class="menu-path">
+                    <span>システム設定</span
+                    ><span>プライバシーとセキュリティ</span
+                    ><span>オートメーション</span><span>（起動元のアプリ）</span
+                    ><span>Google Chrome</span>
+                  </p>
+                </div>
+                <div class="figure-stack">
+                  <figure class="placeholder-figure">
+                    <img
+                      src="/assets/img/setup-automation-dialog.svg"
+                      width="800"
+                      height="500"
+                      alt="「”ターミナル”から”Google Chrome”を制御しようとしています」という macOS の確認ダイアログ（ダミー画像）"
+                      loading="lazy"
+                    />
+                  </figure>
+                  <figure class="placeholder-figure">
+                    <img
+                      src="/assets/img/setup-automation-settings.svg"
+                      width="800"
+                      height="500"
+                      alt="システム設定のプライバシーとセキュリティ → オートメーション画面（ダミー画像）"
+                      loading="lazy"
+                    />
+                  </figure>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="trouble">
+            <h3 class="trouble-title">うまくいかないとき</h3>
+            <div class="trouble-grid">
+              <article class="trouble-card">
+                <p class="trouble-error">
+                  <code>... JavaScript is turned off</code>
+                </p>
+                <p>
+                  Chrome の「Apple Event からの JavaScript
+                  の使用を許可」が無効です。手順 1 の設定を有効にしてください。
+                </p>
+              </article>
+              <article class="trouble-card">
+                <p class="trouble-error">
+                  <code
+                    >Not authorized to send Apple events to "Google
+                    Chrome"</code
+                  >
+                </p>
+                <p>
+                  オートメーションの権限がありません。システム設定 →
+                  プライバシーとセキュリティ →
+                  オートメーションで、起動元のアプリ（ターミナル / VS Code /
+                  Cursor など）に Google Chrome への権限を付与してください。
+                </p>
+              </article>
+              <article class="trouble-card trouble-card-wide">
+                <p class="trouble-symptom">確認ダイアログが出ない</p>
+                <p>
+                  MCP
+                  サーバーを起動するのと同じターミナルから、次のコマンドを一度実行します。開いている
+                  Chrome
+                  のウィンドウがあってもなくても、いまの親プロセスに対して確認ダイアログが出ます。承認すれば、以降は再確認なしで動きます。
+                </p>
+                <div class="code-block">
+                  <pre><code>osascript -e 'tell application "Google Chrome" to get version'</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="osascript -e 'tell application &quot;Google Chrome&quot; to get version'"
+                    aria-label="コマンドをコピー"
+                  >
+                    コピー
+                  </button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. 権限とデータ -->
+      <section id="permissions" class="section">
+        <div class="container">
+          <p class="eyebrow">Permissions &amp; data</p>
+          <h2 class="section-title">使い魔に、<br />何を預けるか。</h2>
+          <p class="section-lead">
+            familiar
+            につないだクライアントには、ログイン済みのブラウザをそのまま預けることになります。
+          </p>
+
+          <div class="resp-grid">
+            <article class="resp-card resp-card-strong">
+              <h3>引き受けるリスク</h3>
+              <p>
+                <code>execute_js</code> と
+                <code>execute_js_file</code> は、ページの中で任意の JavaScript
+                を実行します。これらの tool を与えられた MCP
+                クライアントは、次のことができます。
+              </p>
+              <ul>
+                <li>
+                  サインイン済みのあらゆるページの DOM と、JavaScript から読める
+                  Cookie を読む
+                </li>
+                <li>
+                  あなたの代わりにフォームを送信し、ページを移動し、fetch / XHR
+                  を発火する
+                </li>
+                <li>セッションの状態を操作する</li>
+              </ul>
+              <p>
+                HttpOnly の Cookie の値はページの JavaScript
+                からは読めません。ただし、その Cookie
+                で成り立っているログイン済みのセッションのまま、操作はできます。
+              </p>
+              <p>
+                windowId + tabId
+                は操作するタブを指定するための仕組みです。そのタブにしか触れられないという制限ではありません。
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>familiar 自体は手元で動く</h3>
+              <p>
+                サーバーはローカルで動き、MCP クライアントとは stdio
+                だけで通信します。自分から外部に接続することはなく、テレメトリやアナリティクスもありません。
+              </p>
+              <p>
+                ただし、familiar が取得したページの内容や操作結果は MCP
+                クライアントに渡り、クライアントの構成によってはモデル提供元へ送られます。
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>検出回避の道具ではない</h3>
+              <p>
+                ページから見えるのは通常の Chrome
+                セッションですが、サイト側のアクセス制御はそのまま効きます。特定のサイトへのアクセスを保証するものではありません。
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>中身は読める</h3>
+              <p>
+                オープンソース・MIT ライセンスです。Chrome
+                に何を送っているかは、<a
+                  href="https://github.com/dominion525/familiar/blob/main/skills/familiar/familiar.applescript"
+                  ><code>familiar.applescript</code></a
+                >
+                を読めば確かめられます。
+              </p>
+            </article>
+          </div>
+          <p class="resp-final">
+            AI
+            に任せた操作は、あなたのアカウントで実行されます。何をどこまで任せるかは、あなたの判断です。
+          </p>
+        </div>
+      </section>
+
+      <!-- 7. 詳しく知る -->
+      <section id="details" class="section section-alt">
+        <div class="container">
+          <p class="eyebrow">Details</p>
+          <h2 class="section-title">詳しく知る</h2>
+
+          <details class="detail-block" id="capabilities">
+            <summary>
+              <span class="detail-title">できること</span>
+              <span class="detail-sub">32 の操作と、4 形式のセレクタ</span>
+            </summary>
+            <div class="detail-body">
+              <div class="cap-grid">
+                <article class="cap-card">
+                  <header>
+                    <h3>タブ / ウィンドウ</h3>
+                    <span class="cap-count">7</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>list_tabs</li>
+                    <li>new_tab</li>
+                    <li>new_incognito_tab</li>
+                    <li>close_tab</li>
+                    <li>active_tab</li>
+                    <li>window_mode</li>
+                    <li>is_loading</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>ナビゲーション</h3>
+                    <span class="cap-count">6</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>navigate</li>
+                    <li>get_tab_url</li>
+                    <li>reload</li>
+                    <li>go_back</li>
+                    <li>go_forward</li>
+                    <li>stop</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>待機</h3>
+                    <span class="cap-count">3</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>wait_for_load</li>
+                    <li>wait_for_selector</li>
+                    <li>wait_for_function</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>コンテンツ / スクリプト</h3>
+                    <span class="cap-count">3</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>get_html</li>
+                    <li>execute_js</li>
+                    <li>execute_js_file</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>読み取り</h3>
+                    <span class="cap-count">5</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>get_text</li>
+                    <li>get_attribute</li>
+                    <li>get_value</li>
+                    <li>exists</li>
+                    <li>query_all</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>操作</h3>
+                    <span class="cap-count">8</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>click</li>
+                    <li>fill</li>
+                    <li>clear</li>
+                    <li>select_option</li>
+                    <li>set_checked</li>
+                    <li>press_key</li>
+                    <li>submit</li>
+                    <li>scroll_into_view</li>
+                  </ul>
+                </article>
+              </div>
+              <div class="selectors">
+                <p class="selectors-label">セレクタは 4 形式に対応</p>
+                <ul class="selector-list">
+                  <li><code>button.primary</code><span>CSS（既定）</span></li>
+                  <li><code>text=ログイン</code><span>表示テキスト</span></li>
+                  <li><code>xpath=//form//input</code><span>XPath</span></li>
+                  <li><code>label=メールアドレス</code><span>ラベル</span></li>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details class="detail-block" id="how">
+            <summary>
+              <span class="detail-title">しくみ</span>
+              <span class="detail-sub">命令は、Apple Events で届く</span>
+            </summary>
+            <div class="detail-body how-inner">
+              <div class="how-copy">
+                <p>
+                  Apple Events は、macOS
+                  に組み込まれている、アプリどうしが命令をやり取りする仕組みです。familiar
+                  は AppleScript でこの仕組みを使い、Chrome
+                  に「タブを開く」「このタブで JavaScript
+                  を実行する」といった命令を送ります。
+                </p>
+                <p>
+                  MCP クライアントからの呼び出しは、familiar-mcp を経由して
+                  <code>osascript</code> に渡り、AppleScript が Chrome
+                  に命令します。
+                </p>
+                <p>
+                  Claude Code skill と MCP サーバーは、同じ 1 つの
+                  <code>familiar.applescript</code>
+                  で動いています。どちらの経路でも挙動は同じです。
+                </p>
+              </div>
+              <ol class="flow" aria-label="処理の流れ">
+                <li class="flow-node">
+                  <span class="flow-label">MCP クライアント</span
+                  ><span class="flow-sub">Claude Code / Cursor / …</span>
+                </li>
+                <li class="flow-edge">stdio（JSON-RPC）</li>
+                <li class="flow-node">
+                  <span class="flow-label">familiar-mcp</span
+                  ><span class="flow-sub">Node.js</span>
+                </li>
+                <li class="flow-edge">
+                  osascript familiar.applescript ACTION …
+                </li>
+                <li class="flow-node flow-node-accent">
+                  <span class="flow-label">AppleScript</span
+                  ><span class="flow-sub">Apple Events</span>
+                </li>
+                <li class="flow-edge">tell application "Google Chrome"</li>
+                <li class="flow-node">
+                  <span class="flow-label">Google Chrome</span
+                  ><span class="flow-sub"
+                    >本人がサインイン済みの実ブラウザ</span
+                  >
+                </li>
+                <li class="flow-edge"></li>
+                <li class="flow-node">
+                  <span class="flow-label">ページの DOM</span>
+                </li>
+              </ol>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- 8. 読み終えた人を導入へ戻す -->
+      <section class="section closing">
+        <div class="container closing-inner">
+          <p class="eyebrow">Get started</p>
+          <h2 class="section-title">使い魔を、呼び出しましょう。</h2>
+          <div class="hero-cta closing-cta">
+            <a class="btn btn-primary" href="#install">使い始める</a>
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/dominion525/familiar"
+              >GitHub で見る</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-author">
+          <a
+            class="footer-author-name"
+            href="https://dominion525.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="/assets/img/avatar.png"
+              width="32"
+              height="32"
+              alt="Dominion525"
+            />
+            <span>Dominion525</span>
+          </a>
+          <div class="footer-social">
+            <a
+              href="https://x.com/dominion525"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Twitter プロフィール"
+              ><img
+                src="/assets/img/icon-twitter.svg"
+                width="20"
+                height="20"
+                alt=""
+            /></a>
+            <a
+              href="https://github.com/dominion525"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub プロフィール"
+              ><img
+                src="/assets/img/icon-github.svg"
+                width="20"
+                height="20"
+                alt=""
+            /></a>
+          </div>
+        </div>
+        <nav class="footer-links" aria-label="familiar のリンク">
+          <a href="https://github.com/dominion525/familiar"
+            >familiar on GitHub</a
+          >
+          <a href="https://www.npmjs.com/package/@dominion525/familiar-mcp"
+            >npm</a
+          >
+          <a href="https://github.com/dominion525/familiar/blob/main/LICENSE"
+            >MIT License</a
+          >
+        </nav>
+        <p class="footer-meta">© 2026 Dominion525</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#ffffff" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="#0b0b0e"/>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <rect x="12" y="12" width="776" height="476" rx="10" fill="none" stroke="#ffb547" stroke-opacity=".35" stroke-dasharray="6 6"/>
+  <text x="400" y="222" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="15" fill="#ffb547" letter-spacing="3">DUMMY · CAPTURE</text>
+  <text x="400" y="262" text-anchor="middle" font-family="Hiragino Sans, system-ui, sans-serif" font-size="22" fill="#ededef">Chrome：表示 → 開発 / 管理 メニュー</text>
+  <text x="400" y="296" text-anchor="middle" font-family="Hiragino Sans, system-ui, sans-serif" font-size="14" fill="#6b6b74">「Apple Event からの JavaScript の使用を許可」を選んでいる状態</text>
+</svg>
