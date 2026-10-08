@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="176 0 700 546" font-family="-apple-system, 'Hiragino Sans', system-ui, sans-serif" font-size="13">
+  <title>Chrome の［表示］→［開発 / 管理］→「Apple Events からの JavaScript を許可」</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1b26"/>
+      <stop offset=".55" stop-color="#121118"/>
+      <stop offset="1" stop-color="#241a10"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+
+  <!-- デスクトップ -->
+  <rect width="880" height="560" fill="url(#wall)"/>
+
+  <!-- メニューバー -->
+  <rect width="880" height="30" fill="#2a2a2e" fill-opacity=".92"/>
+  <path d="M24.6 9.2c.7-.9 1.2-2 1.1-3.2-1 .1-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5Zm1 1.7c-1.7-.1-3.1.9-3.9.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8 2.2-1.2 3-2.4c.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-4 0-2.5 2-3.7 2.1-3.8-1.2-1.7-2.9-1.9-3.5-1.9Z" fill="#f2f2f7" transform="translate(-2 1) scale(.9)"/>
+  <g font-size="14" fill="#f2f2f7">
+    <text x="44" y="20" font-weight="700">Chrome</text>
+    <text x="114" y="20">ファイル</text>
+    <text x="186" y="20">編集</text>
+    <rect x="222" y="4" width="44" height="22" rx="5" fill="#ffffff" fill-opacity=".2"/>
+    <text x="230" y="20" fill="#ffffff">表示</text>
+    <text x="282" y="20">履歴</text>
+    <text x="330" y="20">ブックマーク</text>
+    <text x="430" y="20">プロフィール</text>
+    <text x="530" y="20">タブ</text>
+    <text x="578" y="20">ウインドウ</text>
+    <text x="664" y="20">ヘルプ</text>
+  </g>
+
+  <!-- 表示メニュー -->
+  <g filter="url(#shadow)">
+    <rect x="222" y="34" width="336" height="406" rx="9" fill="#2c2c30" stroke="#ffffff" stroke-opacity=".14"/>
+  </g>
+  <g fill="#f2f2f7">
+    <text x="250" y="55">ブックマーク バーを常に表示</text>
+    <text x="250" y="79">全画面表示でツールバーを常に表示する</text>
+    <text x="250" y="103">URL 全体を常に表示</text>
+    <text x="250" y="151">AI モード を常に表示</text>
+    <text x="250" y="199">タブを縦方向に表示</text>
+    <text x="250" y="256">ページを再読み込み</text>
+    <text x="250" y="289">フルスクリーンにする</text>
+    <text x="250" y="337">拡大</text>
+    <text x="250" y="361">縮小</text>
+    <text x="250" y="394">キャスト…</text>
+  </g>
+  <!-- 今の状態では選べない項目 -->
+  <g fill="#6e6e73">
+    <text x="250" y="127">Google レンズのショートカットを常に表示する</text>
+    <text x="250" y="175">検索ショートカットを表示</text>
+    <text x="250" y="232">停止</text>
+    <text x="250" y="313">実際のサイズ</text>
+  </g>
+  <g fill="#8e8e93" text-anchor="end">
+    <text x="546" y="55">⇧⌘B</text>
+    <text x="546" y="79">⇧⌘F</text>
+    <text x="546" y="232" fill="#5a5a5f">⌘.</text>
+    <text x="546" y="256">⇧⌘R</text>
+    <text x="546" y="289">F</text>
+    <text x="522" y="289">⌃⌘</text>
+    <text x="546" y="313" fill="#5a5a5f">⌘0</text>
+    <text x="546" y="337">⌘+</text>
+    <text x="546" y="361">⌘−</text>
+  </g>
+  <!-- ⌃⌘🌐F の地球儀 -->
+  <g fill="none" stroke="#8e8e93" stroke-width="1.1">
+    <circle cx="530" cy="284.5" r="5"/>
+    <ellipse cx="530" cy="284.5" rx="2.2" ry="5"/>
+    <path d="M525 284.5h10"/>
+  </g>
+  <g stroke="#ffffff" stroke-opacity=".12">
+    <path d="M232 211.5h316M232 268.5h316M232 373.5h316M232 406.5h316"/>
+  </g>
+  <rect x="227" y="411" width="326" height="24" rx="5" fill="#0a64d6" fill-opacity=".55"/>
+  <text x="250" y="428" fill="#ffffff">開発 / 管理</text>
+  <path d="M540 418l5 5-5 5" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 開発 / 管理 サブメニュー -->
+  <g filter="url(#shadow)">
+    <rect x="554" y="406" width="312" height="130" rx="9" fill="#2c2c30" stroke="#ffffff" stroke-opacity=".14"/>
+  </g>
+  <g fill="#f2f2f7">
+    <text x="582" y="428">ソースを表示</text>
+    <text x="582" y="452">デベロッパー ツール</text>
+    <text x="582" y="476">要素の検証</text>
+    <text x="582" y="500">JavaScript コンソール</text>
+  </g>
+  <g fill="#8e8e93" text-anchor="end">
+    <text x="854" y="428">⌥⌘U</text>
+    <text x="854" y="452">⌥⌘I</text>
+    <text x="854" y="476">⌥⌘C</text>
+    <text x="854" y="500">⌥⌘J</text>
+  </g>
+  <rect x="559" y="507" width="302" height="24" rx="5" fill="#0a64d6"/>
+  <text x="582" y="524" fill="#ffffff">Apple Events からの JavaScript を許可</text>
+</svg>
