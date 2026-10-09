@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="-apple-system, 'Helvetica Neue', system-ui, sans-serif" font-size="13">
+  <title>System Settings > Privacy &amp; Security > Automation, with Terminal allowed to control Google Chrome</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1b26"/>
+      <stop offset=".55" stop-color="#121118"/>
+      <stop offset="1" stop-color="#241a10"/>
+    </linearGradient>
+    <linearGradient id="term" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4a50"/>
+      <stop offset="1" stop-color="#1e1e22"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+    <clipPath id="win"><rect x="20" y="20" width="600" height="360" rx="12"/></clipPath>
+  </defs>
+
+  <!-- Desktop -->
+  <rect width="640" height="400" fill="url(#wall)"/>
+
+  <!-- Window -->
+  <g filter="url(#shadow)">
+    <rect x="20" y="20" width="600" height="360" rx="12" fill="#1e1e20" stroke="#ffffff" stroke-opacity=".14"/>
+  </g>
+  <g clip-path="url(#win)">
+    <!-- Sidebar -->
+    <rect x="20" y="20" width="230" height="360" fill="#2a2a2d"/>
+    <path d="M250.5 20v360" stroke="#000" stroke-opacity=".5"/>
+  </g>
+  <circle cx="40" cy="40" r="6" fill="#ff5f57"/>
+  <circle cx="60" cy="40" r="6" fill="#febc2e"/>
+  <circle cx="80" cy="40" r="6" fill="#28c840"/>
+
+  <!-- Search -->
+  <rect x="32" y="60" width="206" height="26" rx="7" fill="#ffffff" fill-opacity=".08"/>
+  <circle cx="47" cy="72" r="4.5" fill="none" stroke="#8e8e93" stroke-width="1.5"/>
+  <path d="M50.5 75.5l3.5 3.5" stroke="#8e8e93" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="62" y="77.5" fill="#6e6e73">Search</text>
+
+  <!-- Sidebar items -->
+  <rect x="30" y="200" width="210" height="26" rx="6" fill="#ffffff" fill-opacity=".12"/>
+  <g>
+    <rect x="38" y="106" width="18" height="18" rx="4.5" fill="#8e8e93"/>
+    <rect x="38" y="134" width="18" height="18" rx="4.5" fill="#1c1c1e" stroke="#ffffff" stroke-opacity=".3"/>
+    <rect x="38" y="162" width="18" height="18" rx="4.5" fill="#ff453a"/>
+    <rect x="38" y="204" width="18" height="18" rx="4.5" fill="#0a84ff"/>
+    <rect x="38" y="232" width="18" height="18" rx="4.5" fill="#ff6482"/>
+    <rect x="38" y="260" width="18" height="18" rx="4.5" fill="#0a84ff"/>
+    <rect x="38" y="288" width="18" height="18" rx="4.5" fill="#0a84ff"/>
+  </g>
+  <!-- The hand on "Privacy & Security" -->
+  <path d="M44 218v-6.5a1 1 0 0 1 2 0V216v-6a1 1 0 0 1 2 0v6-5a1 1 0 0 1 2 0v6l.8-1.4a1 1 0 0 1 1.7 1L50 220a3 3 0 0 1-2.6 1.5h-1A2.6 2.6 0 0 1 44 218Z" fill="#ffffff"/>
+  <g fill="#f2f2f7">
+    <text x="64" y="120">General</text>
+    <text x="64" y="148">Appearance</text>
+    <text x="64" y="176">Notifications</text>
+    <text x="64" y="218">Privacy &amp; Security</text>
+    <text x="64" y="246">Touch ID &amp; Password</text>
+    <text x="64" y="274">Users &amp; Groups</text>
+    <text x="64" y="302">Internet Accounts</text>
+  </g>
+
+  <!-- Right pane: Automation -->
+  <path d="M272 38l-6 6 6 6" fill="none" stroke="#8e8e93" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M290 38l6 6-6 6" fill="none" stroke="#5a5a5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="312" y="49" fill="#f2f2f7" font-size="15" font-weight="700">Automation</text>
+
+  <rect x="264" y="68" width="342" height="290" rx="9" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".08"/>
+  <g fill="#98989d" font-size="12">
+    <text x="278" y="94">Allow the applications below to control other</text>
+    <text x="278" y="111">applications. This will provide access to documents</text>
+    <text x="278" y="128">and data in those applications, and to perform</text>
+    <text x="278" y="145">actions with them.</text>
+  </g>
+  <g stroke="#ffffff" stroke-opacity=".1">
+    <path d="M264 162.5h342M300 198.5h292M300 234.5h292M316 270.5h276M300 306.5h292"/>
+  </g>
+
+  <!-- Disclosure chevrons -->
+  <g fill="none" stroke="#8e8e93" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M276 176l4 4-4 4"/>
+    <path d="M276 212l4 4-4 4"/>
+    <path d="M274 250l4 4 4-4"/>
+    <path d="M276 320l4 4-4 4"/>
+  </g>
+
+  <!-- App icons (simplified) -->
+  <rect x="290" y="169" width="22" height="22" rx="5" fill="#d97757"/>
+  <path d="M301 174v12M295 180h12M296.8 175.8l8.4 8.4M305.2 175.8l-8.4 8.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="290" y="205" width="22" height="22" rx="5" fill="#141416" stroke="#ffffff" stroke-opacity=".25"/>
+  <path d="M296 210.5l10 5.5-10 5.5Z" fill="none" stroke="#f2f2f7" stroke-width="1.4" stroke-linejoin="round"/>
+  <rect x="290" y="241" width="22" height="22" rx="5" fill="url(#term)" stroke="#ffffff" stroke-opacity=".2"/>
+  <path d="M295 248l3.5 2.5-3.5 2.5M300 255h5" fill="none" stroke="#f2f2f7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="290" y="313" width="22" height="22" rx="5" fill="#1f6fd1"/>
+  <path d="M305 317.5v13l-8-6.5Z M296 321l-2.5 2.5 2.5 2.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <g fill="#f2f2f7">
+    <text x="322" y="185">Claude</text>
+    <text x="322" y="221">Cursor</text>
+    <text x="322" y="257">Terminal</text>
+    <text x="316" y="293">Google Chrome</text>
+    <text x="322" y="329">Visual Studio Code</text>
+  </g>
+
+  <!-- Toggle (on) -->
+  <rect x="556" y="279" width="34" height="20" rx="10" fill="#0a84ff"/>
+  <circle cx="580" cy="289" r="8" fill="#ffffff"/>
+</svg>
