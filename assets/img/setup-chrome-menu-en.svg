@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="140 0 700 546" font-family="-apple-system, 'Helvetica Neue', system-ui, sans-serif" font-size="13">
+  <title>Chrome's View > Developer > Allow JavaScript from Apple Events</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1b26"/>
+      <stop offset=".55" stop-color="#121118"/>
+      <stop offset="1" stop-color="#241a10"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+
+  <!-- Desktop -->
+  <rect width="880" height="560" fill="url(#wall)"/>
+
+  <!-- Menu bar -->
+  <rect width="880" height="30" fill="#2a2a2e" fill-opacity=".92"/>
+  <g font-size="14" fill="#f2f2f7">
+    <text x="44" y="20" font-weight="700">Chrome</text>
+    <text x="112" y="20">File</text>
+    <text x="150" y="20">Edit</text>
+    <rect x="182" y="4" width="48" height="22" rx="5" fill="#ffffff" fill-opacity=".2"/>
+    <text x="190" y="20" fill="#ffffff">View</text>
+    <text x="244" y="20">History</text>
+    <text x="310" y="20">Bookmarks</text>
+    <text x="396" y="20">Profiles</text>
+    <text x="462" y="20">Tab</text>
+    <text x="500" y="20">Window</text>
+    <text x="568" y="20">Help</text>
+  </g>
+
+  <!-- View menu -->
+  <g transform="translate(-40 0)">
+    <g filter="url(#shadow)">
+      <rect x="222" y="34" width="336" height="406" rx="9" fill="#2c2c30" stroke="#ffffff" stroke-opacity=".14"/>
+    </g>
+    <g fill="#f2f2f7">
+      <text x="250" y="55">Always Show Bookmarks Bar</text>
+      <text x="250" y="79">Always Show Toolbar in Full Screen</text>
+      <text x="250" y="103">Always Show Full URLs</text>
+      <text x="250" y="151">Always Show AI Mode</text>
+      <text x="250" y="199">Show Tabs Vertically</text>
+      <text x="250" y="256">Reload This Page</text>
+      <text x="250" y="289">Enter Full Screen</text>
+      <text x="250" y="337">Zoom In</text>
+      <text x="250" y="361">Zoom Out</text>
+      <text x="250" y="394">Cast…</text>
+    </g>
+    <!-- Items that are unavailable in the current state -->
+    <g fill="#6e6e73">
+      <text x="250" y="127">Always Show Google Lens Shortcut</text>
+      <text x="250" y="175">Show Search Shortcuts</text>
+      <text x="250" y="232">Stop</text>
+      <text x="250" y="313">Actual Size</text>
+    </g>
+    <g fill="#8e8e93" text-anchor="end">
+      <text x="546" y="55">⇧⌘B</text>
+      <text x="546" y="79">⇧⌘F</text>
+      <text x="546" y="232" fill="#5a5a5f">⌘.</text>
+      <text x="546" y="256">⇧⌘R</text>
+      <text x="546" y="289">F</text>
+      <text x="522" y="289">⌃⌘</text>
+      <text x="546" y="313" fill="#5a5a5f">⌘0</text>
+      <text x="546" y="337">⌘+</text>
+      <text x="546" y="361">⌘−</text>
+    </g>
+    <!-- The globe key in ⌃⌘🌐F -->
+    <g fill="none" stroke="#8e8e93" stroke-width="1.1">
+      <circle cx="530" cy="284.5" r="5"/>
+      <ellipse cx="530" cy="284.5" rx="2.2" ry="5"/>
+      <path d="M525 284.5h10"/>
+    </g>
+    <g stroke="#ffffff" stroke-opacity=".12">
+      <path d="M232 211.5h316M232 268.5h316M232 373.5h316M232 406.5h316"/>
+    </g>
+    <rect x="227" y="411" width="326" height="24" rx="5" fill="#0a64d6" fill-opacity=".55"/>
+    <text x="250" y="428" fill="#ffffff">Developer</text>
+    <path d="M540 418l5 5-5 5" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Developer submenu -->
+    <g filter="url(#shadow)">
+      <rect x="554" y="406" width="312" height="130" rx="9" fill="#2c2c30" stroke="#ffffff" stroke-opacity=".14"/>
+    </g>
+    <g fill="#f2f2f7">
+      <text x="582" y="428">View Source</text>
+      <text x="582" y="452">Developer Tools</text>
+      <text x="582" y="476">Inspect Elements</text>
+      <text x="582" y="500">JavaScript Console</text>
+    </g>
+    <g fill="#8e8e93" text-anchor="end">
+      <text x="854" y="428">⌥⌘U</text>
+      <text x="854" y="452">⌥⌘I</text>
+      <text x="854" y="476">⌥⌘C</text>
+      <text x="854" y="500">⌥⌘J</text>
+    </g>
+    <rect x="559" y="507" width="302" height="24" rx="5" fill="#0a64d6"/>
+    <text x="582" y="524" fill="#ffffff">Allow JavaScript from Apple Events</text>
+  </g>
+</svg>
