@@ -130,8 +130,24 @@ function setupDemo(demo) {
   const steps = [...demo.querySelectorAll("[data-step]")];
   const replay = $("[data-replay]");
   const narration = $("[data-narration]");
-  const narrate = (text) => {
-    narration.textContent = text;
+  const lines =
+    document.documentElement.lang === "ja"
+      ? {
+          received: "依頼を受け取りました",
+          found: "課題管理のタブを特定",
+          filling: "フォームに入力",
+          away: "あなたは別のタブへ。使い魔は元のタブで続行",
+          done: "元のタブで登録完了",
+        }
+      : {
+          received: "Request received",
+          found: "Found the issue tracker tab",
+          filling: "Filling in the form",
+          away: "You switched tabs. Your familiar keeps working in tab 47",
+          done: "Filed in the original tab",
+        };
+  const narrate = (key) => {
+    narration.textContent = lines[key];
   };
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -172,7 +188,7 @@ function setupDemo(demo) {
     for (const s of steps) s.classList.remove("is-done");
     target(null);
     demo.classList.remove("is-working");
-    narrate("依頼を受け取りました");
+    narrate("received");
   };
 
   const play = async () => {
@@ -182,10 +198,10 @@ function setupDemo(demo) {
     try {
       await sleep(700, id);
       demo.classList.add("is-working");
-      narrate("課題管理のタブを特定");
+      narrate("found");
       done(1);
       await sleep(500, id);
-      narrate("フォームに入力");
+      narrate("filling");
       target(fields.title);
       await type("title", id);
       done(2);
@@ -196,7 +212,7 @@ function setupDemo(demo) {
       // window 12 / tab 47: it never depends on the active tab.
       await sleep(250, id);
       show("b");
-      narrate("あなたは別のタブへ。使い魔は元のタブで続行");
+      narrate("away");
       await sleep(1000, id);
       done(3);
       await sleep(700, id);
@@ -208,7 +224,7 @@ function setupDemo(demo) {
       target(null);
       await sleep(900, id);
       show("a");
-      narrate("元のタブで登録完了");
+      narrate("done");
       demo.classList.remove("is-working");
     } catch {
       return; // superseded by a newer run
