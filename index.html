@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>familiar — The Chrome you already use, now your familiar.</title>
+    <meta
+      name="description"
+      content="familiar lets AI agents drive the Google Chrome you already use on macOS, through AppleScript. No DevTools Protocol, no Playwright. Available as a Claude Code plugin and an MCP server."
+    />
+    <link rel="canonical" href="https://familiar.dominion525.com/" />
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://familiar.dominion525.com/"
+    />
+    <link
+      rel="alternate"
+      hreflang="ja"
+      href="https://familiar.dominion525.com/ja/"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="https://familiar.dominion525.com/"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="familiar — The Chrome you already use, now your familiar."
+    />
+    <meta
+      property="og:description"
+      content="AI agents drive your real, signed-in Chrome through AppleScript."
+    />
+    <meta property="og:url" content="https://familiar.dominion525.com/" />
+    <meta
+      property="og:image"
+      content="https://familiar.dominion525.com/assets/img/ogp.png"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/main.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/" aria-label="familiar home">
+          <img src="/assets/img/logo.svg" width="28" height="28" alt="" />
+          <span>familiar</span>
+        </a>
+        <nav class="site-nav" aria-label="On this page">
+          <a href="#usecases">Use cases</a>
+          <a href="#different">What's different</a>
+          <a href="#install">Install</a>
+          <a href="#setup">Setup</a>
+          <a href="#permissions">Permissions</a>
+          <a href="#details">Details</a>
+        </nav>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <a href="/" hreflang="en" aria-current="true">EN</a>
+            <a href="/ja/" hreflang="ja" lang="ja">JA</a>
+          </div>
+          <a
+            class="github-link"
+            href="https://github.com/dominion525/familiar"
+            aria-label="GitHub repository"
+          >
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- 1. Hero -->
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <ul class="badges" aria-label="Available as">
+              <li class="badge badge-accent">Claude Code plugin</li>
+              <li class="badge">MCP server</li>
+              <li class="badge">macOS + Chrome</li>
+              <li class="badge">MIT</li>
+            </ul>
+            <h1 class="hero-title">
+              <span class="line">The Chrome you already use,</span>
+              <span class="line">now your <em>familiar</em>.</span>
+            </h1>
+            <p class="hero-lead">
+              Your AI agent reads pages, clicks, and submits forms in the Chrome
+              you're already signed in to. It works through Apple Events, the
+              messaging layer built into macOS. No DevTools Protocol, no
+              Playwright, no separate driver.
+            </p>
+            <div class="hero-install">
+              <div class="code-line code-line-multi">
+                <span class="prompt" aria-hidden="true"
+                  ><span>&gt;</span><span>&gt;</span></span
+                >
+                <code
+                  ><span>/plugin marketplace add dominion525/familiar</span
+                  ><span>/plugin install familiar@familiar</span></code
+                >
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="/plugin marketplace add dominion525/familiar&#10;/plugin install familiar@familiar"
+                  aria-label="Copy commands"
+                >
+                  Copy
+                </button>
+              </div>
+              <p class="hero-install-note">
+                Run these two lines in Claude Code. In Cursor, Codex CLI, and
+                other clients, add it as an
+                <a href="#install" data-select-tab="tab-mcp">MCP server</a>.
+              </p>
+            </div>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#install">Get started</a>
+              <a
+                class="btn btn-ghost"
+                href="https://github.com/dominion525/familiar"
+                >View on GitHub</a
+              >
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <figure
+              class="demo"
+              data-demo
+              aria-label="Demo: the user asks the AI agent to file a bug in their open issue tracker. Using familiar, the agent fills in the form in the signed-in tab and submits it, even after the user switches to another tab."
+            >
+              <div class="demo-request" aria-hidden="true">
+                <span class="demo-request-who">You</span>
+                <p>File this bug in the issue tracker I have open</p>
+              </div>
+              <div class="browser" aria-hidden="true">
+                <div class="browser-tabs">
+                  <span class="browser-dots"><i></i><i></i><i></i></span>
+                  <span class="browser-tab is-active" data-tab="a">
+                    <img
+                      class="tab-eye"
+                      src="/assets/img/eye.svg"
+                      width="22"
+                      height="11"
+                      alt=""
+                    />Issues — Acme Tracker
+                  </span>
+                  <span class="browser-tab" data-tab="b">Inbox — Mail</span>
+                </div>
+                <div class="browser-url">
+                  <span class="url-lock"></span
+                  ><span class="url-text" data-url
+                    >tracker.acme.example/issues/new</span
+                  >
+                  <span class="url-target">window 12 / tab 47</span>
+                </div>
+                <div class="browser-page">
+                  <div class="page page-a is-shown" data-page="a">
+                    <div class="page-head">
+                      <span class="page-avatar">S</span>
+                      <span>New issue</span>
+                    </div>
+                    <div class="form-field" data-field="title">
+                      <span class="field-label">Title</span>
+                      <span class="field-input"
+                        ><span data-type="title"
+                          >Dashboard is blank after signing in</span
+                        ></span
+                      >
+                    </div>
+                    <div class="form-field" data-field="body">
+                      <span class="field-label">Description</span>
+                      <span class="field-input field-textarea"
+                        ><span data-type="body"
+                          >To reproduce: sign in, then open the dashboard.
+                          Content appears only after a reload.</span
+                        ></span
+                      >
+                    </div>
+                    <span class="form-submit" data-submit>Create</span>
+                    <div class="toast is-shown" data-toast>
+                      Issue #128 created
+                    </div>
+                  </div>
+                  <div class="page page-b" data-page="b">
+                    <div class="mail-row">
+                      <b>Team</b><span>Agenda for next week's sync</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>Billing</b><span>Your September invoice</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>GitHub</b><span>Your pull request was merged</span>
+                    </div>
+                    <div class="mail-row">
+                      <b>Calendar</b><span>Design review tomorrow, 10:00</span>
+                    </div>
+                    <p class="page-b-note">You're working in another tab</p>
+                  </div>
+                </div>
+              </div>
+              <p class="demo-narration" data-narration aria-hidden="true">
+                Filed in the original tab
+              </p>
+              <ol class="demo-log" data-log aria-hidden="true">
+                <li class="is-done" data-step="1">
+                  <span class="log-tool">familiar_list_tabs</span
+                  ><span class="log-out"
+                    >→ window 12 / tab 47 "Issues — Acme Tracker"</span
+                  >
+                </li>
+                <li class="is-done" data-step="2">
+                  <span class="log-tool">familiar_fill</span
+                  ><span class="log-arg">12 47 "#title"</span
+                  ><span class="log-out">→ true</span>
+                </li>
+                <li class="is-done" data-step="3">
+                  <span class="log-tool">familiar_fill</span
+                  ><span class="log-arg">12 47 "#body"</span
+                  ><span class="log-out">→ true</span>
+                </li>
+                <li class="is-done" data-step="4">
+                  <span class="log-tool">familiar_submit</span
+                  ><span class="log-arg">12 47 "form"</span
+                  ><span class="log-out">→ { ok: true }</span>
+                </li>
+                <li class="is-done" data-step="5">
+                  <span class="log-tool">familiar_get_text</span
+                  ><span class="log-arg">12 47 ".toast"</span
+                  ><span class="log-out">→ "Issue #128 created"</span>
+                </li>
+              </ol>
+              <figcaption class="demo-caption">
+                <span>Illustration</span>
+                <button type="button" class="demo-replay" data-replay>
+                  Replay
+                </button>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Use cases -->
+      <section id="usecases" class="section section-alt">
+        <div class="container usecases-inner">
+          <div class="usecases-head">
+            <p class="eyebrow">Use cases</p>
+            <h2 class="section-title">Stay signed in.<br />Hand it off.</h2>
+          </div>
+          <div class="feature-grid usecase-list">
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />01
+              </p>
+              <h3>Read from admin dashboards</h3>
+              <p>
+                Keep a signed-in dashboard open and let the agent pull its
+                numbers and lists into a summary.
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />02
+              </p>
+              <h3>Fill in forms</h3>
+              <p>
+                Issue trackers, request forms: the agent fills them in and
+                submits them. No need to sign in again.
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">
+                <img
+                  class="mini-eye"
+                  src="/assets/img/eye.svg"
+                  width="16"
+                  height="8"
+                  alt=""
+                />03
+              </p>
+              <h3>Delegate while you keep working</h3>
+              <p>
+                The agent addresses its tab by windowId + tabId, so you can
+                carry on in other tabs meanwhile.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. What's different -->
+      <section id="different" class="section">
+        <div class="container">
+          <p class="eyebrow">What's different</p>
+          <h2 class="section-title">
+            No new browser.<br />Your own Chrome does the work.
+          </h2>
+          <div class="feature-grid point-list">
+            <article class="feature-card">
+              <p class="feature-index">01</p>
+              <h3>The real Chrome</h3>
+              <p>
+                familiar drives the Chrome you're signed in to, through Apple
+                Events. Pages see an ordinary Chrome session, with no WebDriver
+                or DevTools channel attached.
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">02</p>
+              <h3>No driver</h3>
+              <p>
+                No DevTools Protocol, no Playwright, no separate driver. It
+                talks to Chrome using nothing but AppleScript, which ships with
+                macOS.
+              </p>
+            </article>
+            <article class="feature-card">
+              <p class="feature-index">03</p>
+              <h3>Targets tabs, not focus</h3>
+              <p>
+                Every action targets a specific tab by windowId + tabId. It
+                never depends on the active tab, so it stays out of your way
+                while you work in another one.
+              </p>
+            </article>
+          </div>
+
+          <div class="compare">
+            <h3 class="compare-title">How it compares</h3>
+            <p class="compare-lead">
+              All of these let an AI agent drive a browser, and most can now
+              attach to your everyday browser with some setup. The difference is
+              how they connect: familiar doesn't change how Chrome is launched;
+              it just sends commands over Apple Events.
+            </p>
+            <div class="compare-scroll">
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span class="visually-hidden">Feature</span>
+                    </th>
+                    <th scope="col" class="is-self">
+                      <img
+                        class="mini-eye"
+                        src="/assets/img/eye.svg"
+                        width="16"
+                        height="8"
+                        alt=""
+                      />familiar
+                    </th>
+                    <th scope="col">
+                      <a
+                        href="https://github.com/ChromeDevTools/chrome-devtools-mcp"
+                        >Chrome DevTools MCP</a
+                      >
+                    </th>
+                    <th scope="col">
+                      <a href="https://github.com/microsoft/playwright-mcp"
+                        >Playwright MCP</a
+                      >
+                    </th>
+                    <th scope="col">
+                      <a href="https://github.com/achiya-automation/safari-mcp"
+                        >safari-mcp</a
+                      >
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Control channel</th>
+                    <td class="is-self">Apple Events</td>
+                    <td>DevTools Protocol</td>
+                    <td>Playwright</td>
+                    <td>Apple Events</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Browser it drives by default</th>
+                    <td class="is-self">Your everyday Chrome</td>
+                    <td>A freshly launched Chrome</td>
+                    <td>A freshly launched Chromium / Firefox / WebKit</td>
+                    <td>Your everyday Safari</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">
+                      <code>navigator.webdriver</code><br />with default launch
+                    </th>
+                    <td class="is-self"><code>false</code></td>
+                    <td><code>true</code></td>
+                    <td><code>false</code></td>
+                    <td><code>false</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Using your everyday browser</th>
+                    <td class="is-self">Works out of the box</td>
+                    <td><code>--autoConnect</code></td>
+                    <td>Browser extension</td>
+                    <td>Works out of the box</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Approval for your everyday browser</th>
+                    <td class="is-self">Once</td>
+                    <td>Every connection</td>
+                    <td>Every connection (can be skipped)</td>
+                    <td>Once</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Platforms</th>
+                    <td class="is-self">macOS</td>
+                    <td>macOS / Windows / Linux</td>
+                    <td>macOS / Windows / Linux</td>
+                    <td>macOS</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="compare-note">
+              As of October 2026. The Playwright MCP value for
+              <code>navigator.webdriver</code> is for Chromium, which the MCP
+              server launches with
+              <code>--disable-blink-features=AutomationControlled</code>; the
+              safari-mcp value is taken from its README. When a tool connects to
+              your everyday browser, its launch flags are unchanged, so the
+              value stays <code>false</code>. (We confirmed on Chrome 154 that
+              attaching over the DevTools Protocol alone does not set it to
+              <code>true</code>.)
+            </p>
+
+            <div class="webdriver-note">
+              <h4>What is <code>navigator.webdriver</code>?</h4>
+              <p>
+                It tells a page whether the browser is being controlled by
+                automation. It becomes <code>true</code> when Chrome is launched
+                with flags such as <code>--enable-automation</code>. familiar
+                only sends commands to your everyday Chrome, so it stays
+                <code>false</code>. That doesn't mean you'll go undetected:
+                sites still enforce their own access controls.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Install -->
+      <section id="install" class="section section-alt">
+        <div class="container">
+          <p class="eyebrow">Install</p>
+          <h2 class="section-title">Bind your familiar.</h2>
+
+          <div class="tabs" data-tabs>
+            <div class="tab-list" role="tablist" aria-label="Install method">
+              <button
+                class="tab"
+                role="tab"
+                id="tab-plugin"
+                aria-controls="panel-plugin"
+                aria-selected="true"
+              >
+                Claude Code plugin
+              </button>
+              <button
+                class="tab"
+                role="tab"
+                id="tab-mcp"
+                aria-controls="panel-mcp"
+                aria-selected="false"
+              >
+                MCP server
+              </button>
+            </div>
+
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-plugin"
+              aria-labelledby="tab-plugin"
+            >
+              <h3 class="panel-title">Claude Code plugin</h3>
+              <p>Run these two lines in Claude Code.</p>
+              <div class="code-block">
+                <pre><code>/plugin marketplace add dominion525/familiar
+/plugin install familiar@familiar</code></pre>
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="/plugin marketplace add dominion525/familiar&#10;/plugin install familiar@familiar"
+                  aria-label="Copy commands"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-mcp"
+              aria-labelledby="tab-mcp"
+            >
+              <h3 class="panel-title">MCP server</h3>
+              <p>
+                The same 32 actions, available to any MCP client (Claude Code,
+                Claude Desktop, Cursor, Codex CLI, and more). Launch the npm
+                package <code>@dominion525/familiar-mcp</code> with
+                <code>npx</code>. Requires Node.js 20 or later.
+              </p>
+              <div class="client-list">
+                <details open>
+                  <summary>Claude Code</summary>
+                  <div class="code-block">
+                    <pre><code>claude mcp add familiar -- npx @dominion525/familiar-mcp@latest</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy="claude mcp add familiar -- npx @dominion525/familiar-mcp@latest"
+                      aria-label="Copy command"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Claude Desktop</summary>
+                  <p>
+                    Edit
+                    <code
+                      >~/Library/Application
+                      Support/Claude/claude_desktop_config.json</code
+                    >.
+                  </p>
+                  <div class="code-block">
+                    <pre><code>{
+  "mcpServers": {
+    "familiar": {
+      "command": "npx",
+      "args": ["@dominion525/familiar-mcp@latest"]
+    }
+  }
+}</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="Copy config"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Cursor</summary>
+                  <p>Edit <code>~/.cursor/mcp.json</code>.</p>
+                  <div class="code-block">
+                    <pre><code>{
+  "mcpServers": {
+    "familiar": {
+      "command": "npx",
+      "args": ["@dominion525/familiar-mcp@latest"]
+    }
+  }
+}</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="Copy config"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Codex CLI</summary>
+                  <p>Edit <code>~/.codex/config.toml</code>.</p>
+                  <div class="code-block">
+                    <pre><code>[mcp_servers.familiar]
+command = "npx"
+args = ["@dominion525/familiar-mcp@latest"]</code></pre>
+                    <button
+                      class="copy-btn"
+                      type="button"
+                      data-copy-from-pre
+                      aria-label="Copy config"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </details>
+                <details>
+                  <summary>Other MCP clients</summary>
+                  <p>
+                    Cline, Windsurf, Antigravity, and VS Code extensions (GitHub
+                    Copilot Chat, Continue, and others) use the same JSON config
+                    as Claude Desktop and Cursor. See each client's
+                    documentation for where its config file lives.
+                  </p>
+                </details>
+              </div>
+            </div>
+          </div>
+
+          <p class="install-check">
+            <span class="install-check-label">Check</span>
+            Once you've finished the <a href="#setup">first-run setup</a>, ask
+            your agent to "list the titles of my open tabs." If it lists them,
+            you're connected.
+          </p>
+
+          <details class="other-methods">
+            <summary>Other ways to install</summary>
+            <div class="other-grid">
+              <div>
+                <h4>Vercel Skills (agent-skills)</h4>
+                <div class="code-block">
+                  <pre><code>npx skills add dominion525/familiar</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="npx skills add dominion525/familiar"
+                    aria-label="Copy command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p>
+                  The skill is unpacked into
+                  <code>~/.agents/skills/familiar/</code>, where clients that
+                  follow the agent-skills spec pick it up automatically.
+                </p>
+              </div>
+              <div>
+                <h4>Standalone (no install)</h4>
+                <div class="code-block">
+                  <pre><code>osascript skills/familiar/familiar.applescript list_tabs</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="osascript skills/familiar/familiar.applescript list_tabs"
+                    aria-label="Copy command"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p>Clone the repository and run the script directly.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- 5. First-run setup -->
+      <section id="setup" class="section">
+        <div class="container">
+          <p class="eyebrow">First-run setup</p>
+          <h2 class="section-title">Two permissions,<br />granted once.</h2>
+          <p class="section-lead">
+            familiar needs two one-time grants to talk to Chrome: one in
+            Chrome's settings, one in macOS.
+          </p>
+
+          <ol class="steps">
+            <li class="step">
+              <div class="step-head">
+                <span class="step-num">1</span>
+                <h3>Turn on "Allow JavaScript from Apple Events" in Chrome</h3>
+              </div>
+              <div class="step-body">
+                <div class="step-text">
+                  <p>Check this item in Chrome's menu bar:</p>
+                  <p class="menu-path">
+                    <span>View</span><span>Developer</span
+                    ><span>Allow JavaScript from Apple Events</span>
+                  </p>
+                  <p>
+                    Actions that run JavaScript in the page (reading,
+                    interaction, content/script, and waiting on JS conditions)
+                    need this setting. Tab, window, navigation, history, and
+                    loading-state actions use AppleScript alone and work without
+                    it.
+                  </p>
+                </div>
+                <figure class="placeholder-figure">
+                  <img
+                    src="/assets/img/setup-chrome-menu-ja.svg"
+                    width="700"
+                    height="546"
+                    alt='Chrome&apos;s View > Developer menu with "Allow JavaScript from Apple Events" selected'
+                    loading="lazy"
+                  />
+                </figure>
+              </div>
+            </li>
+
+            <li class="step">
+              <div class="step-head">
+                <span class="step-num">2</span>
+                <h3>Approve the automation prompt</h3>
+              </div>
+              <div class="step-body">
+                <div class="step-text">
+                  <p>
+                    The first time familiar talks to Chrome, macOS asks for
+                    permission. Click "Allow."
+                  </p>
+                  <p class="callout">
+                    <strong>You're not approving familiar itself.</strong>
+                    macOS grants automation permission to the parent process:
+                    the app that actually runs your MCP client or Claude Code
+                    (Terminal, VS Code, Cursor, Claude Desktop, and so on).
+                    You're handing that app control of your signed-in Chrome, so
+                    only approve apps you trust.
+                  </p>
+                  <p>To review or change it later:</p>
+                  <p class="menu-path">
+                    <span>System Settings</span
+                    ><span>Privacy &amp; Security</span><span>Automation</span
+                    ><span>(the launching app)</span><span>Google Chrome</span>
+                  </p>
+                </div>
+                <div class="figure-stack">
+                  <figure class="placeholder-figure">
+                    <img
+                      src="/assets/img/setup-automation-dialog-ja.svg"
+                      width="560"
+                      height="380"
+                      alt='The macOS prompt: "Terminal" wants access to control "Google Chrome".'
+                      loading="lazy"
+                    />
+                  </figure>
+                  <figure class="placeholder-figure">
+                    <img
+                      src="/assets/img/setup-automation-settings-ja.svg"
+                      width="640"
+                      height="400"
+                      alt="System Settings > Privacy &amp; Security > Automation, with Google Chrome turned on under Terminal"
+                      loading="lazy"
+                    />
+                  </figure>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="trouble">
+            <h3 class="trouble-title">Troubleshooting</h3>
+            <div class="trouble-grid">
+              <article class="trouble-card">
+                <p class="trouble-error">
+                  <code>... JavaScript is turned off</code>
+                </p>
+                <p>
+                  "Allow JavaScript from Apple Events" is off in Chrome. Turn it
+                  on as described in step 1.
+                </p>
+              </article>
+              <article class="trouble-card">
+                <p class="trouble-error">
+                  <code
+                    >Not authorized to send Apple events to "Google
+                    Chrome"</code
+                  >
+                </p>
+                <p>
+                  Automation permission is missing. In System Settings &gt;
+                  Privacy &amp; Security &gt; Automation, turn on Google Chrome
+                  under the launching app (Terminal, VS Code, Cursor, and so
+                  on).
+                </p>
+              </article>
+              <article class="trouble-card trouble-card-wide">
+                <p class="trouble-symptom">The prompt never appears</p>
+                <p>
+                  Run this once from the terminal that launches the MCP server.
+                  It triggers the prompt for that process, whether or not a
+                  Chrome window is open. Once you approve, you won't be asked
+                  again.
+                </p>
+                <div class="code-block">
+                  <pre><code>osascript -e 'tell application "Google Chrome" to get version'</code></pre>
+                  <button
+                    class="copy-btn"
+                    type="button"
+                    data-copy="osascript -e 'tell application &quot;Google Chrome&quot; to get version'"
+                    aria-label="Copy command"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Permissions & data -->
+      <section id="permissions" class="section">
+        <div class="container">
+          <p class="eyebrow">Permissions &amp; data</p>
+          <h2 class="section-title">What you entrust<br />to your familiar.</h2>
+          <p class="section-lead">
+            Any client you connect to familiar gets your signed-in browser, as
+            is.
+          </p>
+
+          <div class="resp-grid">
+            <article class="resp-card resp-card-strong">
+              <h3>The risk you take on</h3>
+              <p>
+                <code>execute_js</code> and <code>execute_js_file</code> run
+                arbitrary JavaScript in the page. An MCP client given these
+                tools can:
+              </p>
+              <ul>
+                <li>
+                  Read the DOM of any page you're signed in to, along with any
+                  cookies JavaScript can read
+                </li>
+                <li>
+                  Submit forms, navigate, and fire fetch / XHR requests on your
+                  behalf
+                </li>
+                <li>Manipulate your session state</li>
+              </ul>
+              <p>
+                Page JavaScript can't read HttpOnly cookies, but it can still
+                act within the signed-in session they maintain.
+              </p>
+              <p>
+                Targeting a tab by windowId + tabId is addressing, not
+                isolation: the client isn't confined to that tab.
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>familiar itself runs locally</h3>
+              <p>
+                The server runs on your machine and talks to your MCP client
+                over stdio only. It makes no outbound connections of its own,
+                and there is no telemetry or analytics.
+              </p>
+              <p>
+                That said, whatever familiar retrieves goes to your MCP client
+                and, depending on its setup, on to the model provider.
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>Not a tool for evading detection</h3>
+              <p>
+                Pages see an ordinary Chrome session, but sites still enforce
+                their own access controls. Access to any particular site is not
+                guaranteed.
+              </p>
+            </article>
+            <article class="resp-card">
+              <h3>Read the source</h3>
+              <p>
+                It's open source under the MIT License. To see exactly what it
+                sends to Chrome, read
+                <a
+                  href="https://github.com/dominion525/familiar/blob/main/skills/familiar/familiar.applescript"
+                  ><code>familiar.applescript</code></a
+                >.
+              </p>
+            </article>
+          </div>
+          <p class="resp-final">
+            Whatever you hand to an AI runs as you. How much you hand over is
+            your call.
+          </p>
+        </div>
+      </section>
+
+      <!-- 7. Details -->
+      <section id="details" class="section section-alt">
+        <div class="container">
+          <p class="eyebrow">Details</p>
+          <h2 class="section-title">Under the hood.</h2>
+
+          <details class="detail-block" id="capabilities">
+            <summary>
+              <span class="detail-title">Capabilities</span>
+              <span class="detail-sub">32 actions, four selector styles</span>
+            </summary>
+            <div class="detail-body">
+              <div class="cap-grid">
+                <article class="cap-card">
+                  <header>
+                    <h3>Tabs / windows</h3>
+                    <span class="cap-count">7</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>list_tabs</li>
+                    <li>new_tab</li>
+                    <li>new_incognito_tab</li>
+                    <li>close_tab</li>
+                    <li>active_tab</li>
+                    <li>window_mode</li>
+                    <li>is_loading</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>Navigation</h3>
+                    <span class="cap-count">6</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>navigate</li>
+                    <li>get_tab_url</li>
+                    <li>reload</li>
+                    <li>go_back</li>
+                    <li>go_forward</li>
+                    <li>stop</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>Waiting</h3>
+                    <span class="cap-count">3</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>wait_for_load</li>
+                    <li>wait_for_selector</li>
+                    <li>wait_for_function</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>Content / script</h3>
+                    <span class="cap-count">3</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>get_html</li>
+                    <li>execute_js</li>
+                    <li>execute_js_file</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>Reading</h3>
+                    <span class="cap-count">5</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>get_text</li>
+                    <li>get_attribute</li>
+                    <li>get_value</li>
+                    <li>exists</li>
+                    <li>query_all</li>
+                  </ul>
+                </article>
+                <article class="cap-card">
+                  <header>
+                    <h3>Interaction</h3>
+                    <span class="cap-count">8</span>
+                  </header>
+                  <ul class="tool-list">
+                    <li>click</li>
+                    <li>fill</li>
+                    <li>clear</li>
+                    <li>select_option</li>
+                    <li>set_checked</li>
+                    <li>press_key</li>
+                    <li>submit</li>
+                    <li>scroll_into_view</li>
+                  </ul>
+                </article>
+              </div>
+              <div class="selectors">
+                <p class="selectors-label">Four selector styles</p>
+                <ul class="selector-list">
+                  <li><code>button.primary</code><span>CSS (default)</span></li>
+                  <li><code>text=Sign in</code><span>Visible text</span></li>
+                  <li><code>xpath=//form//input</code><span>XPath</span></li>
+                  <li><code>label=Email</code><span>Form label</span></li>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details class="detail-block" id="how">
+            <summary>
+              <span class="detail-title">How it works</span>
+              <span class="detail-sub">Commands travel over Apple Events</span>
+            </summary>
+            <div class="detail-body how-inner">
+              <div class="how-copy">
+                <p>
+                  Apple Events is the mechanism built into macOS that lets apps
+                  send commands to one another. familiar uses it through
+                  AppleScript to tell Chrome things like "open a tab" or "run
+                  this JavaScript in this tab."
+                </p>
+                <p>
+                  A call from your MCP client passes through familiar-mcp to
+                  <code>osascript</code>, and AppleScript relays the command to
+                  Chrome.
+                </p>
+                <p>
+                  The Claude Code plugin and the MCP server both run the same
+                  <code>familiar.applescript</code>, so they behave identically.
+                </p>
+              </div>
+              <ol class="flow" aria-label="Request flow">
+                <li class="flow-node">
+                  <span class="flow-label">MCP client</span
+                  ><span class="flow-sub">Claude Code / Cursor / …</span>
+                </li>
+                <li class="flow-edge">stdio (JSON-RPC)</li>
+                <li class="flow-node">
+                  <span class="flow-label">familiar-mcp</span
+                  ><span class="flow-sub">Node.js</span>
+                </li>
+                <li class="flow-edge">
+                  osascript familiar.applescript ACTION …
+                </li>
+                <li class="flow-node flow-node-accent">
+                  <span class="flow-label">AppleScript</span
+                  ><span class="flow-sub">Apple Events</span>
+                </li>
+                <li class="flow-edge">tell application "Google Chrome"</li>
+                <li class="flow-node">
+                  <span class="flow-label">Google Chrome</span
+                  ><span class="flow-sub">Your real, signed-in browser</span>
+                </li>
+                <li class="flow-edge"></li>
+                <li class="flow-node">
+                  <span class="flow-label">Page DOM</span>
+                </li>
+              </ol>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- 8. Back to install for readers who made it this far -->
+      <section class="section closing">
+        <div class="container closing-inner">
+          <p class="eyebrow">Get started</p>
+          <h2 class="section-title">Summon your familiar.</h2>
+          <div class="hero-cta closing-cta">
+            <a class="btn btn-primary" href="#install">Get started</a>
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/dominion525/familiar"
+              >View on GitHub</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-author">
+          <a
+            class="footer-author-name"
+            href="https://dominion525.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="/assets/img/avatar.png"
+              width="32"
+              height="32"
+              alt="Dominion525"
+            />
+            <span>Dominion525</span>
+          </a>
+          <div class="footer-social">
+            <a
+              href="https://x.com/dominion525"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Twitter profile"
+              ><img
+                src="/assets/img/icon-twitter.svg"
+                width="20"
+                height="20"
+                alt=""
+            /></a>
+            <a
+              href="https://github.com/dominion525"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub profile"
+              ><img
+                src="/assets/img/icon-github.svg"
+                width="20"
+                height="20"
+                alt=""
+            /></a>
+          </div>
+        </div>
+        <nav class="footer-links" aria-label="familiar links">
+          <a href="https://github.com/dominion525/familiar"
+            >familiar on GitHub</a
+          >
+          <a href="https://www.npmjs.com/package/@dominion525/familiar-mcp"
+            >npm</a
+          >
+          <a href="https://github.com/dominion525/familiar/blob/main/LICENSE"
+            >MIT License</a
+          >
+        </nav>
+        <p class="footer-meta">© 2026 Dominion525</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -401,6 +401,17 @@ pre {
   }
 }
 
+/* 英語の見出しは日本語より横に長いので、行の中で折り返せるようにし、欧文の見出しとして字間を詰める */
+.hero-title:lang(en) {
+  font-size: clamp(36px, 4.2vw, 54px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.hero-title:lang(en) .line {
+  white-space: normal;
+}
+
 .hero-title em {
   font-style: normal;
   color: var(--accent);
