@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" font-family="-apple-system, 'Hiragino Sans', system-ui, sans-serif">
+  <title>macOS の確認ダイアログ：“ターミナル”が“Google Chrome”を制御するアクセスを要求しています</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1b26"/>
+      <stop offset=".55" stop-color="#121118"/>
+      <stop offset="1" stop-color="#241a10"/>
+    </linearGradient>
+    <linearGradient id="term" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4a50"/>
+      <stop offset="1" stop-color="#1e1e22"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".6"/>
+    </filter>
+  </defs>
+
+  <!-- デスクトップ -->
+  <rect width="560" height="380" fill="url(#wall)"/>
+
+  <!-- ダイアログ -->
+  <g filter="url(#shadow)">
+    <rect x="130" y="60" width="300" height="260" rx="14" fill="#2c2c30" stroke="#ffffff" stroke-opacity=".14"/>
+  </g>
+
+  <!-- 要求しているアプリ（ターミナル）のアイコン -->
+  <rect x="248" y="80" width="64" height="64" rx="14" fill="url(#term)" stroke="#ffffff" stroke-opacity=".18"/>
+  <rect x="254" y="86" width="52" height="40" rx="5" fill="#0e0e10"/>
+  <path d="M261 98l7 5-7 5" fill="none" stroke="#f2f2f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M272 109h10" stroke="#f2f2f7" stroke-width="2.2" stroke-linecap="round"/>
+
+  <g fill="#f2f2f7" font-size="12.5" font-weight="700" text-anchor="middle">
+    <text x="280" y="174">“ターミナル”が“Google Chrome”を</text>
+    <text x="280" y="192">制御するアクセスを要求しています。</text>
+    <text x="280" y="210">制御を許可すると、“Google Chrome”の</text>
+    <text x="280" y="228">書類やデータにアクセスしたり、そのアプリ</text>
+    <text x="280" y="246">内で操作を実行したりできるようになります。</text>
+  </g>
+
+  <!-- ボタン -->
+  <rect x="146" y="272" width="130" height="30" rx="8" fill="#ffffff" fill-opacity=".14"/>
+  <text x="211" y="292" fill="#f2f2f7" font-size="13" text-anchor="middle">許可しない</text>
+  <rect x="284" y="272" width="130" height="30" rx="8" fill="#0a64d6"/>
+  <text x="349" y="292" fill="#ffffff" font-size="13" text-anchor="middle">許可</text>
+</svg>
