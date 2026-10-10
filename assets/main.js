@@ -43,6 +43,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tabs (WAI-ARIA tabs pattern)
   for (const root of document.querySelectorAll("[data-tabs]")) {
     const tabs = [...root.querySelectorAll('[role="tab"]')];
+    // Without JS the panels are plain stacked sections with their own
+    // headings, so the tab panel semantics are added only here.
+    for (const t of tabs) {
+      const panel = document.getElementById(t.getAttribute("aria-controls"));
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", t.id);
+      // The panel heading is hidden with JS, so the panel starts with
+      // non-focusable text; make the panel itself focusable (APG).
+      panel.tabIndex = 0;
+    }
     const select = (tab) => {
       for (const t of tabs) {
         const selected = t === tab;
@@ -55,10 +65,16 @@ document.addEventListener("DOMContentLoaded", () => {
     tabs.forEach((tab, i) => {
       tab.addEventListener("click", () => select(tab));
       tab.addEventListener("keydown", (e) => {
-        const step =
-          e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-        if (!step) return;
-        const next = tabs[(i + step + tabs.length) % tabs.length];
+        const last = tabs.length - 1;
+        const index = {
+          ArrowRight: i === last ? 0 : i + 1,
+          ArrowLeft: i === 0 ? last : i - 1,
+          Home: 0,
+          End: last,
+        }[e.key];
+        if (index === undefined) return;
+        e.preventDefault(); // Home / End would otherwise scroll the page
+        const next = tabs[index];
         select(next);
         next.focus();
       });
