@@ -130,22 +130,26 @@ function setupDemo(demo) {
   const steps = [...demo.querySelectorAll("[data-step]")];
   const replay = $("[data-replay]");
   const narration = $("[data-narration]");
-  const lines =
-    document.documentElement.lang === "ja"
-      ? {
-          received: "依頼を受け取りました",
-          found: "課題管理のタブを特定",
-          filling: "フォームに入力",
-          away: "あなたは別のタブへ。使い魔は元のタブで続行",
-          done: "元のタブで登録完了",
-        }
-      : {
-          received: "Request received",
-          found: "Found the issue tracker tab",
-          filling: "Filling in the form",
-          away: "You switched tabs. Your familiar keeps working in tab 47",
-          done: "Filed in the original tab",
-        };
+  const isJa = document.documentElement.lang === "ja";
+  const labels = {
+    replay: replay.textContent.trim(),
+    stop: isJa ? "停止" : "Stop",
+  };
+  const lines = isJa
+    ? {
+        received: "依頼を受け取りました",
+        found: "課題管理のタブを特定",
+        filling: "フォームに入力",
+        away: "あなたは別のタブへ。使い魔は元のタブで続行",
+        done: "元のタブで登録完了",
+      }
+    : {
+        received: "Request received",
+        found: "Found the issue tracker tab",
+        filling: "Filling in the form",
+        away: "You switched tabs. Your familiar keeps working in tab 47",
+        done: "Filed in the original tab",
+      };
   const narrate = (key) => {
     narration.textContent = lines[key];
   };
@@ -191,9 +195,36 @@ function setupDemo(demo) {
     narrate("received");
   };
 
+  // The finished state is the one the HTML ships with (no JS, print, reduced
+  // motion), so stopping lands on the same picture.
+  const finish = () => {
+    show("a");
+    typed.title.textContent = texts.title;
+    typed.body.textContent = texts.body;
+    toast.classList.add("is-shown");
+    for (const s of steps) s.classList.add("is-done");
+    target(null);
+    demo.classList.remove("is-working");
+    narrate("done");
+  };
+
+  // One button toggles between stop (while playing) and replay, so it keeps
+  // its place and focus when the label changes.
+  let playing = false;
+  const setPlaying = (value) => {
+    playing = value;
+    replay.textContent = value ? labels.stop : labels.replay;
+  };
+
+  const stop = () => {
+    run++; // cancels the pending sleep of the current run
+    finish();
+    setPlaying(false);
+  };
+
   const play = async () => {
     const id = ++run;
-    replay.hidden = true;
+    setPlaying(true);
     reset();
     try {
       await sleep(700, id);
@@ -227,26 +258,32 @@ function setupDemo(demo) {
       narrate("done");
       demo.classList.remove("is-working");
     } catch {
-      return; // superseded by a newer run
+      return; // stopped, or superseded by a newer run
     }
-    replay.hidden = false;
+    setPlaying(false);
   };
 
-  replay.addEventListener("click", play);
+  replay.addEventListener("click", () => (playing ? stop() : play()));
+  // The button only works with JS, so the HTML ships it hidden.
+  replay.hidden = false;
   if (reduced) return; // keep the finished state
-  replay.hidden = true;
+
+  // Autoplay once, unless the user has already played or stopped the demo.
+  const autoplay = () => {
+    if (run === 0) play();
+  };
 
   // Background tabs throttle timers to about once a second, so wait until
   // the page is actually visible before starting.
   const start = () => {
     if (document.visibilityState === "visible") {
-      play();
+      autoplay();
       return;
     }
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       document.removeEventListener("visibilitychange", onVisible);
-      play();
+      autoplay();
     };
     document.addEventListener("visibilitychange", onVisible);
   };
