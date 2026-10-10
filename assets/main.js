@@ -7,13 +7,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const isJa = document.documentElement.lang === "ja";
   const copiedLabel = isJa ? "コピーしました" : "Copied";
   const failedLabel = isJa ? "⌘C でコピー" : "Press ⌘C";
+  // Screen readers get the full sentence; the button only has room for a word.
+  const copiedMessage = isJa ? "コピーしました" : "Copied";
+  const failedMessage = isJa
+    ? "コピーできませんでした。コマンドを選択したので、⌘C でコピーしてください"
+    : "Couldn't copy. The command is selected; press ⌘C to copy it";
+
+  // The copy buttons have an aria-label, so changing their text is not
+  // announced. Report the result through one status region instead
+  // (WCAG 4.1.3, technique ARIA22). It must exist before it is updated.
+  const status = document.createElement("p");
+  status.className = "visually-hidden";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-atomic", "true");
+  document.body.append(status);
+  const announce = (message) => {
+    // Clear first so the same message is announced again on a second copy.
+    status.textContent = "";
+    setTimeout(() => {
+      status.textContent = message;
+    }, 100);
+  };
 
   // Copy buttons
   for (const btn of document.querySelectorAll(".copy-btn")) {
     const original = btn.textContent;
-    const flash = (label, cls, ms) => {
+    const flash = (label, cls, ms, message) => {
       btn.textContent = label;
       btn.classList.add(cls);
+      announce(message);
       setTimeout(() => {
         btn.textContent = original;
         btn.classList.remove(cls);
@@ -25,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : btn.dataset.copy;
       try {
         await navigator.clipboard.writeText(text);
-        flash(copiedLabel, "is-copied", 1600);
+        flash(copiedLabel, "is-copied", 1600, copiedMessage);
       } catch {
         // Clipboard unavailable (e.g. insecure context or denied permission):
         // select the command so the user can copy it by hand.
@@ -35,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const selection = getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        flash(failedLabel, "is-failed", 3000);
+        flash(failedLabel, "is-failed", 3000, failedMessage);
       }
     });
   }
